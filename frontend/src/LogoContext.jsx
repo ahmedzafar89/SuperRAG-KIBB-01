@@ -1,8 +1,8 @@
 import { createContext, useEffect, useState } from "react";
-import SuperRAG from "./media/logo/superrag.png";
-import SuperRAGDark from "./media/logo/superrag-dark.png";
-import DefaultLoginLogoLight from "./media/illustrations/login-logo.svg";
-import DefaultLoginLogoDark from "./media/illustrations/login-logo-light.svg";
+import SuperRAG from "./media/logo/logo.png";
+import SuperRAGDark from "./media/logo/logo.png";
+import DefaultLoginLogoLight from "./media/illustrations/login-logo-light.svg";
+import DefaultLoginLogoDark from "./media/illustrations/login-logo.svg";
 import System from "./models/system";
 
 export const REFETCH_LOGO_EVENT = "refetch-logo";
