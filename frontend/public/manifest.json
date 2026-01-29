@@ -1,0 +1,13 @@
+{
+  "name": "SuperRAG",
+  "short_name": "SuperRAG",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any"
+    }
+  ]
+}

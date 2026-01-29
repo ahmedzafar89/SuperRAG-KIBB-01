@@ -1,0 +1,25 @@
+[
+  {
+    "thumbnail_url": "https://cdn.superrag.com/support/announcements/assets/private-browsing.png",
+    "title": "Private Web Scraping",
+    "short_description": "Scrape private, gated, or authenticated websites using the browser tool.",
+    "goto": "https://docs.superrag.com/features/browser-tool",
+    "author": "SuperRAG",
+    "date": "July 8, 2025"
+  },
+  {
+    "thumbnail_url": "https://cdn.superrag.com/support/announcements/assets/mobile.png",
+    "title": "SuperRAG Mobile Beta",
+    "short_description": "SuperRAG on-device, offline, and private. Syncs with SuperRAG.",
+    "goto": "https://docs.google.com/forms/d/e/1FAIpQLSdrMRCUXVDWKrtNTcHzVcHQk_SRoiT8X8tiawTFtAhjMq_L6Q/viewform",
+    "author": "SuperRAG",
+    "date": "July 3, 2025"
+  },
+  {
+    "title": "Community Hub updates",
+    "short_description": "You can now easily push and pull Agent Flows, System Prompts, and more to the SuperRAG Community Hub.",
+    "goto": "https://hub.superrag.com",
+    "author": "SuperRAG",
+    "date": "June 25, 2025"
+  }
+]
