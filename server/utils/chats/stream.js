@@ -12,6 +12,9 @@ const {
   recentChatHistory,
   sourceIdentifier,
 } = require("./index");
+const {
+  formatEvidenceSnippets,
+} = require("../evidence/formatEvidenceSnippets");
 
 const VALID_CHAT_MODE = ["chat", "query"];
 
@@ -25,7 +28,7 @@ async function streamChatWithWorkspace(
   attachments = []
 ) {
   const uuid = uuidv4();
-  const updatedMessage = await grepCommand(message, user);
+  let updatedMessage = await grepCommand(message, user);
 
   if (Object.keys(VALID_COMMANDS).includes(updatedMessage)) {
     const data = await VALID_COMMANDS[updatedMessage](
@@ -226,11 +229,48 @@ async function streamChatWithWorkspace(
     return;
   }
 
+  // === IPO Evidence Injection (only for a workspace/chat mode you decide) ===
+  const shouldUseIpoEvidence =
+    workspace?.slug?.toLowerCase().includes("financial-info-generator") &&
+    updatedMessage.toLowerCase().includes("evidence_snippets_with_metadata");
+
+  if (shouldUseIpoEvidence) {
+    console.log("[IPO EVIDENCE INJECTION] Detected workspace and prompt for IPO evidence injection.");
+
+    const evidencePool = [
+      ...vectorSearchResults.sources,
+      // optional: also include parsedFiles/pinned snippets if you want them eligible
+      ...sources,
+    ];
+
+    // Use filledSources for what the model sees (not everything in contextTexts)
+    const evidenceBlock = formatEvidenceSnippets(
+      vectorSearchResults.sources,
+      {
+        maxSnippets: 12,
+        maxCharsPerSnippet: 1800,
+      }
+    );
+
+    // Replace the user prompt with your IPO drafting prompt template
+    // (You can store these prompts in workspace settings or a constants file)
+    const userTemplate = updatedMessage;
+
+    updatedMessage = userTemplate.replace(
+      "<<EVIDENCE_SNIPPETS_WITH_METADATA>>",
+      evidenceBlock || "Not disclosed in the provided documents."
+    );
+  }
+
+  const systemPrompt = await chatPrompt(workspace, user);
+  console.log("System Prompt:", systemPrompt);
+  console.log("Updated Message:", updatedMessage);
+  
   // Compress & Assemble message to ensure prompt passes token limit with room for response
   // and build system messages based on inputs and history.
   const messages = await LLMConnector.compressMessages(
     {
-      systemPrompt: await chatPrompt(workspace, user),
+      systemPrompt: systemPrompt,
       userPrompt: updatedMessage,
       contextTexts,
       chatHistory,
