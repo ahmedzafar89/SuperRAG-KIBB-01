@@ -76,7 +76,7 @@ function TelemetryLogs({ settings }) {
 
   return (
     <div className="relative w-full max-h-full">
-      <div className="relative rounded-lg">
+      {/*<div className="relative rounded-lg">
         <div className="space-y-6 flex h-full w-full">
           <div className="w-full flex flex-col gap-y-4">
             <div className="">
@@ -126,7 +126,7 @@ function TelemetryLogs({ settings }) {
             .
           </p>
         </div>
-      </div>
+      </div>*/}
     </div>
   );
 }
