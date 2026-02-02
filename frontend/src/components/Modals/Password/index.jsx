@@ -8,7 +8,7 @@ import {
   AUTH_TIMESTAMP,
 } from "../../../utils/constants";
 import useLogo from "../../../hooks/useLogo";
-import illustration from "@/media/illustrations/login-illustration.svg";
+import illustration from "@/media/illustrations/login-illustration.jpg";
 
 export default function PasswordModal({ mode = "single" }) {
   const { loginLogo } = useLogo();
@@ -17,7 +17,7 @@ export default function PasswordModal({ mode = "single" }) {
       backgroundImage: `url(${illustration})`,
       backgroundRepeat: "no-repeat",
       backgroundPosition: "center",
-      backgroundSize: "contain",
+      backgroundSize: "cover",
     }} 
     className="fixed top-0 left-0 right-0 z-50 w-full overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] h-full bg-theme-bg-primary flex flex-col md:flex-row items-center justify-center">
       {/* <div
