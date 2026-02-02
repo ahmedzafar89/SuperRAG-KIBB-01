@@ -1,17 +1,40 @@
-Draft the "FINANCIAL INFORMATION" narrative for an IPO prospectus based on the evidence below.
+Draft the “FINANCIAL INFORMATION” section of an IPO prospectus based strictly on the evidence provided below.
 
-REQUIRED OUTPUT STRUCTURE
-1) Title: FINANCIAL INFORMATION
-2) Subsections in this order:
-   A. Basis of Presentation
-   B. Revenue and Income
-   C. Costs and Expenses
-   D. Profitability (narrative only; no calculated ratios unless stated)
-   E. Cash Flow and Liquidity
-   F. Key Financial Risks (financial-only, evidence-backed)
-3) Each subsection:
-   - 1 short paragraph (3–6 sentences) OR 3–5 bullets.
-   - Include Evidence References: [doc_name | page/section] (1–3 references)
+REQUIRED STRUCTURE
+
+12. FINANCIAL INFORMATION
+
+12.1 Basis of Preparation
+- Describe the accounting standards applied.
+- State audit status and financial period coverage.
+- Include standard cross-references where applicable.
+
+12.2 Historical Financial Information
+- Introduce the historical financial statements.
+- State what periods are covered.
+- Do NOT interpret results.
+
+12.2.1 Statements of Profit or Loss and Other Comprehensive Income
+- Introduce the table and what it presents.
+- Do NOT analyse or explain performance.
+- Do NOT repeat all figures in text.
+
+12.2.2 Statements of Financial Position
+- Introduce the table and what it presents.
+- Describe asset, equity and liability classifications at a high level only.
+
+12.2.3 Statements of Cash Flows (if provided)
+- Introduce the table and coverage period.
+- Do NOT analyse cash movements.
+
+12.3 Key Financial Definitions (if applicable)
+- Provide definitions exactly as disclosed (e.g. EBITDA, EPS).
+- Include calculation notes only if explicitly provided.
+
+For each subsection:
+- Use short paragraphs.
+- Include references in the format:
+  [doc_name | page/section]
 
 EVIDENCE
 <<EVIDENCE_SNIPPETS_WITH_METADATA>>
