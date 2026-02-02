@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import paths from "@/utils/paths";
 import Workspace from "@/models/workspace";
 import { useTranslation } from "react-i18next";
+import illustration from "@/media/illustrations/superrag.png";
 
 export default function ExploreFeatures() {
   const { t } = useTranslation();
@@ -54,11 +55,13 @@ export default function ExploreFeatures() {
 
   return (
     <div>
-      <h1 className="text-theme-home-text uppercase text-sm font-semibold mb-4">
+      {/* <h1 className="text-theme-home-text uppercase text-sm font-semibold mb-4">
         {t("main-page.exploreMore.title")}
-      </h1>
+      </h1> */}
+      <img style={{display: "block", marginTop: "2rem", marginLeft: "auto", marginRight: "auto", width: "300px"}} src={illustration} alt="Welcome" />
+      <h2 style={{textAlign: "center", marginTop: "2rem"}}>Welcome to SuperRAG - Your Enterprise AI assistant</h2>
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <FeatureCard
+        {/* <FeatureCard
           title={t("main-page.exploreMore.features.customAgents.title")}
           description={t(
             "main-page.exploreMore.features.customAgents.description"
@@ -102,7 +105,7 @@ export default function ExploreFeatures() {
           onPrimaryAction={setSystemPrompt}
           onSecondaryAction={managePromptVariables}
           isNew={true}
-        />
+        /> */}
       </div>
     </div>
   );

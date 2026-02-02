@@ -228,7 +228,7 @@ function PresetItem({ preset, onUse, onEdit, onPublish }) {
           >
             Edit
           </button>
-          <button
+          {/* <button
             type="button"
             className="px-[10px] py-[6px] text-sm text-white hover:bg-theme-sidebar-item-hover rounded-b-lg cursor-pointer border-none w-full text-left whitespace-nowrap"
             onClick={(e) => {
@@ -238,7 +238,7 @@ function PresetItem({ preset, onUse, onEdit, onPublish }) {
             }}
           >
             Publish
-          </button>
+          </button> */}
         </div>
       )}
     </button>

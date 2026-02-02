@@ -1,0 +1,21 @@
+Check the IPO draft against the checklist.
+
+OUTPUT FORMAT (Markdown table)
+Columns:
+1) Checklist Item ID
+2) Checklist Requirement
+3) Status (Compliant / Partially Compliant / Missing / Non-Compliant)
+4) Evidence From Draft (quote or excerpt; 1–3 sentences max)
+5) Reference (doc_name | page/section if available; otherwise "Not provided")
+6) Issue Explanation (1–3 sentences)
+7) Suggested Remediation Text (2–5 sentences; must be consistent with checklist wording)
+
+INPUTS
+A) CHECKLIST ITEMS
+<<CHECKLIST_ITEMS>>
+
+B) IPO DRAFT CONTENT (with section/page metadata if available)
+<<DRAFT_CONTENT_WITH_METADATA>>
+
+C) OPTIONAL GUIDELINE EVIDENCE (if provided)
+<<GUIDELINE_EVIDENCE_WITH_METADATA>>

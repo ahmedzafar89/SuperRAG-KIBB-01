@@ -1,0 +1,20 @@
+
+# create log file
+mkdir /var/log/superrag/
+touch /var/log/superrag/superrag.log
+
+
+# run superrag 
+nohup yarn dev:all > /var/log/superrag/superrag.log 2>&1 &
+
+# tail superrag.log
+tail -f /var/log/superrag/superrag.log
+
+# open in browser 
+http://10.10.5.109:3000/
+
+
+# stop application
+ps aux | grep yarn
+
+kill -9 $(lsof -t -i:3000 -i:3001 -i:8888) 

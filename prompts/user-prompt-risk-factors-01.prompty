@@ -1,0 +1,19 @@
+Draft the "RISK FACTORS" section for an IPO prospectus based on the evidence below.
+
+REQUIRED OUTPUT STRUCTURE
+1) Title: RISK FACTORS
+2) Headings in this order:
+   A. Business Risks
+   B. Industry and Market Risks
+   C. Operational Risks
+   D. Regulatory and Compliance Risks
+   E. Financial Risks
+3) Under each heading, provide 3–6 risk items (15–25 total).
+4) Each risk item must have:
+   - Risk Title (max 12 words)
+   - Risk Description (2–4 sentences)
+   - Evidence References: [doc_name | page/section] (1–3 references)
+5) Do not exceed 4 sentences per risk description.
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
