@@ -129,7 +129,7 @@ const ModalTabSwitcher = ({ selectedTab, setSelectedTab }) => {
         >
           {t("connectors.manage.documents")}
         </button>
-        <button
+        {/* <button
           onClick={() => setSelectedTab("dataConnectors")}
           className={`border-none px-4 py-2 rounded-[8px] font-semibold hover:bg-theme-modal-border hover:bg-opacity-60 ${
             selectedTab === "dataConnectors"
@@ -138,7 +138,7 @@ const ModalTabSwitcher = ({ selectedTab, setSelectedTab }) => {
           }`}
         >
           {t("connectors.manage.data-connectors")}
-        </button>
+        </button> */}
       </div>
     </div>
   );
