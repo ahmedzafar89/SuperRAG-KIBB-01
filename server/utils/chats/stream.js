@@ -249,6 +249,7 @@ async function streamChatWithWorkspace(
       {
         maxSnippets: 12,
         maxCharsPerSnippet: 1800,
+        allowTransactions: false,
       }
     );
 

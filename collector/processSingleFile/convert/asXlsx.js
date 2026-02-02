@@ -19,11 +19,19 @@ const { tokenizeString } = require("../../utils/tokenizer");
 function normalizeCellValue(v) {
   if (v === null || v === undefined) return "";
   if (typeof v === "object") {
-    // exceljs can return { richText }, { formula }, { result }, dates, etc.
     if (v.text) return String(v.text);
+    if (v.hyperlink && v.text) return String(v.text);
     if (v.richText) return v.richText.map((r) => r.text).join("");
     if (v.result !== undefined) return String(v.result);
-    if (v.formula !== undefined && v.result !== undefined) return String(v.result);
+    if (v.formula !== undefined && v.result !== undefined)
+      return String(v.result);
+    if (v.error) return String(v.error);
+
+    try {
+      return JSON.stringify(v);
+    } catch {
+      return String(v);
+    }
   }
   if (v instanceof Date) return v.toISOString().slice(0, 10);
   return String(v).trim();
@@ -35,7 +43,9 @@ function worksheetToGrid(ws) {
   const maxCol = ws.actualColumnCount || ws.columnCount || 0;
 
   // Build base grid
-  const grid = Array.from({ length: maxRow }, () => Array.from({ length: maxCol }, () => ""));
+  const grid = Array.from({ length: maxRow }, () =>
+    Array.from({ length: maxCol }, () => "")
+  );
   for (let r = 1; r <= maxRow; r++) {
     const row = ws.getRow(r);
     for (let c = 1; c <= maxCol; c++) {
@@ -111,7 +121,8 @@ function splitIntoBlocks(grid) {
       const end = empty ? i - 1 : i;
       const block = grid.slice(start, end + 1);
       // Skip tiny noise blocks
-      if (block.length >= 2) blocks.push({ startRow: start, endRow: end, rows: block });
+      if (block.length >= 2)
+        blocks.push({ startRow: start, endRow: end, rows: block });
       start = null;
     }
   }
@@ -127,10 +138,15 @@ function detectHeaderDepth(blockRows) {
   // Find first row that looks like data (has many numeric cells)
   for (let i = 0; i < maxCheck; i++) {
     const row = blockRows[i];
-    const numericCount = row.filter((v) => /^-?\d+(\.\d+)?$/.test(String(v).replace(/,/g, ""))).length;
+    const numericCount = row.filter((v) =>
+      /^-?\d+(\.\d+)?$/.test(String(v).replace(/,/g, ""))
+    ).length;
     const filled = row.filter((v) => v && String(v).trim()).length;
     // if a row is mostly numeric and reasonably filled, assume it's data row
-    if (filled >= Math.max(3, Math.floor(row.length * 0.4)) && numericCount >= Math.max(2, Math.floor(row.length * 0.3))) {
+    if (
+      filled >= Math.max(3, Math.floor(row.length * 0.4)) &&
+      numericCount >= Math.max(2, Math.floor(row.length * 0.3))
+    ) {
       return Math.max(1, i); // headers are rows before first data-ish row
     }
   }
@@ -161,7 +177,10 @@ function flattenHeaders(headerRows) {
 }
 
 function toMarkdownTable(headers, rows, maxRows = 200) {
-  const safe = (s) => String(s ?? "").replace(/\|/g, "\\|").trim();
+  const safe = (s) =>
+    String(s ?? "")
+      .replace(/\|/g, "\\|")
+      .trim();
   const md = [];
   md.push(`| ${headers.map(safe).join(" | ")} |`);
   md.push(`| ${headers.map(() => "---").join(" | ")} |`);
@@ -180,7 +199,11 @@ function chunkRowsWithHeader(headers, dataRows, chunkSize = 200) {
   const chunks = [];
   for (let i = 0; i < dataRows.length; i += chunkSize) {
     const slice = dataRows.slice(i, i + chunkSize);
-    chunks.push({ rowStart: i, rowEnd: Math.min(i + chunkSize - 1, dataRows.length - 1), rows: slice });
+    chunks.push({
+      rowStart: i,
+      rowEnd: Math.min(i + chunkSize - 1, dataRows.length - 1),
+      rows: slice,
+    });
   }
   return chunks;
 }
@@ -188,9 +211,17 @@ function chunkRowsWithHeader(headers, dataRows, chunkSize = 200) {
 /**
  * -------- Finance-grade asXlsx ----------
  */
-async function asXlsx({ fullFilePath = "", filename = "", options = {}, metadata = {} }) {
+async function asXlsx({
+  fullFilePath = "",
+  filename = "",
+  options = {},
+  metadata = {},
+}) {
   const documents = [];
-  const folderName = slugify(`${path.basename(filename)}-${v4().slice(0, 4)}`, { lower: true, trim: true });
+  const folderName = slugify(`${path.basename(filename)}-${v4().slice(0, 4)}`, {
+    lower: true,
+    trim: true,
+  });
   const outFolderPath = options.parseOnly
     ? path.resolve(directUploadsFolder, folderName)
     : path.resolve(documentsFolder, folderName);
@@ -199,7 +230,8 @@ async function asXlsx({ fullFilePath = "", filename = "", options = {}, metadata
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.readFile(fullFilePath);
 
-    if (!fs.existsSync(outFolderPath)) fs.mkdirSync(outFolderPath, { recursive: true });
+    if (!fs.existsSync(outFolderPath))
+      fs.mkdirSync(outFolderPath, { recursive: true });
 
     for (const ws of wb.worksheets) {
       const sheetName = ws.name || "Sheet";
@@ -226,25 +258,41 @@ async function asXlsx({ fullFilePath = "", filename = "", options = {}, metadata
         if (!dataRows.length) continue;
 
         const headers = flattenHeaders(headerRows);
-        const rowChunks = chunkRowsWithHeader(headers, dataRows, options.xlsxRowChunkSize || 200);
+        const rowChunks = chunkRowsWithHeader(
+          headers,
+          dataRows,
+          options.xlsxRowChunkSize || 200
+        );
 
         for (let ci = 0; ci < rowChunks.length; ci++) {
           const chunk = rowChunks[ci];
-          const md = toMarkdownTable(headers, chunk.rows, options.xlsxEmbedMaxRows || 120);
+          const md = toMarkdownTable(
+            headers,
+            chunk.rows,
+            options.xlsxEmbedMaxRows || 120
+          );
 
           const chunkTitle =
             metadata.title ||
-            `${filename} - Sheet:${sheetName} - Table:${tableIndex} - Rows:${chunk.rowStart + 1}-${chunk.rowEnd + 1}`;
+            `${filename} - Sheet:${sheetName} - Table:${tableIndex} - Rows:${
+              chunk.rowStart + 1
+            }-${chunk.rowEnd + 1}`;
 
           const sheetData = {
             id: v4(),
-            url: `file://${path.join(outFolderPath, `${slugify(sheetName)}-t${tableIndex}-c${ci + 1}.md`)}`,
+            url: `file://${path.join(
+              outFolderPath,
+              `${slugify(sheetName)}-t${tableIndex}-c${ci + 1}.md`
+            )}`,
             title: chunkTitle,
             docAuthor: metadata.docAuthor || "Unknown",
             description:
               metadata.description ||
-              `Spreadsheet table chunk from sheet "${sheetName}" (table ${tableIndex}, rows ${chunk.rowStart + 1}-${chunk.rowEnd + 1}).`,
-            docSource: metadata.docSource || "an xlsx file uploaded by the user.",
+              `Spreadsheet table chunk from sheet "${sheetName}" (table ${tableIndex}, rows ${
+                chunk.rowStart + 1
+              }-${chunk.rowEnd + 1}).`,
+            docSource:
+              metadata.docSource || "an xlsx file uploaded by the user.",
             chunkSource: metadata.chunkSource || "",
             published: createdDate(fullFilePath),
             wordCount: md.split(/\s+/).length,
@@ -275,20 +323,32 @@ async function asXlsx({ fullFilePath = "", filename = "", options = {}, metadata
         }
       }
 
-      console.log(`[SUCCESS]: Sheet "${sheetName}" parsed into ${tableIndex} table block(s).`);
+      console.log(
+        `[SUCCESS]: Sheet "${sheetName}" parsed into ${tableIndex} table block(s).`
+      );
     }
   } catch (err) {
     console.error("Could not process xlsx file!", err);
-    return { success: false, reason: `Error processing ${filename}: ${err.message}`, documents: [] };
+    return {
+      success: false,
+      reason: `Error processing ${filename}: ${err.message}`,
+      documents: [],
+    };
   } finally {
     trashFile(fullFilePath);
   }
 
   if (!documents.length) {
-    return { success: false, reason: `No valid tables found in ${filename}.`, documents: [] };
+    return {
+      success: false,
+      reason: `No valid tables found in ${filename}.`,
+      documents: [],
+    };
   }
 
-  console.log(`[SUCCESS]: ${filename} fully processed. Created ${documents.length} document(s).\n`);
+  console.log(
+    `[SUCCESS]: ${filename} fully processed. Created ${documents.length} document(s).\n`
+  );
   return { success: true, reason: null, documents };
 }
 

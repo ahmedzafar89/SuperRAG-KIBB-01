@@ -26,7 +26,6 @@ function chatEndpoints(app) {
     [validatedRequest, flexUserRoleValid([ROLES.all]), validWorkspaceSlug],
     async (request, response) => {
       try {
-	console.log("hello this is called");
         const user = await userFromSession(request, response);
         const { message, attachments = [] } = reqBody(request);
         const workspace = response.locals.workspace;
