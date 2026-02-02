@@ -6,6 +6,7 @@ touch /var/log/superrag/superrag.log
 
 # run superrag 
 nohup yarn dev:all > /var/log/superrag/superrag.log 2>&1 &
+echo $! > save_pid.txt
 
 # tail superrag.log
 tail -f /var/log/superrag/superrag.log
