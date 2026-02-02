@@ -18,23 +18,22 @@ const { tokenizeString } = require("../../utils/tokenizer");
  */
 function normalizeCellValue(v) {
   if (v === null || v === undefined) return "";
-  if (typeof v === "object") {
-    if (v.text) return String(v.text);
-    if (v.hyperlink && v.text) return String(v.text);
-    if (v.richText) return v.richText.map((r) => r.text).join("");
-    if (v.result !== undefined) return String(v.result);
-    if (v.formula !== undefined && v.result !== undefined)
-      return String(v.result);
-    if (v.error) return String(v.error);
-
-    try {
-      return JSON.stringify(v);
-    } catch {
-      return String(v);
-    }
-  }
   if (v instanceof Date) return v.toISOString().slice(0, 10);
-  return String(v).trim();
+  if (typeof v !== "object") return String(v).trim();
+
+  if (v.text) return String(v.text);
+  if (v.hyperlink && v.text) return String(v.text);
+  if (v.richText) return v.richText.map((r) => r.text).join("");
+  if (v.sharedFormula && v.result !== undefined) return String(v.result);
+  if (v.formula && v.result !== undefined) return String(v.result);
+  if (v.result !== undefined) return String(v.result);
+  if (v.error) return String(v.error);
+
+  try {
+    return JSON.stringify(v);
+  } catch {
+    return String(v);
+  }
 }
 
 // Returns 2D array of strings for used range, with merged cells expanded.
@@ -134,24 +133,28 @@ function splitIntoBlocks(grid) {
  * - many finance sheets have 2–3 header rows (years + subheaders)
  */
 function detectHeaderDepth(blockRows) {
-  const maxCheck = Math.min(4, blockRows.length);
-  // Find first row that looks like data (has many numeric cells)
+  const maxCheck = Math.min(6, blockRows.length);
+
   for (let i = 0; i < maxCheck; i++) {
     const row = blockRows[i];
-    const numericCount = row.filter((v) =>
-      /^-?\d+(\.\d+)?$/.test(String(v).replace(/,/g, ""))
+
+    const textCells = row.filter(
+      (v) => v && !/^[-\d.,]+$/.test(String(v).replace(/,/g, ""))
     ).length;
-    const filled = row.filter((v) => v && String(v).trim()).length;
-    // if a row is mostly numeric and reasonably filled, assume it's data row
-    if (
-      filled >= Math.max(3, Math.floor(row.length * 0.4)) &&
-      numericCount >= Math.max(2, Math.floor(row.length * 0.3))
-    ) {
-      return Math.max(1, i); // headers are rows before first data-ish row
+
+    const numericCells = row.filter(
+      (v) => /^-?\d+(\.\d+)?$/.test(String(v).replace(/,/g, ""))
+    ).length;
+
+    // Finance heuristic:
+    // Header rows are text-heavy; first numeric-heavy row is data
+    if (numericCells >= 3 && numericCells > textCells) {
+      return Math.max(1, i);
     }
   }
-  // default: 1 header row
-  return 1;
+
+  // Default for finance statements: assume 2 header rows
+  return Math.min(2, blockRows.length - 1);
 }
 
 function flattenHeaders(headerRows) {

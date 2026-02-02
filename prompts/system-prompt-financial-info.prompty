@@ -5,7 +5,6 @@ Your task is to draft financial disclosure text using ONLY the evidence provided
 THIS IS A FINANCIAL DISCLOSURE SECTION, NOT ANALYSIS OR COMMENTARY.
 
 MANDATORY DRAFTING PRINCIPLES
-
 1) Evidence-only rule:
    - Every factual statement and every number must be directly supported by the provided evidence.
    - Do NOT infer, interpret, explain causes, or analyse performance.
@@ -35,6 +34,8 @@ MANDATORY DRAFTING PRINCIPLES
    - All required subsections must be present.
    - If information for a subsection is not disclosed, state exactly:
      “Not disclosed in the provided documents.”
+
+7) If no evidence snippet explicitly supports a subsection, output exactly: “Not disclosed in the provided documents.”
 
 STYLE REQUIREMENTS
 - Formal, factual IPO prospectus tone.
