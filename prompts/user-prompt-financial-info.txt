@@ -1,0 +1,259 @@
+---
+# Step 1
+---
+
+Draft the section:
+
+12.9 SIGNIFICANT FACTORS AFFECTING OUR REVENUE
+
+Using only the provided financial evidence, describe the main sources and composition of our Group’s revenue during the Financial Years Under Review.
+
+Focus on:
+  - customer concentration,
+  - revenue contribution by major customers,
+  - segment or business line exposure,
+  - industry or sector exposure,
+  - geographic concentration,
+  - project-based or contract-based revenue characteristics,
+  - order book or pipeline characteristics,
+  - pricing, fee structures, or contract values,
+  - other revenue-related factors explicitly disclosed.
+
+Present figures clearly in normal financial format (currency amounts, rounded where appropriate).
+
+Describe revenue at a high level suitable for an IPO prospectus and avoid referencing accounting adjustments, reversals, or internal ledger labels.
+
+Do not include margins, ratios, percentages, costs, or profitability figures.
+
+Write in formal IPO prospectus financial disclosure style:
+- neutral,
+- descriptive,
+- continuous narrative paragraphs.
+
+Avoid explanations, analysis, conclusions, or discussion of missing information.
+
+If no relevant revenue information is available, state exactly:
+“Not disclosed in the provided documents.”
+
+
+---
+# Step 2
+---
+
+Draft the section:
+
+12.9 SIGNIFICANT FACTORS AFFECTING OUR REVENUE
+
+Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the significant factors affecting our Group’s revenue during the Financial Years Under Review.
+
+CONTENT REQUIREMENTS:
+- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
+  - customer concentration,
+  - revenue contribution by major customers,
+  - segment or business line exposure,
+  - industry or sector exposure,
+  - geographic concentration,
+  - project-based or contract-based revenue characteristics,
+  - order book or pipeline characteristics,
+  - pricing, fee structures, or contract values,
+  - other revenue-related factors explicitly disclosed.
+
+- Include numerical disclosures ONLY where they appear explicitly in the evidence.
+- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
+- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
+- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
+- If a factor is mentioned without numerical data, describe it factually without quantification.
+- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
+
+STRUCTURE AND STYLE:
+- Write in continuous narrative paragraphs.
+- Do NOT use bullet points, tables, subheadings, or numbered lists.
+- Do NOT analyse, interpret, explain causes, or speculate on revenue performance.
+- Do NOT attribute causation unless explicitly stated in the evidence.
+- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
+
+DISCLOSURE CONSTRAINTS:
+- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
+- Do NOT introduce forward-looking statements or projections.
+- Do NOT restate management commentary unless supported by the evidence.
+- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
+
+COMPLETENESS:
+- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
+
+STYLE REQUIREMENTS:
+- Formal IPO prospectus financial disclosure tone.
+- Neutral, accountant-style language.
+- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
+- No promotional language.
+- No mention of AI, systems, prompts, or internal processes.
+
+STRICT DATA SCOPE FOR THIS SECTION:
+- Use ONLY revenue-related figures.
+- Do NOT include gross profit, net profit, margins, ratios, or any profitability metrics, even if present in the evidence.
+- Do NOT include calculated fields or derived values.
+- Ignore columns relating to cost, profit, margins, or ratios.
+
+
+---
+# Step 3
+---
+
+Draft the section:
+
+12.10 Impact of Government, Economic, Fiscal or Monetary Policies
+
+Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the significant Impact of Government, Economic, Fiscal or Monetary Policies.
+
+CONTENT REQUIREMENTS:
+- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
+  - Government regulations or policy frameworks affecting the industry.
+  - Fiscal policies such as taxation, incentives, or government programmes relevant to our operations.
+  - Monetary policy developments, including interest rate environments where disclosed.
+  - Capital market regulatory developments affecting advisory, financial services, or related activities.
+  - Economic policies influencing sector activity or investment behaviour.
+  - Government infrastructure, industry, or digitalisation initiatives relevant to our business.
+  - Regulatory compliance requirements affecting revenue recognition, reporting, or operations.
+  - Other government or macroeconomic policy factors explicitly disclosed in the evidence.
+
+- Include numerical disclosures ONLY where they appear explicitly in the evidence.
+- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
+- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
+- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
+- If a factor is mentioned without numerical data, describe it factually without quantification.
+- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
+
+STRUCTURE AND STYLE:
+- Write in continuous narrative paragraphs.
+- Do NOT use bullet points, tables, subheadings, or numbered lists.
+- Do NOT analyse, interpret, explain causes, or speculate on revenue performance.
+- Do NOT attribute causation unless explicitly stated in the evidence.
+- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
+
+DISCLOSURE CONSTRAINTS:
+- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
+- Do NOT introduce forward-looking statements or projections.
+- Do NOT restate management commentary unless supported by the evidence.
+- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
+
+COMPLETENESS:
+- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
+
+STYLE REQUIREMENTS:
+- Formal IPO prospectus financial disclosure tone.
+- Neutral, accountant-style language.
+- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
+- No promotional language.
+- No mention of AI, systems, prompts, or internal processes.
+
+STRICT DATA SCOPE FOR THIS SECTION:
+- Use ONLY revenue-related figures.
+- Do NOT include gross profit, net profit, margins, ratios, or any profitability metrics, even if present in the evidence.
+- Do NOT include calculated fields or derived values.
+- Ignore columns relating to cost, profit, margins, or ratios.
+
+---
+# Step 4
+---
+
+Draft the section:
+
+12.11 Impact of Inflation
+
+Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the Impact of Inflation.
+
+CONTENT REQUIREMENTS:
+- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
+  - General price inflation affecting operating costs.
+  - Inflation impact on staff costs, vendor costs, or service costs where disclosed.
+  - Impact of inflation on project pricing or contract values where evidenced.
+  - Cost escalation clauses or pricing adjustments explicitly disclosed.
+  - Inflation-related changes in customer spending patterns where disclosed.
+  - Impact of inflation on margins or profitability where explicitly disclosed.
+  - Other inflation-related factors explicitly disclosed in the evidence.
+
+- Include numerical disclosures ONLY where they appear explicitly in the evidence.
+- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
+- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
+- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
+- If a factor is mentioned without numerical data, describe it factually without quantification.
+- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
+
+STRUCTURE AND STYLE:
+- Write in continuous narrative paragraphs.
+- Do NOT use bullet points, tables, subheadings, or numbered lists.
+- Do NOT analyse, interpret, explain causes, or speculate on revenue performance.
+- Do NOT attribute causation unless explicitly stated in the evidence.
+- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
+
+DISCLOSURE CONSTRAINTS:
+- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
+- Do NOT introduce forward-looking statements or projections.
+- Do NOT restate management commentary unless supported by the evidence.
+- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
+
+COMPLETENESS:
+- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
+
+STYLE REQUIREMENTS:
+- Formal IPO prospectus financial disclosure tone.
+- Neutral, accountant-style language.
+- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
+- No promotional language.
+- No mention of AI, systems, prompts, or internal processes.
+
+
+---
+# Step 5
+---
+
+Draft the section:
+
+12.12 Impact of FX, Interest Rates, Commodity Prices
+
+Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the Impact of FX, Interest Rates, Commodity Prices.
+
+CONTENT REQUIREMENTS:
+- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
+  - Exposure to foreign exchange rate movements affecting revenue or costs.
+  - Currency denomination of contracts, revenues, or expenses where disclosed.
+  - Interest rate exposure affecting financing costs or financial instruments.
+  - Borrowing structures or financing arrangements sensitive to interest rates.
+  - Commodity price exposure where relevant to operational inputs.
+  - Hedging policies or financial instruments where explicitly disclosed.
+  - Sensitivity disclosures included in financial statements.
+  - Other market price exposures explicitly disclosed in the evidence.
+
+- Include numerical disclosures ONLY where they appear explicitly in the evidence.
+- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
+- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
+- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
+- If a factor is mentioned without numerical data, describe it factually without quantification.
+- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
+
+STRUCTURE AND STYLE:
+- Write in continuous narrative paragraphs.
+- Do NOT use bullet points, tables, subheadings, or numbered lists.
+- Do NOT analyse, interpret, explain causes, or speculate on revenue performance.
+- Do NOT attribute causation unless explicitly stated in the evidence.
+- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
+
+DISCLOSURE CONSTRAINTS:
+- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
+- Do NOT introduce forward-looking statements or projections.
+- Do NOT restate management commentary unless supported by the evidence.
+- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
+
+COMPLETENESS:
+- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
+
+STYLE REQUIREMENTS:
+- Formal IPO prospectus financial disclosure tone.
+- Neutral, accountant-style language.
+- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
+- No promotional language.
+- No mention of AI, systems, prompts, or internal processes.
+
+---
+# Step 6
+---
