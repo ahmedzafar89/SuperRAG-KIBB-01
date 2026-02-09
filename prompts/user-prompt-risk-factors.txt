@@ -11,23 +11,54 @@ Generate ONLY a structured outline under:
 9.3 RISKS RELATING TO INVESTMENT IN OUR SHARES
 9.4 OTHER RISKS
 
+EXPECTED COVERAGE:
+
+9.1 Business & Operations
+- Aim for approximately 10–15 distinct risks where supported by evidence.
+- Prioritise operational, financial, compliance, technology, customer concentration, personnel, governance, execution, dependency, and business continuity risks.
+- Prefer document-specific risks over generic risks.
+- If evidence is insufficient, generate fewer risks rather than introducing speculative or boilerplate risks.
+
+9.2 Industry Risks
+- Generate only 2–5 risks.
+- Focus strictly on external industry-wide factors affecting multiple companies (e.g., macroeconomic conditions, competition, regulatory landscape, market demand, sector disruption).
+- Do NOT include company-specific operational, governance, or financial risks.
+- Avoid repetition of risks already included in 9.1.
+
+9.3 Shares & Listing Risks
+- Generate only 2–3 investor-related risks.
+- Focus strictly on capital market exposure such as: listing uncertainty, liquidity, dividends, trading volatility, and absence of prior public market where applicable.
+- Exclude operational, industry, regulatory business, or governance risks.
+- Avoid duplication with other sections.
+
+9.4 Other Risks
+- Optional section.
+- Include only material risks that clearly do not fit within Business & Operations, Industry, or Shares & Listing.
+- Maximum 0–2 risks.
+- If no such risks exist, omit this section entirely.
+
 STRICT CLASSIFICATION RULES:
-- Business operations, revenue, personnel, systems, compliance → 9.1
+- Business operations, revenue, personnel, systems, compliance, governance, financial dependencies → 9.1
 - Broad industry trends affecting multiple companies → 9.2
-- Share price, dividends, listing, investor exposure → 9.3
-- Governance, regulatory oversight, residual risks → 9.4
+- Share price, dividends, listing process, investor exposure → 9.3
+- Residual or exceptional risks not otherwise classified → 9.4
 
-ADDITIONAL RULES:
-- Each risk heading MUST start with: “We”, “Our Group”, or “Our business”.
-- Avoid overlapping risks.
-- Do NOT include explanations.
-- Use only evidence-supported risks.
-- If evidence is insufficient, state:
-  “Not disclosed in the provided documents.”
+OUTPUT REQUIREMENTS:
+- Each risk heading MUST begin with: “We”, “Our Group”, or “Our business”.
+- Provide headings only — no explanations, elaborations, or descriptive paragraphs.
+- Avoid duplication or overlap across sections.
+- Prefer document-supported risks at all times.
+- Do not invent risks beyond available evidence.
+- If evidence is insufficient for a section, state exactly: “Not disclosed in the provided documents.”
 
+FINAL CONSISTENCY CHECK (MANDATORY BEFORE OUTPUT):
+- Ensure each risk appears in only one section.
+- Reassign any misclassified risks.
+- Remove duplicated or overlapping risks.
+- Confirm section counts broadly align with IPO prospectus conventions.
 
 ---
-# Step 2
+# Step 2a (optional)
 ---
 
 Draft ONLY the introductory paragraph for the “Risk Factors” section.
@@ -49,9 +80,8 @@ Requirements:
 - Avoid generic examples of risks unless explicitly supported by evidence.
 - Avoid investor advisory language beyond neutral prospectus phrasing.
 
-
 ---
-# Step 3
+# Step 2
 ---
 
 Draft detailed IPO prospectus risk factors under:
@@ -59,40 +89,47 @@ Draft detailed IPO prospectus risk factors under:
 9.1 RISKS RELATING TO OUR BUSINESS AND OUR OPERATIONS
 
 For each listed risk:
-- We may experience volatility in profitability due to timing differences in deal completions, market conditions, and transaction-specific cost structures.
-- Our business is dependent on capital markets activity affecting advisory revenue, which could lead to fluctuations in our financial performance.
-- Variations in the complexity of transactions may influence our cost structures, particularly in relation to IPO mandates and M&A activities.
-- We are reliant on senior advisory personnel, and any loss or departure of key individuals could adversely impact our operations and financial results.
-- Our business depends on effective execution and timely completion of transactions, which is subject to various uncertainties that could delay or disrupt our operations.
+[Insert risks generated and classified under 9.1]
 
-Provide a full risk heading starting with: “We”, “Our Group”, or “Our business”.
-- Draft 2–4 continuous formal prospectus paragraphs.
-- DO NOT use subheadings, bullet points, or structured labels.
-
-Within the narrative:
-- Explain the business or operational context creating the risk.
-- Include factual historical disclosures where available.
-- Describe operational dependencies where relevant.
-- Emphasise uncertainty using formal prospectus hedging.
-- Conclude with adverse impact language.
-
-MANDATORY:
-- Formal IPO prospectus tone.
-- Evidence-only drafting.
-- No mitigation language.
-- No promotional tone.
-- No mention of AI, systems, or prompts.
-- Each risk factor MUST contain at least two continuous narrative paragraphs:
-  1) Context and historical disclosure.
-  2) Future uncertainty and adverse impact.
-- Avoid causal inference unless explicitly supported by evidence.
-- Number each risk factor sequentially within the section (e.g., 9.1.1, 9.1.2, 9.1.3).
+RISK HEADING REQUIREMENTS:
+- Provide a full risk heading beginning with: “We”, “Our Group”, or “Our business”.
+- Number each risk sequentially within this section (example 9.1.1, 9.1.2, 9.1.3).
 - The numbering should appear only in the risk heading.
-- Do NOT introduce internal subheadings within the narrative.
 
+NARRATIVE STRUCTURE REQUIREMENTS:
+- Draft 2–4 continuous formal prospectus paragraphs (approximately 150–300 words total per risk).
+- Do NOT use subheadings, bullet points, structured labels, or internal numbering.
+- Each risk factor MUST include:
+  1) Business and operational context:
+     - Company-specific operational exposure, dependencies, governance factors, financial or customer concentration where applicable.
+     - Include factual historical disclosures where available.
+  2) Forward-looking uncertainty:
+     - Operational variability, regulatory developments, execution risks, market dependencies where relevant.
+  3) Adverse impact conclusion:
+     - Potential material impact on business operations, financial performance, liquidity, reputation, or investor confidence.
+
+MANDATORY DRAFTING RULES:
+- Formal IPO prospectus tone throughout.
+- Evidence-based drafting only.
+- No speculative assumptions.
+- No mitigation language.
+- No promotional or reassuring tone.
+- No mention of AI, systems, prompts, or drafting methodology.
+- Avoid causal inference unless explicitly supported by evidence.
+
+CONSISTENCY AND CLASSIFICATION CONTROLS:
+- Do NOT repeat risks already covered elsewhere.
+- Maintain clear distinction from: Industry risks (external macro factors), Shares & Listing risks (capital market exposure), Other residual risks.
+- Governance, compliance, operational, financial dependency, and execution risks should remain within this section.
+
+STYLE CONTROLS:
+- Use formal prospectus hedging language (example “may”, “could”, “there can be no assurance”).
+- Avoid excessive verbosity or rhetorical emphasis.
+- Maintain factual neutrality.
+- Avoid absolute terms. Use Malaysian standard qualifying language (example 'material adverse effect' rather than just 'adverse effect')."
 
 ---
-# Step 4
+# Step 3
 ---
 
 Draft detailed IPO prospectus risk factors under:
@@ -100,34 +137,62 @@ Draft detailed IPO prospectus risk factors under:
 9.2 RISKS RELATING TO THE INDUSTRY IN WHICH WE OPERATE
 
 For each listed risk:
-- [add risk titles here]
+[Insert risks generated and classified under 9.2]
 
-Provide a full risk heading starting with: “We”, “Our Group”, or “Our business”.
+RISK EXPANSION CONTROL:
+- Expand ONLY the risks provided under 9.2.
+- Do NOT introduce new risks.
+- If more than 5 risks are provided, prioritise the most material or clearly evidence-supported risks and expand a maximum of 5.
+- If fewer risks are provided, expand only those available.
 
-Narrative Requirements:
-- Draft 2–4 continuous formal prospectus paragraphs.
-- DO NOT use subheadings, bullet points, or structured labels.
-- Number each risk sequentially (e.g., 9.2.1, 9.2.2).
+RISK HEADING REQUIREMENTS:
+- Provide a full risk heading beginning with: “We”, “Our Group”, or “Our business”.
+- Number each risk sequentially within this section (example 9.2.1, 9.2.2, 9.2.3).
+- The numbering should appear only in the risk heading.
 
-Content Requirements:
-- Describe broader industry conditions affecting the sector in which we operate.
-- Clearly explain how those industry conditions may affect our business.
-- Include factual historical disclosures only where explicitly supported by evidence.
-- Avoid generic macroeconomic commentary unless evidenced.
-- Avoid causal inference unless explicitly supported.
-- Emphasise uncertainty using formal prospectus hedging.
-- Conclude with adverse impact language.
+NARRATIVE STRUCTURE REQUIREMENTS:
+- Draft 2–3 continuous formal prospectus paragraphs (approximately 120–250 words total per risk).
+- Do NOT use subheadings, bullet points, structured labels, or internal numbering.
 
-MANDATORY:
-- Formal IPO prospectus tone.
-- Evidence-only drafting.
+Each risk factor MUST include:
+1) Industry context:
+   - External sector conditions, regulatory landscape, macroeconomic environment, competition dynamics, technological disruption, or demand variability.
+   - Include factual industry disclosures where supported.
+
+2) Forward-looking uncertainty:
+   - How broader industry developments may indirectly affect our Group’s performance, financial position, growth prospects, or market position.
+
+3) Adverse impact conclusion:
+   - Potential material adverse effect on revenue, profitability, market share, business prospects, financial condition, or investor perception.
+
+MANDATORY DRAFTING RULES:
+- Formal IPO prospectus tone throughout.
+- Evidence-based drafting only.
+- No speculative assumptions.
 - No mitigation language.
-- No promotional tone.
-- No mention of AI, prompts, or internal systems.
-- Minimum two continuous narrative paragraphs per risk:
-  (1) Context/historical disclosure
-  (2) Future uncertainty/adverse impact.
+- No promotional or reassuring tone.
+- No mention of AI, systems, prompts,
+  or drafting methodology.
+- Avoid causal inference unless explicitly supported
+  by evidence.
 
+CONSISTENCY AND CLASSIFICATION CONTROLS:
+- Industry risks MUST remain external.
+- Do NOT introduce:
+  - company-specific operational risks,
+  - governance or compliance effectiveness issues,
+  - financial dependency or customer concentration risks,
+  - internal execution or technology implementation risks.
+- These belong under Business & Operations (9.1).
+- Avoid duplication with 9.1, 9.3, or 9.4 risks.
+
+STYLE CONTROLS:
+- Use formal prospectus hedging language (example “may”, “could”, “there can be no assurance”).
+- Maintain concise, non-repetitive prose.
+- Avoid excessive verbosity or rhetorical emphasis.
+- Maintain factual neutrality.
+- Avoid absolute terms.
+- Use Malaysian prospectus-standard qualifying language (example “material adverse effect” rather than simply “adverse effect”).
 
 ---
 # Step 5
@@ -138,36 +203,67 @@ Draft detailed IPO prospectus risk factors under:
 9.3 RISKS RELATING TO INVESTMENT IN OUR SHARES
 
 For each listed risk:
-- [add risk titles here]
+[Insert risks generated and classified under 9.3]
 
-Provide a full risk heading starting with: “We”, “Our Group”, or “Our business”.
+RISK EXPANSION CONTROL:
+- Expand ONLY the risks provided under 9.3.
+- Do NOT introduce new risks.
+- If more than 3 risks are provided, prioritise the most material or clearly evidence-supported risks and expand a maximum of 3.
+- If fewer risks are provided, expand only those available.
 
-Narrative Requirements:
-- Draft 2–4 continuous formal prospectus paragraphs.
-- DO NOT use subheadings, bullet points, or structured labels.
-- Number each risk sequentially (e.g., 9.3.1, 9.3.2).
+RISK HEADING REQUIREMENTS:
+- Provide a full risk heading beginning with: “We”, “Our Group”, or “Our business”.
+- Number each risk sequentially within this section (example 9.3.1, 9.3.2, 9.3.3).
+- The numbering should appear only in the risk heading.
 
-Content Requirements:
-- Focus specifically on risks relevant to investors or shareholders.
-- Avoid repeating operational risks from Sections 9.1 or 9.2.
-- Where supported by evidence, discuss:
-  - share price volatility,
-  - dividend uncertainty,
-  - market liquidity,
-  - listing-related risks,
-  - or capital market conditions.
-- Include historical disclosures only where explicitly evidenced.
-- Avoid speculative statements.
-- Emphasise uncertainty using prospectus hedging.
-- Conclude with adverse impact language.
+NARRATIVE STRUCTURE REQUIREMENTS:
+- Draft 2–3 continuous formal prospectus paragraphs (approximately 120–220 words total per risk).
+- Do NOT use subheadings, bullet points, structured labels, or internal numbering.
 
-MANDATORY:
-- Formal IPO prospectus tone.
-- Evidence-only drafting.
+Each risk factor MUST include:
+1) Capital market context:
+   - Listing status, market conditions, investor sentiment, liquidity considerations, dividend policy uncertainty, or absence of prior public trading where applicable.
+   - Include factual disclosures where supported.
+
+2) Forward-looking uncertainty:
+   - Potential volatility, listing timing risks, investor demand variability, or market perception factors.
+
+3) Adverse impact conclusion:
+   - Potential material adverse effect on share price, trading liquidity, market capitalisation, investor confidence, or ability to raise capital.
+
+MANDATORY DRAFTING RULES:
+- Formal IPO prospectus tone throughout.
+- Evidence-based drafting only.
+- No speculative assumptions.
 - No mitigation language.
-- No promotional tone.
-- No mention of AI, prompts, or internal systems.
-- Minimum two continuous narrative paragraphs per risk.
+- No promotional or reassuring tone.
+- No mention of AI, systems, prompts, or drafting methodology.
+- Avoid causal inference unless explicitly supported by evidence.
+
+CONSISTENCY AND CLASSIFICATION CONTROLS:
+- Risks must relate strictly to investment in our Shares and capital market exposure.
+
+Do NOT include:
+- operational business risks,
+- industry competition or macroeconomic risks,
+- regulatory compliance risks affecting operations,
+- governance effectiveness risks,
+- financial dependency risks unrelated to share investment.
+These belong under 9.1 or 9.2.
+- Avoid duplication with other sections.
+
+STYLE CONTROLS:
+- Where applicable, use established IPO phrasing such as:
+  - absence of prior public market,
+  - potential delay or cancellation of listing,
+  - share price volatility following listing.
+
+- Use formal prospectus hedging language (example “may”, “could”, “there can be no assurance”).
+- Maintain concise, non-repetitive prose.
+- Avoid excessive verbosity or rhetorical emphasis.
+- Maintain factual neutrality.
+- Avoid absolute terms.
+- Use Malaysian prospectus-standard qualifying language (example “material adverse effect” rather than simply “adverse effect”).
 
 ---
 # Step 6
@@ -178,37 +274,63 @@ Draft detailed IPO prospectus risk factors under:
 9.4 OTHER RISKS
 
 For each listed risk:
-- Our Group is subject to changes in financial regulations that could impact our operations and compliance requirements.
-- Governance effectiveness depends on the continued availability of experienced board members, regulatory alignment, and effective internal reporting structures. Changes in governance composition or regulatory expectations may require adjustments to control frameworks.
-- We rely on financial modelling and deal management systems, which are critical for our operations. Any failure or disruption in these systems could adversely affect our business performance.
+[Insert risks generated and classified under 9.4]
 
-Provide a full risk heading starting with:
-  “We”, “Our Group”, or “Our business”.
+RISK EXPANSION CONTROL:
+- Expand ONLY the risks provided under 9.4.
+- Do NOT introduce new risks.
+- Maximum 2 risks should be expanded.
+- If no risks are provided, output exactly: "This section is not applicable based on the provided documents."
 
-- Draft 2–4 continuous formal prospectus paragraphs.
-- DO NOT use subheadings, bullet points, or structured labels.
-
-Within the narrative:
-
-- Explain the business or operational context creating the risk.
-- Include factual historical disclosures where available.
-- Describe operational dependencies where relevant.
-- Emphasise uncertainty using formal prospectus hedging.
-- Conclude with adverse impact language.
-
-MANDATORY:
-
-- Formal IPO prospectus tone.
-- Evidence-only drafting.
-- No mitigation language.
-- No promotional tone.
-- No mention of AI, systems, or prompts.
-- Each risk factor MUST contain at least two continuous narrative paragraphs:
-  1) Context and historical disclosure.
-  2) Future uncertainty and adverse impact.
-- Avoid causal inference unless explicitly supported by evidence.
-- Number each risk factor sequentially within the section (e.g., 9.1.1, 9.1.2, 9.1.3).
+RISK HEADING REQUIREMENTS:
+- Provide a full risk heading beginning with: “We”, “Our Group”, or “Our business”.
+- Number each risk sequentially within this section (example 9.4.1, 9.4.2).
 - The numbering should appear only in the risk heading.
-- Do NOT introduce internal subheadings within the narrative.
 
+NARRATIVE STRUCTURE REQUIREMENTS:
+- Draft 2–3 continuous formal prospectus paragraphs (approximately 120–220 words total per risk).
+- Do NOT use subheadings, bullet points, structured labels, or internal numbering.
+
+Each risk factor MUST include:
+1) Contextual explanation:
+   - Nature of the residual or exceptional risk, such as ownership concentration, promoter influence, litigation exposure, structural or governance considerations not already covered elsewhere.
+   - Include factual disclosures where supported.
+
+2) Forward-looking uncertainty:
+   - Potential implications for business stability, governance dynamics, investor perception, or strategic flexibility.
+
+3) Adverse impact conclusion:
+   - Potential material adverse effect on investor confidence, shareholding structure, business reputation, or corporate control.
+
+MANDATORY DRAFTING RULES:
+- Formal IPO prospectus tone throughout.
+- Evidence-based drafting only.
+- No speculative assumptions.
+- No mitigation language.
+- No promotional or reassuring tone.
+- No mention of AI, systems, prompts, or drafting methodology.
+- Avoid causal inference unless explicitly supported by evidence.
+
+
+CONSISTENCY AND CLASSIFICATION CONTROLS:
+- Include ONLY risks that clearly do not belong under:
+  - Business & Operations (9.1),
+  - Industry (9.2),
+  - Shares & Listing (9.3).
+
+- Do NOT include:
+  - operational risks,
+  - industry macro risks,
+  - capital market risks,
+  - financial dependency risks,
+  - customer concentration risks.
+
+- Avoid duplication with other sections.
+
+STYLE CONTROLS:
+- Use formal prospectus hedging language (example “may”, “could”, “there can be no assurance”).
+- Maintain concise, neutral, non-promotional tone.
+- Avoid excessive verbosity.
+- Avoid absolute terms.
+- Use Malaysian prospectus-standard qualifying language (example “material adverse effect”).
 
