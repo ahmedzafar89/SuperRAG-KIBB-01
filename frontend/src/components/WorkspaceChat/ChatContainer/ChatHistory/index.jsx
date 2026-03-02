@@ -5,7 +5,6 @@ import StatusResponse from "./StatusResponse";
 import { useManageWorkspaceModal } from "../../../Modals/ManageWorkspace";
 import ManageWorkspace from "../../../Modals/ManageWorkspace";
 import { ArrowDown } from "@phosphor-icons/react";
-import debounce from "lodash.debounce";
 import useUser from "@/hooks/useUser";
 import Chartable from "./Chartable";
 import Workspace from "@/models/workspace";
@@ -17,6 +16,8 @@ import { v4 } from "uuid";
 import { useTranslation } from "react-i18next";
 import { useChatMessageAlignment } from "@/hooks/useChatMessageAlignment";
 
+const BOTTOM_THRESHOLD_PX = 16;
+
 export default function ChatHistory({
   history = [],
   workspace,
@@ -26,50 +27,59 @@ export default function ChatHistory({
   hasAttachments = false,
 }) {
   const { t } = useTranslation();
-  const lastScrollTopRef = useRef(0);
   const { user } = useUser();
   const { threadSlug = null } = useParams();
   const { showing, showModal, hideModal } = useManageWorkspaceModal();
   const [isAtBottom, setIsAtBottom] = useState(true);
   const chatHistoryRef = useRef(null);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const isAutoScrollingRef = useRef(false);
   const isStreaming = history[history.length - 1]?.animate;
   const { showScrollbar } = Appearance.getSettings();
   const { textSizeClass } = useTextSize();
   const { getMessageAlignment } = useChatMessageAlignment();
+  const latestMessageSignature = useMemo(() => {
+    const lastMessage = history?.[history.length - 1];
+    if (!lastMessage) return "empty";
+    return [
+      lastMessage.uuid ?? "no-uuid",
+      lastMessage.chatId ?? "no-chat-id",
+      lastMessage.type ?? "message",
+      lastMessage.animate ? "streaming" : "static",
+      lastMessage.content?.length ?? 0,
+      history.length,
+    ].join("|");
+  }, [history]);
 
   useEffect(() => {
-    if (!isUserScrolling && (isAtBottom || isStreaming)) {
+    const shouldFollowStream = isStreaming && !isUserScrolling;
+    const shouldPinToBottom = !isStreaming && isAtBottom;
+
+    if (shouldFollowStream || shouldPinToBottom) {
       scrollToBottom(false); // Use instant scroll for auto-scrolling
     }
-  }, [history, isAtBottom, isStreaming, isUserScrolling]);
+  }, [latestMessageSignature, isAtBottom, isStreaming, isUserScrolling]);
 
-  const handleScroll = (e) => {
+  const handleScroll = useCallback((e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
-    const isBottom = scrollHeight - scrollTop === clientHeight;
+    const isNearBottom =
+      scrollHeight - scrollTop - clientHeight <= BOTTOM_THRESHOLD_PX;
 
-    // Detect if this is a user-initiated scroll
-    if (Math.abs(scrollTop - lastScrollTopRef.current) > 10) {
-      setIsUserScrolling(!isBottom);
+    setIsAtBottom(isNearBottom);
+
+    if (isNearBottom) {
+      setIsUserScrolling(false);
+      return;
     }
 
-    setIsAtBottom(isBottom);
-    lastScrollTopRef.current = scrollTop;
-  };
-
-  const debouncedScroll = debounce(handleScroll, 100);
-
-  useEffect(() => {
-    const chatHistoryElement = chatHistoryRef.current;
-    if (chatHistoryElement) {
-      chatHistoryElement.addEventListener("scroll", debouncedScroll);
-      return () =>
-        chatHistoryElement.removeEventListener("scroll", debouncedScroll);
+    if (!isAutoScrollingRef.current) {
+      setIsUserScrolling(true);
     }
   }, []);
 
   const scrollToBottom = (smooth = false) => {
     if (chatHistoryRef.current) {
+      isAutoScrollingRef.current = true;
       chatHistoryRef.current.scrollTo({
         top: chatHistoryRef.current.scrollHeight,
 
@@ -77,6 +87,9 @@ export default function ChatHistory({
         // We must disable this during auto scroll because it causes issues with
         // detecting when we are at the bottom of the chat.
         ...(smooth ? { behavior: "smooth" } : {}),
+      });
+      requestAnimationFrame(() => {
+        isAutoScrollingRef.current = false;
       });
     }
   };
@@ -163,6 +176,7 @@ export default function ChatHistory({
       regenerateAssistantMessage,
       saveEditedMessage,
       forkThread,
+      getMessageAlignment,
     ]
   );
   const lastMessageInfo = useMemo(() => getLastMessageInfo(history), [history]);
@@ -241,6 +255,7 @@ export default function ChatHistory({
               onClick={() => {
                 scrollToBottom(true);
                 setIsUserScrolling(false);
+                setIsAtBottom(true);
               }}
             >
               <ArrowDown weight="bold" className="text-white/60 w-5 h-5" />
