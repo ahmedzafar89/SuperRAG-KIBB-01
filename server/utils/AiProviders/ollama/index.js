@@ -26,6 +26,9 @@ class OllamaAILLM {
     this.keepAlive = process.env.OLLAMA_KEEP_ALIVE_TIMEOUT
       ? Number(process.env.OLLAMA_KEEP_ALIVE_TIMEOUT)
       : 300; // Default 5-minute timeout for Ollama model loading.
+    this.enableThinking = ["true", "1", "yes"].includes(
+      String(process.env.OLLAMA_ENABLE_THINKING || "").toLowerCase()
+    );
 
     const headers = this.authToken
       ? { Authorization: `Bearer ${this.authToken}` }
@@ -270,6 +273,7 @@ class OllamaAILLM {
         .chat({
           model: this.model,
           stream: false,
+          think: this.enableThinking,
           messages,
           keep_alive: this.keepAlive,
           options: {
@@ -323,6 +327,7 @@ class OllamaAILLM {
       func: this.client.chat({
         model: this.model,
         stream: true,
+        think: this.enableThinking,
         messages,
         keep_alive: this.keepAlive,
         options: {
