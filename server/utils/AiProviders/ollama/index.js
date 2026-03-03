@@ -264,7 +264,7 @@ class OllamaAILLM {
           messages,
           keep_alive: this.keepAlive,
           options: {
-            think: false,
+            chat_template_kwargs: { enable_thinking: false },
             temperature,
             use_mlock: true,
             // There are currently only two performance settings so if its not "base" - its max context.
@@ -320,7 +320,7 @@ class OllamaAILLM {
         messages,
         keep_alive: this.keepAlive,
         options: {
-          think: false,
+          chat_template_kwargs: { enable_thinking: false },
           temperature,
           use_mlock: true,
           // There are currently only two performance settings so if its not "base" - its max context.
