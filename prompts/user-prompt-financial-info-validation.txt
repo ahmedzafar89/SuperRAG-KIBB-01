@@ -1,0 +1,88 @@
+FINANCIAL INFORMATION VALIDATION REVIEW
+
+PURPOSE
+- Review an assembled draft of Section 12, "Financial Information".
+- Validate the draft against the supplied accountant report and retrieved evidence.
+- Check alignment with the target prospectus structure and tone.
+- Do NOT rewrite the draft and do NOT generate replacement disclosure.
+
+INPUTS
+
+DRAFT TO REVIEW
+<<DRAFT_FINANCIAL_INFORMATION_CHAPTER>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OPTIONAL STYLE REFERENCE NOTES
+<<STYLE_REFERENCE_NOTES>>
+
+VALIDATION OBJECTIVE
+- Identify unsupported claims, altered figures, section misclassification, duplication, terminology drift, missing required tables where the evidence is tabular, and overuse of fallback wording.
+
+SECTIONS IN SCOPE
+- 12.1 Historical Financial Information
+- 12.1.1 Consolidated statements of profit or loss and other comprehensive income
+- 12.1.2 Consolidated statements of financial position
+- 12.1.3 Consolidated statements of cash flows
+- 12.2 Capitalisation and Indebtedness
+- 12.3 Management's Discussion and Analysis of Financial Condition and Results of Operations
+- 12.4 Liquidity and Capital Resources
+- 12.5 Financial Instruments, Treasury Policies and Objectives
+- 12.6 Material Commitment for Capital Expenditure
+- 12.7 Material Litigation and Contingent Liabilities
+- 12.8 Key Financial Ratios
+- 12.9 Impact of Interest Rates, Commodity Prices and/or Foreign Exchange
+- 12.10 Trend Information
+- 12.11 Order Book
+- 12.12 Significant Changes/Events After Reporting Period
+- 12.13 Dividend Policy
+
+VALIDATION CHECKS
+1) Numerical consistency
+- Confirm all figures, dates, periods, units, labels, notes, and placeholders match the evidence.
+- Flag any inferred, reconstructed, calculated, rounded, or reformatted figures that are not supported by the evidence.
+
+2) Evidence support
+- Confirm every factual statement is supported by the evidence.
+- Flag speculation, unsupported causal explanations, invented accounting references, and unsupported cross-references.
+
+3) Section scope compliance
+- Confirm each section contains only content appropriate to that heading.
+- Flag content that belongs in another section, including duplicated ratio, borrowing, litigation, or dividend content.
+
+4) Structure and table compliance
+- Confirm the draft follows the target section structure.
+- Flag missing tables where the evidence is tabular and the section is expected to reproduce the table.
+- Flag cases where prose replaces a material source table without preserving the disclosed content.
+
+5) Tone and disclosure compliance
+- Confirm neutral prospectus tone.
+- Flag promotional, speculative, reassuring, or forward-looking language that is not expressly disclosed in the evidence.
+
+6) Internal consistency
+- Check consistency of terminology, defined periods, accounting framework references, and section cross-references across the draft.
+
+7) Fallback discipline
+- Flag any use of "Not disclosed in the provided documents." where the section is partially or fully supported by the evidence.
+- Flag sections that appear unsupported but were drafted as if supported.
+
+OUTPUT FORMAT
+Provide findings under the following headings only:
+- Numerical Consistency Issues
+- Evidence Support Issues
+- Duplication or Misclassification Issues
+- Structure or Table Compliance Issues
+- Tone / Disclosure Compliance Issues
+- Internal Consistency Issues
+- General Observations
+
+If no material issues are identified, state exactly:
+"No material inconsistencies identified based on the provided evidence."
+
+RESTRICTIONS
+- Do NOT rewrite any section.
+- Do NOT propose replacement wording.
+- Do NOT add new disclosures.
+- Maintain neutral professional tone.
+- Do NOT mention AI, prompts, or internal drafting process.

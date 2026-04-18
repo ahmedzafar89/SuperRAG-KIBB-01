@@ -1,40 +1,16 @@
-Draft the “FINANCIAL INFORMATION” section of an IPO prospectus based strictly on the evidence provided below.
+Draft only the requested Section 12 Financial Information heading of an IPO prospectus using the supplied evidence.
 
-REQUIRED STRUCTURE
+TARGET SECTION
+<<TARGET_SECTION_HEADING>>
 
-12. FINANCIAL INFORMATION
-
-12.1 Basis of Preparation
-- Describe the accounting standards applied.
-- State audit status and financial period coverage.
-- Include standard cross-references where applicable.
-
-12.2 Historical Financial Information
-- Introduce the historical financial statements.
-- State what periods are covered.
-- Do NOT interpret results.
-
-12.2.1 Statements of Profit or Loss and Other Comprehensive Income
-- Introduce the table and what it presents.
-- Do NOT analyse or explain performance.
-- Do NOT repeat all figures in text.
-
-12.2.2 Statements of Financial Position
-- Introduce the table and what it presents.
-- Describe asset, equity and liability classifications at a high level only.
-
-12.2.3 Statements of Cash Flows (if provided)
-- Introduce the table and coverage period.
-- Do NOT analyse cash movements.
-
-12.3 Key Financial Definitions (if applicable)
-- Provide definitions exactly as disclosed (e.g. EBITDA, EPS).
-- Include calculation notes only if explicitly provided.
-
-For each subsection:
-- Use short paragraphs.
-- Include references in the format:
-  [doc_name | page/section]
+RULES
+- Output only the requested section and preserve the heading exactly.
+- Use the accountant report and retrieved evidence as the only factual source.
+- Use the completed financial information chapter only as a style and structure reference if it is provided separately.
+- Start with one short framing paragraph before any table.
+- Reproduce source tables in clean markdown or aligned text when the evidence is tabular.
+- Use "Not disclosed in the provided documents." only when the requested section is wholly unsupported.
+- Do not validate, annotate, or comment on the draft.
 
 EVIDENCE
 <<EVIDENCE_SNIPPETS_WITH_METADATA>>

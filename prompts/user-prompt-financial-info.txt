@@ -1,796 +1,184 @@
----
-# Step 1
----
+FINANCIAL INFORMATION DRAFTING ORCHESTRATOR
 
-Draft the section:
+PURPOSE
+- Draft one Financial Information section or subsection at a time.
+- Align the output structure and tone to the completed prospectus reference, while using the accountant report and retrieved evidence as the only factual source.
+- Do NOT draft the full chapter unless the request explicitly asks for all sections sequentially.
+
+TARGET SECTION
+- Replace the placeholder below with the exact section heading to be drafted.
+
+<<TARGET_SECTION_HEADING>>
+
+OPTIONAL SECTION FOCUS
+- If a narrower scope is required for the selected section, replace the placeholder below.
+- Otherwise delete this block before use.
+
+<<TARGET_SECTION_FOCUS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+GLOBAL OUTPUT CONTRACT
+- Output only the requested section.
+- Preserve the requested heading exactly.
+- Begin with one short framing paragraph before any table.
+- Reproduce source tables in clean markdown or plain aligned format when the evidence is already tabular.
+- Keep table notes if they are expressly disclosed and necessary to preserve meaning.
+- Do not perform validation, redlining, commentary on prompt quality, or cross-section QA.
+- Do not add bullets unless the evidence itself is presented as bullet-style disclosure and the requested section requires that format.
+- Use "Not disclosed in the provided documents." only if the requested section is wholly unsupported by the evidence.
+
+STYLE ANCHORS
+- Use these as structural examples only. They are not factual source material and must not be copied with invented facts.
+- Example 1: "The following table sets out a summary of the consolidated statements for the Financial Years/Period Under Review. The consolidated financial statements have been prepared in accordance with [accounting framework] and should be read in conjunction with the Accountants' Report in Section [X] of this Prospectus."
+- Example 2: "The table below summarises our capitalisation and indebtedness based on the latest [audited/unaudited] financial information as at [date] and after adjusting the effects of [transaction], where applicable."
+- Example 3: "The following is our cash flow for the Financial Years/Period Under Review based on our audited consolidated financial statements. This should be read in conjunction with the Accountants' Report in Section [X] of this Prospectus."
+
+SECTION MAP AND DRAFTING RULES
 
 12.1 HISTORICAL FINANCIAL INFORMATION
+- Introduce the historical financial information at chapter level.
+- State the financial periods covered, the accounting framework, and that the information should be read together with the Accountants' Report where disclosed.
+- Refer neutrally to notes or related subsections where disclosed.
+- Do not analyse performance, profitability, liquidity, or trends.
 
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure introducing the Group’s historical financial information.
+12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME
+- Use one short introductory paragraph followed by the relevant table if supported.
+- Present the disclosed periods exactly as shown.
+- Include disclosed measures such as revenue, cost of sales, gross profit, PBT, PAT, EBITDA, margins, or EPS only if they appear in the evidence.
+- Include calculation notes only if expressly disclosed.
+- Do not explain movements or performance drivers in this section.
 
-CONTENT REQUIREMENTS:
-- Describe the scope of historical financial statements included (example combined financial statements, subsidiaries covered, accounting framework such as MFRS/IFRS where disclosed).
-- Refer to the relevant financial periods under review.
-- State that financial information is extracted from the Accountants’ Report where applicable.
-- Refer readers to Management’s Discussion and Analysis and accompanying notes where disclosed.
+12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION
+- Use one short introductory paragraph followed by the relevant table if supported.
+- Present assets, equity, and liabilities using the same line-item terminology as the evidence.
+- Keep classifications such as current and non-current exactly as disclosed.
+- Do not interpret balance sheet strength or movements.
 
-DATA CONSTRAINTS:
-- Do NOT introduce new financial figures unless explicitly disclosed.
-- Do NOT summarise performance trends or profitability.
-- Do NOT analyse financial results.
-- Do NOT repeat detailed table contents.
-
-STRUCTURE AND STYLE:
-- Continuous formal narrative paragraphs only.
-- Neutral accountant-style disclosure tone.
-- No promotional language.
-- No forward-looking statements.
-- No speculation or interpretation.
-
-COMPLETENESS:
-- If the section is not supported by the documents, state exactly: "Not disclosed in the provided documents."
-
----
-# Step 2
----
-
-Draft the section:
-
-12.1.1 Historical Statements of Profit or Loss and Other Comprehensive Income
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure introducing the summary financial performance tables.
-
-CONTENT REQUIREMENTS:
-- Refer to revenue, profit measures, margins, and earnings metrics ONLY if explicitly disclosed.
-- State that the information is extracted from audited financial statements or the Accountants’ Report.
-- Reference the financial periods under review.
-
-DATA CONSTRAINTS:
-- Do NOT calculate growth rates, margins, or ratios.
-- Do NOT interpret financial performance.
-- Do NOT restate table figures unnecessarily.
-
-STYLE:
-- Formal financial disclosure tone.
-- Continuous narrative paragraphs only.
-- No analysis or commentary.
-
----
-# Step 3
----
-
-Draft the section:
-
-12.1.2 Historical Statements of Financial Position
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure introducing the Group’s historical financial position.
-
-CONTENT REQUIREMENTS:
-- Refer generally to assets, liabilities, and equity.
-- Reference audited financial statements where disclosed.
-- Mention financial periods under review.
-
-DATA CONSTRAINTS:
-- Do NOT analyse balance sheet changes.
-- Do NOT infer financial health.
-- Do NOT introduce calculated metrics.
-
-STYLE:
-- Neutral accountant-style narrative.
-- Continuous paragraphs only.
-
----
-# Step 4
----
-
-Draft the section:
-
-12.1.3 Historical Statements of Cash Flows
-
-Using ONLY the provided financial evidence,
-prepare a formal IPO prospectus disclosure
-introducing historical cash flow information.
-
-CONTENT REQUIREMENTS:
-
-- Refer generally to operating, investing,
-  and financing cash flows.
-- Reference audited financial statements
-  or Accountants’ Report where disclosed.
-
-DATA CONSTRAINTS:
-
-- Do NOT interpret liquidity or performance.
-- Do NOT compute cash flow ratios.
-- Do NOT speculate on causes.
-
-STYLE:
-
-- Formal IPO financial disclosure tone.
-- Continuous narrative paragraphs only.
-
----
-# Step 5
----
-
-Draft the section:
+12.1.3 CONSOLIDATED STATEMENTS OF CASH FLOWS
+- Use one short introductory paragraph followed by the relevant table if supported.
+- Present operating, investing, and financing cash flow line items only as disclosed.
+- Include the exact period coverage and source reference where disclosed.
+- Do not explain the movements in this section.
 
 12.2 CAPITALISATION AND INDEBTEDNESS
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure introducing the Group’s capitalisation and indebtedness information.
-
-CONTENT REQUIREMENTS:
-- Describe capitalisation structure including shareholders’ equity and indebtedness where disclosed.
-- Refer to financial reporting date and whether information is audited or unaudited.
-- Refer to adjustments arising from acquisitions, public issue, or utilisation of proceeds if disclosed.
-- Mention gearing ratios only if explicitly disclosed.
-- Refer to contingent liabilities only if explicitly stated.
-
-DATA CONSTRAINTS:
-- Do NOT calculate ratios, totals, or derived values.
-- Do NOT interpret financial leverage or solvency.
-- Do NOT speculate on funding strategy.
-
-STYLE:
-- Formal IPO financial disclosure tone.
-- Continuous narrative paragraphs only.
-- Neutral accountant-style language.
-- No promotional or forward-looking statements.
-
-COMPLETENESS:
-- If unsupported by evidence, state exactly: "Not disclosed in the provided documents."
-
----
-# Step 6
----
-
-Draft the section:
-
-12.3 MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure describing the Group’s financial condition and results of operations.
-
-CONTENT REQUIREMENTS:
-- Provide overview of business operations where disclosed.
-- Describe revenue sources and segment contributions.
-- Describe financial performance context explicitly disclosed.
-- Refer to historical financial periods under review.
-- Include operational context supporting financial performance only where explicitly stated.
-
-DATA CONSTRAINTS:
-- Do NOT calculate growth rates or derived metrics.
-- Do NOT speculate on performance drivers.
-- Do NOT introduce forward-looking commentary.
-
-STRUCTURE:
-- Continuous narrative paragraphs only.
-- No bullet points or structured lists.
-
-STYLE:
-- Neutral prospectus disclosure tone.
-- Avoid promotional language.
-- Avoid interpretive commentary beyond evidence.
-
-COMPLETENESS:
-- If unsupported by documents, state exactly: "Not disclosed in the provided documents."
-
----
-# Step 7
----
-
-Draft the section:
-
-12.4 KEY FINANCIAL INDICATORS
-
-Using ONLY the provided financial evidence, prepare a formal IPO disclosure introducing key financial indicators.
-
-CONTENT REQUIREMENTS:
-- Include margins, EPS, EBITDA, or ratios only if explicitly disclosed.
-- Refer to financial periods under review.
-
-DATA CONSTRAINTS:
-- Do NOT compute ratios not disclosed.
-- Do NOT interpret financial performance.
-- Do NOT restate table figures unnecessarily.
-
-STYLE:
-- Neutral financial disclosure tone.
-- Continuous narrative paragraphs only.
-
----
-# Step 8
----
-
-Draft the section:
-
-12.5 WORKING CAPITAL SUFFICIENCY
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure regarding the sufficiency of the Group’s working capital.
-
-CONTENT REQUIREMENTS:
-- State whether the Directors are of the opinion that working capital is sufficient for the Group’s present requirements where explicitly disclosed.
-- Refer to sources of working capital such as: operating cash flows, banking facilities, internally generated funds, or IPO proceeds only if explicitly disclosed.
-- Mention material limitations, conditions, or assumptions only if disclosed.
-- Refer to relevant financial reporting period where applicable.
-
-DATA CONSTRAINTS:
-- Do NOT calculate liquidity ratios, working capital balances, or projections.
-- Do NOT assess sufficiency independently.
-- Do NOT speculate on funding adequacy.
-- Do NOT introduce forward-looking financial analysis.
-
-STRUCTURE AND STYLE:
-- Continuous formal narrative paragraphs only.
-- Neutral IPO prospectus disclosure tone.
-- Accountant-style wording.
-- Avoid promotional or reassuring language.
-- Avoid speculative commentary.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT restate detailed financial figures unless necessary for clarity.
-- Avoid repeating financial table data.
-
-COMPLETENESS:
-- If this disclosure is not supported by the provided documents, state exactly: "Not disclosed in the provided documents."
-
-STYLE REQUIREMENTS:
-- Formal prospectus disclosure tone.
-- No mention of AI, prompts, or drafting process.
-- No forward-looking projections.
-
----
-# Step 9
----
-
-Draft the section:
-
-12.6 INDEBTEDNESS / BORROWINGS
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure describing the Group’s indebtedness and borrowing profile.
-
-CONTENT REQUIREMENTS:
-- Describe outstanding borrowings where disclosed, including bank borrowings, lease liabilities, hire purchase obligations, or other financing arrangements.
-- Distinguish between secured and unsecured borrowings where explicitly disclosed.
-- Refer to guarantees, collateral, or security arrangements only where disclosed.
-- Mention maturity profiles, repayment terms, or interest arrangements where explicitly disclosed.
-- Refer to contingent liabilities or off-balance-sheet obligations only if explicitly stated.
-
-DATA CONSTRAINTS:
-- Include numerical disclosures ONLY if explicitly stated.
-- Use figures exactly as presented in the evidence.
-- Do NOT compute totals, ratios, gearing, or leverage.
-- Do NOT infer debt exposure or financial strength.
-- Do NOT speculate on refinancing or repayment capacity.
-
-STRUCTURE AND STYLE:
-- Continuous formal narrative paragraphs only.
-- No bullet points, tables, or numbered lists.
-- Neutral accountant-style disclosure tone.
-- No promotional or reassuring language.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT restate full financial tables unnecessarily.
-- Avoid duplication with Capitalisation section (12.2) unless required for narrative clarity.
-- Do NOT introduce forward-looking statements.
-
-COMPLETENESS:
-- If indebtedness disclosure is not supported by the provided documents, state exactly: "Not disclosed in the provided documents."
-
-STYLE REQUIREMENTS:
-- Formal IPO prospectus tone.
-- Neutral factual language.
-- No mention of AI, prompts, or drafting process.
-
----
-# Step 10
----
-
-Draft the section:
-
-12.7 CAPITAL EXPENDITURE / COMMITMENTS
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure describing the Group’s capital expenditure and capital commitments.
-
-CONTENT REQUIREMENTS:
-- Describe historical capital expenditure where disclosed.
-- Describe outstanding capital commitments, contractual obligations, or approved expenditures only where explicitly disclosed.
-- Refer to funding sources such as internally generated funds, borrowings, or IPO proceeds only if explicitly stated.
-- Mention project-related or asset-related commitments where disclosed.
-- Refer to material contractual obligations only where explicitly disclosed.
-
-DATA CONSTRAINTS:
-- Include numerical disclosures ONLY where explicitly stated.
-- Use figures exactly as presented in the evidence.
-- Do NOT calculate totals, projections, or derived values.
-- Do NOT estimate future expenditure.
-- Do NOT interpret strategic intent behind capex.
-
-STRUCTURE AND STYLE:
-- Continuous formal narrative paragraphs only.
-- No bullet points, tables, or structured lists.
-- Neutral accountant-style disclosure tone.
-- Avoid promotional or forward-looking language.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT speculate on business expansion plans unless explicitly disclosed.
-- Do NOT assess adequacy of capital expenditure.
-- Avoid duplication with working capital, indebtedness, or use-of-proceeds sections.
-
-COMPLETENESS:
-- If capital expenditure or commitments are not supported by the provided documents, state exactly: "Not disclosed in the provided documents."
-
-STYLE REQUIREMENTS:
-- Formal IPO prospectus financial disclosure tone.
-- Neutral factual wording.
-- No mention of AI, prompts, or drafting process.
-
----
-# Step 11
----
-
-Draft the section:
-
-12.8 DIVIDEND POLICY
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure describing the Group’s dividend policy.
-
-CONTENT REQUIREMENTS:
-- Describe any stated dividend policy, payout intention, or distribution framework only where explicitly disclosed.
-- Refer to historical dividend payments only if explicitly disclosed.
-- Include statements regarding Board discretion, financial performance considerations, cash flow availability, or regulatory constraints where disclosed.
-- Mention restrictions arising from financing arrangements or contractual obligations only if explicitly stated.
-
-DATA CONSTRAINTS:
-- Include numerical disclosures ONLY where explicitly stated.
-- Use figures exactly as presented in the evidence.
-- Do NOT compute payout ratios, yields, or dividend trends.
-- Do NOT forecast future dividends.
-
-STRUCTURE AND STYLE:
-- Continuous formal narrative paragraphs only.
-- No bullet points, tables, or structured lists.
-- Neutral accountant-style disclosure tone.
-- Avoid promotional or investor-persuasive language.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT guarantee or imply future dividends.
-- Do NOT interpret financial capacity to declare dividends.
-- Do NOT speculate on dividend sustainability.
-
-COMPLETENESS:
-- If dividend policy disclosure is not supported by the provided documents, state exactly: "Not disclosed in the provided documents."
-
-STYLE REQUIREMENTS:
-- Formal IPO prospectus tone.
-- Neutral factual language.
-- No forward-looking commitments.
-- No mention of AI, prompts, or drafting process.
-
-
----
-# Step 12
----
-
-Draft the section:
-
-12.9 SIGNIFICANT FACTORS AFFECTING OUR REVENUE
-
-Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the significant factors affecting our Group’s revenue during the Financial Years Under Review.
-
-CONTENT REQUIREMENTS:
-- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
-  - customer concentration,
-  - revenue contribution by major customers,
-  - segment or business line exposure,
-  - industry or sector exposure,
-  - geographic concentration,
-  - project-based or contract-based revenue characteristics,
-  - order book or pipeline characteristics,
-  - pricing, fee structures, or contract values,
-  - other revenue-related factors explicitly disclosed.
-
-- Include numerical disclosures ONLY where they appear explicitly in the evidence.
-- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
-- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
-- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
-- If a factor is mentioned without numerical data, describe it factually without quantification.
-- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
-
-STRUCTURE AND STYLE:
-- Write in continuous narrative paragraphs.
-- Do NOT use bullet points, tables, subheadings, or numbered lists.
-- Do NOT introduce new interpretations or causal explanations beyond those explicitly disclosed in the evidence. Where the evidence provides explanatory context, restate it factually without additional interpretation. 
-- Do NOT speculate on revenue performance.
-- Do NOT attribute causation unless explicitly stated in the evidence.
-- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
-- Do NOT introduce forward-looking statements or projections.
-- Do NOT restate management commentary unless supported by the evidence.
-- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
-
-COMPLETENESS:
-- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
-
-STYLE REQUIREMENTS:
-- Formal IPO prospectus financial disclosure tone.
-- Neutral, accountant-style language.
-- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
-- No promotional language.
-- No mention of AI, systems, prompts, or internal processes.
-
-STRICT DATA SCOPE FOR THIS SECTION:
-- Use ONLY revenue-related figures.
-- Do NOT include gross profit, net profit, margins, ratios, or any profitability metrics, even if present in the evidence.
-- Do NOT include calculated fields or derived values.
-- Ignore columns relating to cost, profit, margins, or ratios.
-
-
----
-# Step 13
----
-
-Draft the section:
-
-12.10 Impact of Government, Economic, Fiscal or Monetary Policies
-
-Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the significant Impact of Government, Economic, Fiscal or Monetary Policies.
-
-CONTENT REQUIREMENTS:
-- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
-  - Government regulations or policy frameworks affecting the industry.
-  - Fiscal policies such as taxation, incentives, or government programmes relevant to our operations.
-  - Monetary policy developments, including interest rate environments where disclosed.
-  - Capital market regulatory developments affecting advisory, financial services, or related activities.
-  - Economic policies influencing sector activity or investment behaviour.
-  - Government infrastructure, industry, or digitalisation initiatives relevant to our business.
-  - Regulatory compliance requirements affecting revenue recognition, reporting, or operations.
-  - Other government or macroeconomic policy factors explicitly disclosed in the evidence.
-
-- Include numerical disclosures ONLY where they appear explicitly in the evidence.
-- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
-- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
-- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
-- If a factor is mentioned without numerical data, describe it factually without quantification.
-- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
-
-STRUCTURE AND STYLE:
-- Write in continuous narrative paragraphs.
-- Do NOT use bullet points, tables, subheadings, or numbered lists.
-- Do NOT introduce new interpretations or causal explanations beyond those explicitly disclosed in the evidence. Where the evidence provides explanatory context, restate it factually without additional interpretation. 
-- Do NOT speculate on revenue performance.
-- Do NOT attribute causation unless explicitly stated in the evidence.
-- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
-- Do NOT introduce forward-looking statements or projections.
-- Do NOT restate management commentary unless supported by the evidence.
-- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
-
-COMPLETENESS:
-- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
-
-STYLE REQUIREMENTS:
-- Formal IPO prospectus financial disclosure tone.
-- Neutral, accountant-style language.
-- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
-- No promotional language.
-- No mention of AI, systems, prompts, or internal processes.
-
-STRICT DATA SCOPE FOR THIS SECTION:
-- Use ONLY revenue-related figures.
-- Do NOT include gross profit, net profit, margins, ratios, or any profitability metrics, even if present in the evidence.
-- Do NOT include calculated fields or derived values.
-- Ignore columns relating to cost, profit, margins, or ratios.
-
----
-# Step 14
----
-
-Draft the section:
-
-12.11 Impact of Inflation
-
-Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the Impact of Inflation.
-
-CONTENT REQUIREMENTS:
-- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
-  - General price inflation affecting operating costs.
-  - Inflation impact on staff costs, vendor costs, or service costs where disclosed.
-  - Impact of inflation on project pricing or contract values where evidenced.
-  - Cost escalation clauses or pricing adjustments explicitly disclosed.
-  - Inflation-related changes in customer spending patterns where disclosed.
-  - Impact of inflation on margins or profitability where explicitly disclosed.
-  - Other inflation-related factors explicitly disclosed in the evidence.
-
-- Include numerical disclosures ONLY where they appear explicitly in the evidence.
-- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
-- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
-- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
-- If a factor is mentioned without numerical data, describe it factually without quantification.
-- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
-
-STRUCTURE AND STYLE:
-- Write in continuous narrative paragraphs.
-- Do NOT use bullet points, tables, subheadings, or numbered lists.
-- Do NOT introduce new interpretations or causal explanations beyond those explicitly disclosed in the evidence. Where the evidence provides explanatory context, restate it factually without additional interpretation. 
-- Do NOT speculate on revenue performance.
-- Do NOT attribute causation unless explicitly stated in the evidence.
-- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
-- Do NOT introduce forward-looking statements or projections.
-- Do NOT restate management commentary unless supported by the evidence.
-- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
-
-COMPLETENESS:
-- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
-
-STYLE REQUIREMENTS:
-- Formal IPO prospectus financial disclosure tone.
-- Neutral, accountant-style language.
-- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
-- No promotional language.
-- No mention of AI, systems, prompts, or internal processes.
-
-
----
-# Step 15
----
-
-Draft the section:
-
-12.12 Impact of FX, Interest Rates, Commodity Prices
-
-Using ONLY the provided financial evidence, draft a formal IPO prospectus disclosure describing the Impact of FX, Interest Rates, Commodity Prices.
-
-CONTENT REQUIREMENTS:
-- Describe the principal factors affecting revenue as disclosed in the evidence, which may include:
-  - Exposure to foreign exchange rate movements affecting revenue or costs.
-  - Currency denomination of contracts, revenues, or expenses where disclosed.
-  - Interest rate exposure affecting financing costs or financial instruments.
-  - Borrowing structures or financing arrangements sensitive to interest rates.
-  - Commodity price exposure where relevant to operational inputs.
-  - Hedging policies or financial instruments where explicitly disclosed.
-  - Sensitivity disclosures included in financial statements.
-  - Other market price exposures explicitly disclosed in the evidence.
-
-- Include numerical disclosures ONLY where they appear explicitly in the evidence.
-- Use figures exactly as disclosed in the evidence, including original units, labels, rounding, and formatting.
-- Do NOT compute, derive, infer, or restate percentages, ratios, or proportions unless they are explicitly disclosed.
-- If numerical values appear in raw or excessive decimal precision due to spreadsheet formatting, use the original reported or presentation-ready format consistent with financial disclosures.
-- If a factor is mentioned without numerical data, describe it factually without quantification.
-- Omit factors not supported by evidence rather than explicitly discussing their absence, unless the evidence explicitly states that such information is unavailable.
-
-STRUCTURE AND STYLE:
-- Write in continuous narrative paragraphs.
-- Do NOT use bullet points, tables, subheadings, or numbered lists.
-- Do NOT introduce new interpretations or causal explanations beyond those explicitly disclosed in the evidence. Where the evidence provides explanatory context, restate it factually without additional interpretation. 
-- Do NOT speculate on revenue performance.
-- Do NOT attribute causation unless explicitly stated in the evidence.
-- Avoid evaluative or qualitative language such as “strong”, “improved”, “weakened”, or similar terms.
-
-DISCLOSURE CONSTRAINTS:
-- Do NOT compute trends, growth rates, margins, or comparisons unless explicitly disclosed.
-- Do NOT introduce forward-looking statements or projections.
-- Do NOT restate management commentary unless supported by the evidence.
-- Avoid unnecessary repetition of figures already presented elsewhere unless required for definition or clarity.
-
-COMPLETENESS:
-- If the section is not supported by the provided documents, state exactly: “Not disclosed in the provided documents.”
-
-STYLE REQUIREMENTS:
-- Formal IPO prospectus financial disclosure tone.
-- Neutral, accountant-style language.
-- Avoid hedging unless explicitly present in the evidence or required for formal disclosure phrasing.
-- No promotional language.
-- No mention of AI, systems, prompts, or internal processes.
-
----
-# Step 16
----
-
-Draft the section:
-
-12.13 MATERIAL CHANGES / RECENT DEVELOPMENTS
-
-Using ONLY the provided financial evidence, prepare a formal IPO prospectus disclosure describing any material changes or recent financial developments affecting the Group.
-
-CONTENT REQUIREMENTS:
-- Describe significant events occurring after the latest audited financial period where explicitly disclosed.
-- Include acquisitions, disposals, capital raising, major contracts, restructuring, or operational changes only where disclosed.
-- Refer to financial impact only if explicitly stated.
-
-DATA CONSTRAINTS:
-- Do NOT speculate on future impact.
-- Do NOT infer materiality unless stated.
-- Do NOT introduce forward-looking commentary.
-- Do NOT compute financial effects.
-
-STRUCTURE AND STYLE:
-- Continuous formal narrative paragraphs only.
-- Neutral IPO disclosure tone.
-- No promotional or speculative language.
-
-COMPLETENESS:
-- If no material changes are disclosed, state exactly:
-  "There have been no material changes since the last reported financial period based on the provided documents."
-
----
-# Step 17
----
-
-
-Draft the section:
-
-12.14 CONTINGENT LIABILITIES AND LITIGATION
-
-Using ONLY the provided financial evidence,
-prepare a formal IPO prospectus disclosure
-describing contingent liabilities,
-legal proceedings, or potential financial exposures.
-
-CONTENT REQUIREMENTS:
-
-- Describe contingent liabilities,
-  guarantees, indemnities, or legal claims
-  only where explicitly disclosed.
-- Refer to potential financial exposure
-  only if quantified in the evidence.
-- Include litigation or disputes only if disclosed.
-
-DATA CONSTRAINTS:
-
-- Do NOT speculate on legal outcomes.
-- Do NOT estimate financial exposure.
-- Do NOT interpret legal risk severity.
-
-STRUCTURE AND STYLE:
-
-- Continuous formal narrative paragraphs only.
-- Neutral accountant-style disclosure tone.
-- Avoid promotional or defensive language.
-
-COMPLETENESS:
-
-- If no contingent liabilities or litigation
-  are disclosed, state exactly:
-
-  "No material contingent liabilities or litigation
-  are disclosed in the provided documents."
-
----
-# Step 18
----
-
-Draft the section:
-
-12.15 OTHER FINANCIAL INFORMATION
-
-Using ONLY the provided financial evidence,
-prepare a formal IPO prospectus disclosure
-covering any additional financial information
-not addressed elsewhere in this chapter.
-
-CONTENT REQUIREMENTS:
-
-- Include exceptional or extraordinary items
-  only where explicitly disclosed.
-- Refer to audit qualifications or emphasis
-  of matter only if disclosed.
-- Include other financial disclosures explicitly stated
-  but not covered in previous sections.
-
-DATA CONSTRAINTS:
-
-- Do NOT introduce new financial information.
-- Do NOT speculate or interpret financial performance.
-- Do NOT duplicate disclosures already covered.
-
-STRUCTURE AND STYLE:
-
-- Continuous formal narrative paragraphs only.
-- Neutral financial disclosure tone.
-- No promotional language.
-
-COMPLETENESS:
-
-- If no additional financial information is disclosed,
-  state exactly:
-
-  "No additional financial information
-  is disclosed in the provided documents."
-
-
----
-# Step 19
----
-
-Perform a comprehensive validation review of the drafted IPO Financial Information sections.
-
-Scope includes (where applicable):
-
-12.1 Historical Financial Information
-12.2 Capitalisation and Indebtedness
-12.3 Management’s Discussion and Analysis
-12.5 Working Capital Sufficiency
-12.6 Indebtedness / Borrowings
-12.7 Capital Expenditure / Commitments
-12.8 Dividend Policy
-12.9 Significant Factors Affecting Revenue
-12.10 Government/Economic Policy Impact
-12.11 Impact of Inflation
-12.12 Impact of FX, Interest Rates, Commodity Prices
-
-
-VALIDATION OBJECTIVE:
-
-Identify inconsistencies, unsupported disclosures, tone issues, numerical inaccuracies, duplication across sections, and potential regulatory disclosure risks.
-
-DO NOT rewrite the sections.
-DO NOT generate replacement content.
-Only flag issues and provide concise observations.
-
-
-VALIDATION CHECKS:
-1. NUMERICAL CONSISTENCY
-- Verify all financial figures match the evidence.
-- Flag any calculated, inferred, or restated figures.
-- Identify rounding inconsistencies.
-- Identify unsupported ratios or percentages.
-
-2. EVIDENCE SUPPORT
-- Confirm each disclosure is supported by the provided financial evidence.
-- Flag speculative or inferred statements.
-
-3. CROSS-SECTION DUPLICATION
-- Identify repeated disclosures across sections.
-- Highlight misplaced content (example policy factors appearing in revenue sections).
-
-4. SECTION SCOPE COMPLIANCE
-- Ensure each section focuses on its intended topic:
-  - Revenue drivers → 12.9
-  - Policy impacts → 12.10
-  - Inflation → 12.11
-  - Market exposure → 12.12
-  - Capital structure → 12.2
-  - Borrowings → 12.6
-  - Dividend policy → 12.8
-
-5. TONE AND DISCLOSURE COMPLIANCE
-- Confirm neutral prospectus tone.
-- Flag promotional, speculative, or forward-looking language.
-- Identify implied guarantees or commitments.
-
-6. FINANCIAL DISCLOSURE RISKS
-- Highlight statements that could raise regulatory, audit, or investor disclosure concerns.
-
-7. INTERNAL CONSISTENCY
-- Check terminology consistency (example revenue labels, financial period naming).
-- Confirm consistent accounting references.
-
-8. COMPLETENESS CHECK
-- Identify sections that appear unsupported by evidence but were drafted.
-- Confirm correct use of: "Not disclosed in the provided documents." where appropriate.
-
-
-OUTPUT FORMAT:
-Provide findings under the following headings:
-- Numerical Consistency Issues
-- Evidence Support Issues
-- Duplication or Misclassification Issues
-- Tone / Disclosure Compliance Issues
-- Potential Regulatory Risks
-- General Observations
-
-If no issues are identified, state: "No material inconsistencies identified based on the provided evidence."
-
-RESTRICTIONS:
-- Do NOT rewrite any sections.
-- Do NOT generate new disclosures.
-- Do NOT interpret financial performance.
-- Maintain neutral professional tone.
-- No mention of AI, prompts, or internal drafting process
+- Introduce the table with the basis date and whether the information is audited, unaudited, pro forma, or adjusted, where disclosed.
+- Reproduce the capitalisation and indebtedness table if supported.
+- Preserve categories such as secured and guaranteed, unsecured and unguaranteed, current, non-current, total indebtedness, total capitalisation, and gearing ratio exactly as disclosed.
+- Retain pro forma adjustment captions, notes, and placeholders such as [●] only if they appear in the evidence.
+- Do not calculate totals or gearing.
+
+12.3 MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+- Draft this section through the narrower subsection requested below. Do not produce a generic blended MD&A section.
+
+12.3.1 OVERVIEW OF OUR BUSINESS
+- Describe the business model, principal activities, and operational scope only as disclosed.
+- Include project counts, GDV, geography, or operating status only if expressly disclosed.
+- Keep this section descriptive, not promotional.
+
+12.3.2 SIGNIFICANT FACTORS MATERIALLY AFFECTING OUR OPERATIONS AND FINANCIAL RESULTS
+- Include only factors expressly disclosed in the evidence.
+- Explanatory narrative is allowed here if the evidence itself attributes the factor or risk.
+- Preserve any issuer-centric risk phrasing if disclosed.
+- Do not add generic sector risks that are not in the evidence.
+
+12.3.3 OVERVIEW OF OUR RESULTS OF OPERATIONS
+- Summarise the basis of revenue recognition, business segment mix, geographic concentration, or headline operating context only if explicitly disclosed.
+- Use disclosed comparisons only if the evidence itself states them.
+- Do not invent CAGR, percentages, or trend language.
+
+12.3.4 REVENUE
+- Describe revenue composition, segmentation, or contributions only where disclosed.
+- Reproduce any supporting table if available.
+- Use only disclosed revenue figures, percentages, segment labels, and explanatory statements.
+
+12.3.5 COST OF SALES
+- Present the section only if cost-of-sales breakdown or explanation is expressly disclosed.
+- Use disclosed drivers or component descriptions only as stated.
+
+12.3.6 GP AND GP MARGIN
+- Present gross profit and gross profit margin only if expressly disclosed.
+- Include notes or basis of computation only if provided.
+- Do not calculate or restate margins not shown in the evidence.
+
+12.3.7 OTHER INCOME
+- Present this section only if the evidence discloses the composition or narrative relating to other income.
+
+12.3.8 ADMINISTRATIVE EXPENSES
+- Present this section only if the evidence discloses the composition or narrative relating to administrative expenses.
+
+12.3.9 SELLING AND DISTRIBUTION EXPENSES
+- Present this section only if the evidence discloses the composition or narrative relating to selling and distribution expenses.
+
+12.3.10 OTHER EXPENSES AND IMPAIRMENT LOSS ON FINANCIAL ASSETS
+- Present this section only if the evidence discloses these items.
+- Keep impairment terminology exactly as disclosed.
+
+12.3.11 FINANCE COSTS
+- Present finance-cost discussion only if expressly disclosed.
+- Include interest-rate or borrowing explanations only if expressly stated in the evidence.
+
+12.3.12 PBT, PAT AND EFFECTIVE TAX RATE
+- Present only the disclosed profit and tax measures and any disclosed explanation of effective tax rate.
+- Do not compute effective tax rate if it is not already disclosed.
+
+12.4 LIQUIDITY AND CAPITAL RESOURCES
+- Draft this section through the narrower subsection requested below.
+
+12.4.1 WORKING CAPITAL
+- Describe funding sources, working capital position, banking facilities, net assets, gearing, and board view on sufficiency only where expressly disclosed.
+- Preserve time qualifiers such as "as at the LPD" or "for 12 months from the date of this Prospectus" only if disclosed.
+- Do not independently assess sufficiency.
+
+12.4.2 CASH FLOW
+- Use one short framing paragraph followed by the cash flow table if disclosed.
+- Explanatory narrative for each period is allowed only if the evidence expressly provides the reasons for movements.
+- Preserve the ordering of operating, investing, and financing activities.
+
+12.4.3 BANK BORROWINGS
+- Present bank borrowing amounts, facility types, security, repayment profile, and related narrative only if expressly disclosed.
+- Do not merge this section into 12.2 unless the evidence does so.
+
+12.5 FINANCIAL INSTRUMENTS, TREASURY POLICIES AND OBJECTIVES
+- Cover treasury practices, exposure management, or financial instrument policies only if expressly disclosed.
+- Do not invent hedging, risk management, or treasury policies.
+
+12.6 MATERIAL COMMITMENT FOR CAPITAL EXPENDITURE
+- Present capital commitments, approved expenditure, project-related commitments, or funding sources only where expressly disclosed.
+- Reproduce tables if the evidence is tabular.
+
+12.7 MATERIAL LITIGATION AND CONTINGENT LIABILITIES
+- Present litigation, claims, guarantees, indemnities, or contingent liabilities only if expressly disclosed.
+- Do not speculate on outcome, likelihood, or severity.
+
+12.8 KEY FINANCIAL RATIOS
+- Use one short framing paragraph followed by the ratio table if supported.
+- Reproduce disclosed ratios, notes, formula descriptions, turnover tables, ageing tables, and follow-on explanations only if they appear in the evidence.
+- Do not calculate new ratios or reconstruct missing figures.
+
+12.9 IMPACT OF INTEREST RATES, COMMODITY PRICES AND/OR FOREIGN EXCHANGE
+- Present this section only if the evidence expressly discusses these exposures or confirms immateriality.
+- Do not generalise macroeconomic exposure beyond the evidence.
+
+12.10 TREND INFORMATION
+- Include trend statements only where expressly disclosed.
+- Do not infer market trends, pipeline trends, or financial direction from raw figures alone.
+
+12.11 ORDER BOOK
+- Present order book, unbilled sales, outstanding contract value, or equivalent pipeline information only if expressly disclosed.
+- Preserve defined terms exactly as shown.
+
+12.12 SIGNIFICANT CHANGES/EVENTS AFTER REPORTING PERIOD
+- Present only disclosed post-reporting-period changes or state the disclosed absence of such changes.
+- Do not infer materiality from raw events unless the evidence states it.
+
+12.13 DIVIDEND POLICY
+- Present stated dividend policy, board discretion, historical dividends, restrictions, or payout framework only if expressly disclosed.
+- Do not imply future dividends unless the evidence expressly does so.
+
+FINAL REMINDERS
+- The accountant report and retrieved snippets are the only factual source.
+- The completed prospectus chapter is a style and structure reference only.
+- Evidence overrides style.
+- Draft only the requested section heading and nothing else.
