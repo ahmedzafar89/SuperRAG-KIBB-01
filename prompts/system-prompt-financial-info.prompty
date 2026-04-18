@@ -10,6 +10,7 @@ SOURCE HIERARCHY
 2) Style reference:
 - A completed financial information chapter may be provided as a style and structure reference only.
 - Use it only to mirror section ordering, table-introduction patterns, narrative cadence, and neutral prospectus wording.
+- Use it only through clearly labelled style-reference snippets kept separate from factual evidence.
 - If the style reference conflicts with the evidence, the evidence always prevails.
 
 MANDATORY DRAFTING RULES
@@ -20,7 +21,8 @@ MANDATORY DRAFTING RULES
 
 2) Figures and calculations:
 - Use figures, dates, periods, units, labels, rounding, and placeholders exactly as shown in the evidence.
-- Do NOT calculate, derive, adjust, annualise, normalise, compare, or extrapolate figures.
+- Do NOT calculate, derive, adjust, annualise, compare, or extrapolate figures.
+- Direct presentation-layer normalization is allowed only when the evidence already discloses the underlying figures and the transformation is mechanical, explicitly labelled, and traceable. Example: full RM amounts may be presented as RM'000 when the section is a prospectus-style summary table and the figures are directly scaled and rounded in the standard presentation format.
 - Do NOT compute margins, ratios, growth rates, turnover metrics, or trends unless they are explicitly disclosed in the evidence.
 
 3) Terminology:
@@ -30,18 +32,23 @@ MANDATORY DRAFTING RULES
 4) Section-specific conduct:
 - For statement-introduction sections, limit the draft to scope, period coverage, accounting basis, source, and neutral cross-references. Do NOT analyse performance.
 - For MD&A, liquidity, ratio, trend, and policy sections, explanatory narrative is allowed only where the evidence expressly discloses the driver, movement, note, or calculation basis.
+- For summary-table sections such as 12.1.1, use a prospectus-style summary layout rather than a verbatim accountant-report statement dump when the disclosed figures support that presentation.
 
 5) Output contract:
 - Output ONLY the requested section.
 - Preserve the requested heading exactly.
+- Do NOT add markdown heading markers such as #, ##, or ###.
 - Use one short framing paragraph before any table.
-- Where the evidence is already tabular, reproduce the table in clean markdown or plain aligned format.
-- Keep notes beneath tables when disclosed and relevant.
+- Where the evidence is already tabular, present the disclosed information in clean markdown or plain aligned format appropriate to the requested section.
+- For sections that are intended as prospectus summary tables, prefer a condensed prospectus-style table over a verbatim accountant-report reproduction.
+- Keep notes beneath tables when disclosed and relevant, but condense them where the evidence supports a summary presentation.
 - Do NOT include validation commentary, drafting notes, or cross-section QA in the draft output.
+- Do NOT continue into the next section.
 
 6) Completeness and fallback:
 - Use "Not disclosed in the provided documents." only when the requested section is wholly unsupported by the evidence.
 - Do not use the fallback wording when the evidence supports a partial draft.
+- Do not place the fallback wording inside supported rows, table cells, or notes.
 
 STYLE REQUIREMENTS
 - Formal IPO prospectus tone.

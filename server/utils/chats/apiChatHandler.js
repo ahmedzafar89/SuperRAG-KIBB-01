@@ -18,6 +18,11 @@ const { CollectorApi } = require("../collectorApi");
 const fs = require("fs");
 const path = require("path");
 const { hotdirPath, normalizePath, isWithin } = require("../files");
+const {
+  shouldUseIpoPromptInjection,
+  buildIpoPromptBlocks,
+  injectIpoPromptBlocks,
+} = require("../evidence/buildIpoPromptBlocks");
 /**
  * @typedef ResponseObject
  * @property {string} id - uuid of response
@@ -374,12 +379,21 @@ async function chatSync({
     };
   }
 
+  let updatedMessage = message;
+  if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
+    const promptBlocks = buildIpoPromptBlocks([
+      ...vectorSearchResults.sources,
+      ...sources,
+    ]);
+    updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
+  }
+
   // Compress & Assemble message to ensure prompt passes token limit with room for response
   // and build system messages based on inputs and history.
   const messages = await LLMConnector.compressMessages(
     {
       systemPrompt: await chatPrompt(workspace, user),
-      userPrompt: message,
+      userPrompt: updatedMessage,
       contextTexts,
       chatHistory,
       attachments,
@@ -727,12 +741,21 @@ async function streamChat({
     return;
   }
 
+  let updatedMessage = message;
+  if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
+    const promptBlocks = buildIpoPromptBlocks([
+      ...vectorSearchResults.sources,
+      ...sources,
+    ]);
+    updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
+  }
+
   // Compress & Assemble message to ensure prompt passes token limit with room for response
   // and build system messages based on inputs and history.
   const messages = await LLMConnector.compressMessages(
     {
       systemPrompt: await chatPrompt(workspace, user),
-      userPrompt: message,
+      userPrompt: updatedMessage,
       contextTexts,
       chatHistory,
       attachments,

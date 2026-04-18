@@ -16,18 +16,25 @@ OPTIONAL SECTION FOCUS
 
 <<TARGET_SECTION_FOCUS>>
 
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
 EVIDENCE
 <<EVIDENCE_SNIPPETS_WITH_METADATA>>
 
 GLOBAL OUTPUT CONTRACT
 - Output only the requested section.
 - Preserve the requested heading exactly.
+- Do not add markdown heading markers such as #, ##, or ###.
 - Begin with one short framing paragraph before any table.
-- Reproduce source tables in clean markdown or plain aligned format when the evidence is already tabular.
-- Keep table notes if they are expressly disclosed and necessary to preserve meaning.
+- Present tables in clean markdown or plain aligned format appropriate to the requested section.
+- Where the section is a prospectus-style summary section, prefer a condensed summary table over a verbatim accountant-report statement dump.
+- Keep table notes if they are expressly disclosed and necessary to preserve meaning, but condense them when the evidence supports summary presentation.
 - Do not perform validation, redlining, commentary on prompt quality, or cross-section QA.
 - Do not add bullets unless the evidence itself is presented as bullet-style disclosure and the requested section requires that format.
 - Use "Not disclosed in the provided documents." only if the requested section is wholly unsupported by the evidence.
+- Do not place fallback wording inside supported rows, table cells, or notes.
+- Do not continue into the next section.
 
 STYLE ANCHORS
 - Use these as structural examples only. They are not factual source material and must not be copied with invented facts.
@@ -48,6 +55,10 @@ SECTION MAP AND DRAFTING RULES
 - Present the disclosed periods exactly as shown.
 - Include disclosed measures such as revenue, cost of sales, gross profit, PBT, PAT, EBITDA, margins, or EPS only if they appear in the evidence.
 - Include calculation notes only if expressly disclosed.
+- When the evidence provides full RM figures and the requested section is a prospectus-style summary, you may present the table in RM'000 provided the unit label states RM'000 and the scaling is direct and traceable.
+- For this section, prefer the approved prospectus summary-table display pattern over verbatim accountant-report statement reproduction.
+- Include disclosed EBITDA, GP margin, PBT margin, PAT margin, and basic and diluted EPS rows when they are expressly disclosed in the evidence.
+- Condense disclosed notes to the minimum necessary summary form rather than reproducing the full accountant-report note block verbatim.
 - Do not explain movements or performance drivers in this section.
 
 12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION

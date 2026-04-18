@@ -4,6 +4,11 @@ const { WorkspaceChats } = require("../../models/workspaceChats");
 const { getVectorDbClass, getLLMProvider } = require("../helpers");
 const { writeResponseChunk } = require("../helpers/chat/responses");
 const { chatPrompt, sourceIdentifier } = require("./index");
+const {
+  shouldUseIpoPromptInjection,
+  buildIpoPromptBlocks,
+  injectIpoPromptBlocks,
+} = require("../evidence/buildIpoPromptBlocks");
 
 const { PassThrough } = require("stream");
 
@@ -150,11 +155,20 @@ async function chatSync({
     );
   }
 
+  let updatedPrompt = String(prompt);
+  if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
+    const promptBlocks = buildIpoPromptBlocks([
+      ...vectorSearchResults.sources,
+      ...sources,
+    ]);
+    updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
+  }
+
   // Compress & Assemble message to ensure prompt passes token limit with room for response
   // and build system messages based on inputs and history.
   const messages = await LLMConnector.compressMessages({
     systemPrompt: systemPrompt ?? (await chatPrompt(workspace)),
-    userPrompt: String(prompt),
+    userPrompt: updatedPrompt,
     contextTexts,
     chatHistory: history,
     attachments,
@@ -384,11 +398,20 @@ async function streamChat({
     return;
   }
 
+  let updatedPrompt = String(prompt);
+  if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
+    const promptBlocks = buildIpoPromptBlocks([
+      ...vectorSearchResults.sources,
+      ...sources,
+    ]);
+    updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
+  }
+
   // Compress & Assemble message to ensure prompt passes token limit with room for response
   // and build system messages based on inputs and history.
   const messages = await LLMConnector.compressMessages({
     systemPrompt: systemPrompt ?? (await chatPrompt(workspace)),
-    userPrompt: String(prompt),
+    userPrompt: updatedPrompt,
     contextTexts,
     chatHistory: history,
     attachments,

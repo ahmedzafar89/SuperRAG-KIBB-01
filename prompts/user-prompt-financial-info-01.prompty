@@ -3,13 +3,18 @@ Draft only the requested Section 12 Financial Information heading of an IPO pros
 TARGET SECTION
 <<TARGET_SECTION_HEADING>>
 
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
 RULES
 - Output only the requested section and preserve the heading exactly.
+- Do not add markdown heading markers such as #, ##, or ###.
 - Use the accountant report and retrieved evidence as the only factual source.
 - Use the completed financial information chapter only as a style and structure reference if it is provided separately.
 - Start with one short framing paragraph before any table.
-- Reproduce source tables in clean markdown or aligned text when the evidence is tabular.
+- Present tables in clean markdown or aligned text appropriate to the requested section.
 - Use "Not disclosed in the provided documents." only when the requested section is wholly unsupported.
+- Do not continue into the next section.
 - Do not validate, annotate, or comment on the draft.
 
 EVIDENCE

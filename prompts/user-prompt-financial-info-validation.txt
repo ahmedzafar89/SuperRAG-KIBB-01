@@ -42,6 +42,7 @@ VALIDATION CHECKS
 1) Numerical consistency
 - Confirm all figures, dates, periods, units, labels, notes, and placeholders match the evidence.
 - Flag any inferred, reconstructed, calculated, rounded, or reformatted figures that are not supported by the evidence.
+- Where figures are presented in normalized units such as RM'000, confirm the transformation is directly traceable to disclosed source figures and uses the stated unit label consistently.
 
 2) Evidence support
 - Confirm every factual statement is supported by the evidence.
@@ -55,6 +56,8 @@ VALIDATION CHECKS
 - Confirm the draft follows the target section structure.
 - Flag missing tables where the evidence is tabular and the section is expected to reproduce the table.
 - Flag cases where prose replaces a material source table without preserving the disclosed content.
+- Flag markdown heading syntax where the output contract requires a plain heading.
+- Flag raw accountant-report statement-table leakage where a prospectus-style summary table is expected.
 
 5) Tone and disclosure compliance
 - Confirm neutral prospectus tone.
@@ -66,6 +69,7 @@ VALIDATION CHECKS
 7) Fallback discipline
 - Flag any use of "Not disclosed in the provided documents." where the section is partially or fully supported by the evidence.
 - Flag sections that appear unsupported but were drafted as if supported.
+- Flag any use of fallback wording inside supported table rows, cells, or notes.
 
 OUTPUT FORMAT
 Provide findings under the following headings only:
@@ -76,6 +80,7 @@ Provide findings under the following headings only:
 - Tone / Disclosure Compliance Issues
 - Internal Consistency Issues
 - General Observations
+- Use plain heading lines only. Do not add markdown heading markers such as #, ##, or ###.
 
 If no material issues are identified, state exactly:
 "No material inconsistencies identified based on the provided evidence."

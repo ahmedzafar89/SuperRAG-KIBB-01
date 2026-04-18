@@ -13,8 +13,10 @@ const {
   sourceIdentifier,
 } = require("./index");
 const {
-  formatEvidenceSnippets,
-} = require("../evidence/formatEvidenceSnippets");
+  shouldUseIpoPromptInjection,
+  buildIpoPromptBlocks,
+  injectIpoPromptBlocks,
+} = require("../evidence/buildIpoPromptBlocks");
 
 const VALID_CHAT_MODE = ["chat", "query"];
 
@@ -230,37 +232,15 @@ async function streamChatWithWorkspace(
   }
 
   // === IPO Evidence Injection (only for a workspace/chat mode you decide) ===
-  const shouldUseIpoEvidence =
-    workspace?.slug?.toLowerCase().includes("financial-info-generator") &&
-    updatedMessage.toLowerCase().includes("evidence_snippets_with_metadata");
-
-  if (shouldUseIpoEvidence) {
+  if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
     console.log("[IPO EVIDENCE INJECTION] Detected workspace and prompt for IPO evidence injection.");
 
-    const evidencePool = [
+    const promptSources = [
       ...vectorSearchResults.sources,
-      // optional: also include parsedFiles/pinned snippets if you want them eligible
       ...sources,
     ];
-
-    // Use filledSources for what the model sees (not everything in contextTexts)
-    const evidenceBlock = formatEvidenceSnippets(
-      vectorSearchResults.sources,
-      {
-        maxSnippets: 12,
-        maxCharsPerSnippet: 1800,
-        allowTransactions: false,
-      }
-    );
-
-    // Replace the user prompt with your IPO drafting prompt template
-    // (You can store these prompts in workspace settings or a constants file)
-    const userTemplate = updatedMessage;
-
-    updatedMessage = userTemplate.replace(
-      "<<EVIDENCE_SNIPPETS_WITH_METADATA>>",
-      evidenceBlock || "Not disclosed in the provided documents."
-    );
+    const promptBlocks = buildIpoPromptBlocks(promptSources);
+    updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 
   const systemPrompt = await chatPrompt(workspace, user);

@@ -3,6 +3,11 @@ const { getVectorDbClass, getLLMProvider } = require("../helpers");
 const { chatPrompt, sourceIdentifier } = require("./index");
 const { EmbedChats } = require("../../models/embedChats");
 const {
+  shouldUseIpoPromptInjection,
+  buildIpoPromptBlocks,
+  injectIpoPromptBlocks,
+} = require("../evidence/buildIpoPromptBlocks");
+const {
   convertToPromptHistory,
   writeResponseChunk,
 } = require("../helpers/chat/responses");
@@ -148,12 +153,21 @@ async function streamChatWithForEmbed(
     return;
   }
 
+  let updatedMessage = message;
+  if (shouldUseIpoPromptInjection(embed.workspace, updatedMessage)) {
+    const promptBlocks = buildIpoPromptBlocks([
+      ...vectorSearchResults.sources,
+      ...sources,
+    ]);
+    updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
+  }
+
   // Compress message to ensure prompt passes token limit with room for response
   // and build system messages based on inputs and history.
   const messages = await LLMConnector.compressMessages(
     {
       systemPrompt: await chatPrompt(embed.workspace, username),
-      userPrompt: message,
+      userPrompt: updatedMessage,
       contextTexts,
       chatHistory,
     },
