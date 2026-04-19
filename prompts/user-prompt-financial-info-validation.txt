@@ -56,6 +56,8 @@ VALIDATION CHECKS
 - Confirm the draft follows the target section structure.
 - Flag missing tables where the evidence is tabular and the section is expected to reproduce the table.
 - Flag cases where prose replaces a material source table without preserving the disclosed content.
+- Flag sections such as 12.4.1 that should remain prospectus-style narrative if the draft introduces unnecessary tables not supported by the evidence.
+- Flag sections such as 12.4.2 where a summary cash flow table is expected first but the draft jumps straight into narrative or raw statement reproduction.
 - Flag markdown heading syntax where the output contract requires a plain heading.
 - Flag raw accountant-report statement-table leakage where a prospectus-style summary table is expected.
 

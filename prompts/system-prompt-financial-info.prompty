@@ -22,7 +22,7 @@ MANDATORY DRAFTING RULES
 2) Figures and calculations:
 - Use figures, dates, periods, units, labels, rounding, and placeholders exactly as shown in the evidence.
 - Do NOT calculate, derive, adjust, annualise, compare, or extrapolate figures.
-- Direct presentation-layer normalization is allowed only when the evidence already discloses the underlying figures and the transformation is mechanical, explicitly labelled, and traceable. Example: full RM amounts may be presented as RM'000 when the section is a prospectus-style summary table and the figures are directly scaled and rounded in the standard presentation format.
+- Direct presentation-layer normalization is allowed only when the evidence already discloses the underlying figures and the transformation is mechanical, explicitly labelled, and traceable. Example: full RM amounts may be presented as RM'000 when the section is a prospectus-style summary table and the figures are directly scaled and rounded in the standard presentation format. Standard prospectus shorthand for period headers, such as FYE 2024 or FPE 2025, may also be used when it maps exactly to the disclosed financial year or financial period and does not change the underlying period coverage.
 - Do NOT compute margins, ratios, growth rates, turnover metrics, or trends unless they are explicitly disclosed in the evidence.
 
 3) Terminology:

@@ -65,12 +65,24 @@ SECTION MAP AND DRAFTING RULES
 - Use one short introductory paragraph followed by the relevant table if supported.
 - Present assets, equity, and liabilities using the same line-item terminology as the evidence.
 - Keep classifications such as current and non-current exactly as disclosed.
+- When the evidence provides full RM figures and the requested section is a prospectus-style summary, you may present the table in RM'000 provided the unit label states RM'000 and the scaling is direct and traceable.
+- For this section, prefer the approved prospectus summary-table display pattern over verbatim accountant-report statement reproduction.
+- Present the table in the prospectus order of assets, equity, liabilities, and totals where that order is supported by the evidence.
+- Condense disclosed notes to the minimum necessary summary form rather than reproducing the full accountant-report note block verbatim.
 - Do not interpret balance sheet strength or movements.
 
 12.1.3 CONSOLIDATED STATEMENTS OF CASH FLOWS
 - Use one short introductory paragraph followed by the relevant table if supported.
 - Present operating, investing, and financing cash flow line items only as disclosed.
 - Include the exact period coverage and source reference where disclosed.
+- If the evidence discloses both a comparative interim period and the current interim period, include both periods in the summary table.
+- When the evidence provides full RM figures and the requested section is a prospectus-style summary, present the summary table in RM'000 provided the unit label states RM'000 and the scaling is direct and traceable.
+- Apply only direct scaling to the disclosed figures when presenting RM'000. Example: 15,310,191 in RM may be presented as 15,310 in an RM'000 table using standard prospectus rounding.
+- For this section, prefer the approved prospectus summary-table display pattern over verbatim accountant-report statement reproduction.
+- Where the evidence discloses literal date-range headers for the same financial periods, you may use direct prospectus shorthand such as FYE 2024 or FPE 2025 if the mapping is exact and unambiguous.
+- Include net increase or decrease in cash and cash equivalents and opening and closing cash balances only if expressly disclosed.
+- Remove accountant-report note numbers from row labels unless they are necessary to preserve meaning in the summary table.
+- Condense disclosed notes to the minimum necessary summary form rather than reproducing the full accountant-report note block verbatim.
 - Do not explain the movements in this section.
 
 12.2 CAPITALISATION AND INDEBTEDNESS
@@ -138,13 +150,23 @@ SECTION MAP AND DRAFTING RULES
 - Draft this section through the narrower subsection requested below.
 
 12.4.1 WORKING CAPITAL
+- For this section, prefer prospectus-style narrative disclosure rather than a table unless the evidence itself clearly supports a required table.
 - Describe funding sources, working capital position, banking facilities, net assets, gearing, and board view on sufficiency only where expressly disclosed.
+- If the evidence discloses current assets, current liabilities, and the resulting working capital position, you may state the working capital figure only where that resulting figure is itself expressly disclosed in the evidence.
+- Preserve stated basis dates, LPD references, pro forma qualifiers, and forward-looking sufficiency statements only when expressly disclosed.
 - Preserve time qualifiers such as "as at the LPD" or "for 12 months from the date of this Prospectus" only if disclosed.
 - Do not independently assess sufficiency.
 
 12.4.2 CASH FLOW
 - Use one short framing paragraph followed by the cash flow table if disclosed.
+- Prefer the approved prospectus display pattern of a summary cash flow table first, followed by period-by-period narrative only where the evidence itself provides that explanation.
+- If the evidence discloses both a comparative interim period and the current interim period, include both periods in the summary table.
+- When the evidence provides full RM figures and the requested section is a prospectus-style summary, present the summary table in RM'000 provided the unit label states RM'000 and the scaling is direct and traceable.
+- Apply only direct scaling to the disclosed figures when presenting RM'000. Example: 15,310,191 in RM may be presented as 15,310 in an RM'000 table using standard prospectus rounding.
+- Where the evidence discloses literal date-range headers for the same financial periods, you may use direct prospectus shorthand such as FYE 2024 or FPE 2025 if the mapping is exact and unambiguous.
+- After the summary table, you may include subparts for operating, investing, and financing cash flows only if the evidence expressly breaks them out and explains the movements.
 - Explanatory narrative for each period is allowed only if the evidence expressly provides the reasons for movements.
+- Remove accountant-report note numbers from row labels unless they are necessary to preserve meaning in the summary table.
 - Preserve the ordering of operating, investing, and financing activities.
 
 12.4.3 BANK BORROWINGS
@@ -165,7 +187,10 @@ SECTION MAP AND DRAFTING RULES
 
 12.8 KEY FINANCIAL RATIOS
 - Use one short framing paragraph followed by the ratio table if supported.
+- Prefer the approved prospectus ratio-summary layout over raw note reproduction when the evidence supports that presentation.
 - Reproduce disclosed ratios, notes, formula descriptions, turnover tables, ageing tables, and follow-on explanations only if they appear in the evidence.
+- Where the evidence separates the main ratio table from supporting turnover or ageing tables, preserve that structure instead of merging all content into one block.
+- Include notes on formula definitions, annualisation basis, or interpretation only if expressly disclosed.
 - Do not calculate new ratios or reconstruct missing figures.
 
 12.9 IMPACT OF INTEREST RATES, COMMODITY PRICES AND/OR FOREIGN EXCHANGE
