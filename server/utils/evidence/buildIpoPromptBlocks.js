@@ -7,7 +7,7 @@ const {
 function shouldUseIpoPromptInjection(workspace, prompt = "") {
   const normalizedPrompt = String(prompt || "").toLowerCase();
   return (
-    workspace?.slug?.toLowerCase().includes("financial-info-generator") &&
+    workspace?.slug?.toLowerCase().includes("financial-info") &&
     (normalizedPrompt.includes("evidence_snippets_with_metadata") ||
       normalizedPrompt.includes("style_reference_snippets"))
   );
