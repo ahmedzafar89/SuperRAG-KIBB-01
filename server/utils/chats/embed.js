@@ -155,10 +155,13 @@ async function streamChatWithForEmbed(
 
   let updatedMessage = message;
   if (shouldUseIpoPromptInjection(embed.workspace, updatedMessage)) {
-    const promptBlocks = buildIpoPromptBlocks([
-      ...vectorSearchResults.sources,
-      ...sources,
-    ]);
+    const promptBlocks = buildIpoPromptBlocks(
+      [
+        ...vectorSearchResults.sources,
+        ...sources,
+      ],
+      { userTemplate: updatedMessage }
+    );
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 

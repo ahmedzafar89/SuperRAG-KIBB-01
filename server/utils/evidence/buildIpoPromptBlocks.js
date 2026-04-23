@@ -1,4 +1,7 @@
-const { formatEvidenceSnippets } = require("./formatEvidenceSnippets");
+const {
+  extractIpoPromptContext,
+  formatEvidenceSnippets,
+} = require("./formatEvidenceSnippets");
 const {
   formatStyleReferenceSnippets,
   isStyleReferenceSource,
@@ -14,12 +17,15 @@ function shouldUseIpoPromptInjection(workspace, prompt = "") {
 }
 
 function buildIpoPromptBlocks(allSources = [], opts = {}) {
-  const {
-    evidenceMaxSnippets = 12,
-    evidenceMaxCharsPerSnippet = 1800,
-    styleMaxSnippets = 3,
-    styleMaxCharsPerSnippet = 1200,
-  } = opts;
+  const promptContext = extractIpoPromptContext(opts.userTemplate || "");
+  const evidenceMaxSnippets =
+    opts.evidenceMaxSnippets ??
+    (promptContext.tableHeavy ? 18 : 12);
+  const evidenceMaxCharsPerSnippet =
+    opts.evidenceMaxCharsPerSnippet ??
+    (promptContext.tableHeavy ? 2200 : 1800);
+  const styleMaxSnippets = opts.styleMaxSnippets ?? 2;
+  const styleMaxCharsPerSnippet = opts.styleMaxCharsPerSnippet ?? 800;
 
   const normalizedSources = Array.isArray(allSources) ? allSources : [];
   const evidenceSources = normalizedSources.filter(
@@ -31,6 +37,7 @@ function buildIpoPromptBlocks(allSources = [], opts = {}) {
     maxSnippets: evidenceMaxSnippets,
     maxCharsPerSnippet: evidenceMaxCharsPerSnippet,
     allowTransactions: false,
+    promptText: opts.userTemplate || "",
   });
 
   const styleBlock = formatStyleReferenceSnippets(styleSources, {
@@ -61,5 +68,6 @@ function injectIpoPromptBlocks(userTemplate = "", blocks = {}) {
 module.exports = {
   shouldUseIpoPromptInjection,
   buildIpoPromptBlocks,
+  extractIpoPromptContext,
   injectIpoPromptBlocks,
 };

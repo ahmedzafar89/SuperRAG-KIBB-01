@@ -157,10 +157,13 @@ async function chatSync({
 
   let updatedPrompt = String(prompt);
   if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
-    const promptBlocks = buildIpoPromptBlocks([
-      ...vectorSearchResults.sources,
-      ...sources,
-    ]);
+    const promptBlocks = buildIpoPromptBlocks(
+      [
+        ...vectorSearchResults.sources,
+        ...sources,
+      ],
+      { userTemplate: updatedPrompt }
+    );
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
   }
 
@@ -400,10 +403,13 @@ async function streamChat({
 
   let updatedPrompt = String(prompt);
   if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
-    const promptBlocks = buildIpoPromptBlocks([
-      ...vectorSearchResults.sources,
-      ...sources,
-    ]);
+    const promptBlocks = buildIpoPromptBlocks(
+      [
+        ...vectorSearchResults.sources,
+        ...sources,
+      ],
+      { userTemplate: updatedPrompt }
+    );
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
   }
 

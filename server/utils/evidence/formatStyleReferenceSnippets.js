@@ -24,13 +24,44 @@ function cleanText(txt = "") {
     .trim();
 }
 
-function refLine(source = {}) {
-  const doc =
-    styleReferenceKey(source) ||
-    source.filename ||
-    source.docSource ||
-    "Unknown style reference";
+function sanitizeStyleReferenceText(txt = "") {
+  return cleanText(txt)
+    .replace(/\u00a0/g, " ")
+    .replace(/●|\[●\]/g, "[PLACEHOLDER]")
+    .replace(
+      /\b[A-Z][A-Za-z&.\-]*(?:\s+[A-Z][A-Za-z&.\-]*){0,4}\s+(?:Berhad|Bhd|Sdn\.?\s*Bhd\.?|Ltd\.?|Limited|Inc\.?|Corp\.?|Corporation|PLC)\b/g,
+      "[ENTITY]"
+    )
+    .replace(/\bSection\s+\d+(?:\.\d+)*/gi, "Section [SECTION]")
+    .replace(/\bNotes?\s+\d+(?:\.\d+)*/gi, "Note [NOTE]")
+    .replace(/<sup>\(\d+\)<\/sup>/gi, "<sup>([NOTE])</sup>")
+    .replace(/\b(?:FYE|FPE|FY)\s+20\d{2}\b/gi, (match) =>
+      match.replace(/20\d{2}/, "[YEAR]")
+    )
+    .replace(
+      /\b\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b/gi,
+      "[DATE]"
+    )
+    .replace(
+      /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/gi,
+      "[DATE]"
+    )
+    .replace(/\b\d{4}-\d{2}-\d{2}\b/g, "[DATE]")
+    .replace(
+      /\b(?:RM|MYR|USD|US\$|SGD|EUR|GBP)\s?[0-9][0-9,]*(?:\.\d+)?(?:\s?(?:million|billion|thousand|m))?\b/gi,
+      "[CURRENCY_AMOUNT]"
+    )
+    .replace(/\b(?:RM|MYR|USD|US\$|SGD|EUR|GBP)[’']?0{3}\b/gi, "[CURRENCY_UNIT]")
+    .replace(/\b\d+(?:\.\d+)?%/g, "[PERCENTAGE]")
+    .replace(/\b20\d{2}\b/g, "[YEAR]")
+    .replace(/\b\d+\.\d+(?:\.\d+)*\b/g, "[SECTION_NUMBER]")
+    .replace(/\b\d[\d,]*(?:\.\d+)?\b/g, "[NUMBER]")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
+function refLine(source = {}) {
   const sheet = source.sheet ? `sheet:${source.sheet}` : null;
   const table = source.table_index ? `table:${source.table_index}` : null;
   const rows =
@@ -39,7 +70,7 @@ function refLine(source = {}) {
       : null;
 
   const loc = [sheet, table, rows].filter(Boolean).join(", ");
-  return `[${doc} | ${loc || "section: n/a"}]`;
+  return `[Style reference | ${loc || "section: n/a"}]`;
 }
 
 function formatStyleReferenceSnippets(sources = [], opts = {}) {
@@ -57,7 +88,7 @@ function formatStyleReferenceSnippets(sources = [], opts = {}) {
 
     picked.push({
       ...source,
-      __cleanText: text,
+      __cleanText: sanitizeStyleReferenceText(text),
     });
 
     if (picked.length >= maxSnippets) break;
@@ -74,6 +105,7 @@ function formatStyleReferenceSnippets(sources = [], opts = {}) {
 module.exports = {
   STYLE_REFERENCE_PREFIX,
   isStyleReferenceSource,
+  sanitizeStyleReferenceText,
   styleReferenceKey,
   formatStyleReferenceSnippets,
 };

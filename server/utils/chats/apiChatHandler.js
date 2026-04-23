@@ -381,10 +381,13 @@ async function chatSync({
 
   let updatedMessage = message;
   if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
-    const promptBlocks = buildIpoPromptBlocks([
-      ...vectorSearchResults.sources,
-      ...sources,
-    ]);
+    const promptBlocks = buildIpoPromptBlocks(
+      [
+        ...vectorSearchResults.sources,
+        ...sources,
+      ],
+      { userTemplate: updatedMessage }
+    );
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 
@@ -743,10 +746,13 @@ async function streamChat({
 
   let updatedMessage = message;
   if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
-    const promptBlocks = buildIpoPromptBlocks([
-      ...vectorSearchResults.sources,
-      ...sources,
-    ]);
+    const promptBlocks = buildIpoPromptBlocks(
+      [
+        ...vectorSearchResults.sources,
+        ...sources,
+      ],
+      { userTemplate: updatedMessage }
+    );
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 

@@ -239,7 +239,9 @@ async function streamChatWithWorkspace(
       ...vectorSearchResults.sources,
       ...sources,
     ];
-    const promptBlocks = buildIpoPromptBlocks(promptSources);
+    const promptBlocks = buildIpoPromptBlocks(promptSources, {
+      userTemplate: updatedMessage,
+    });
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 
