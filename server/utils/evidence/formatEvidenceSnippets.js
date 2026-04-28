@@ -987,48 +987,97 @@ function lineAt(lines = [], index = -1) {
   return index >= 0 && index < lines.length ? lines[index] : "";
 }
 
-function buildProfitOrLossRowAlignedHelper(sources = []) {
-  const byPage = new Map();
+function selectProfitOrLossStatementPageLines(sources = []) {
+  const pageMap = new Map();
   for (const source of Array.isArray(sources) ? sources : []) {
     const page = Number(source.page_number);
     if (!Number.isFinite(page)) continue;
-    if (!byPage.has(page)) byPage.set(page, []);
-    byPage.get(page).push(source.__cleanText || "");
+    const text = source.__cleanText || "";
+    if (!pageMap.has(page)) pageMap.set(page, []);
+    pageMap.get(page).push(text);
   }
 
-  const page22Lines = (byPage.get(22) || [])
-    .join("\n")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const page23Lines = (byPage.get(23) || [])
-    .join("\n")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const pageEntries = Array.from(pageMap.entries()).map(([page, texts]) => {
+    const merged = texts.join("\n");
+    const lower = merged.toLowerCase();
+    const mainScore =
+      profitOrLossMarkerCount(lower) +
+      (/revenue/.test(lower) ? 2 : 0) +
+      (/cost of sales/.test(lower) ? 2 : 0) +
+      (/gross profit/.test(lower) ? 2 : 0) +
+      (/profit before taxation/.test(lower) ? 2 : 0);
+    const continuationScore =
+      (/profit after taxation/.test(lower) ? 2 : 0) +
+      (/total comprehensive/.test(lower) ? 2 : 0) +
+      (/earnings per share/.test(lower) ? 2 : 0) +
+      (/basic/.test(lower) ? 1 : 0) +
+      (/diluted/.test(lower) ? 1 : 0) +
+      (/attributable to:/.test(lower) ? 2 : 0);
 
-  if (page22Lines.length === 0) return "";
+    return {
+      page,
+      lines: merged
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean),
+      mainScore,
+      continuationScore,
+    };
+  });
+
+  if (pageEntries.length === 0) return { mainLines: [], continuationLines: [] };
+
+  const mainPage =
+    [...pageEntries].sort((a, b) => {
+      if (b.mainScore !== a.mainScore) return b.mainScore - a.mainScore;
+      return a.page - b.page;
+    })[0] || null;
+
+  const continuationPage =
+    [...pageEntries]
+      .filter((entry) => !mainPage || entry.page !== mainPage.page)
+      .sort((a, b) => {
+        if (b.continuationScore !== a.continuationScore) {
+          return b.continuationScore - a.continuationScore;
+        }
+        if (mainPage) {
+          const aDist = Math.abs(a.page - mainPage.page);
+          const bDist = Math.abs(b.page - mainPage.page);
+          if (aDist !== bDist) return aDist - bDist;
+        }
+        return a.page - b.page;
+      })[0] || null;
+
+  return {
+    mainLines: mainPage?.lines || [],
+    continuationLines: continuationPage?.lines || [],
+  };
+}
+
+function buildProfitOrLossRowAlignedHelper(sources = []) {
+  const { mainLines, continuationLines } = selectProfitOrLossStatementPageLines(sources);
+  if (mainLines.length === 0) return "";
 
   const periods = [
     {
       period: "FYE 2022",
       label: /REPORT 2022/,
       from: () => {
-        const idx = findLineIndex(page22Lines, /REPORT 2022/);
+        const idx = findLineIndex(mainLines, /REPORT 2022/);
         if (idx === -1) return null;
-        const p23Idx = findLineIndex(page23Lines, /^2022\s+0\.\d+/);
-        const p23PatIdx = findLineIndex(page23Lines, /COMPREHENSIVE\s+\d[\d,]*/);
-        const main = extractStatementNumberTokens(lineAt(page22Lines, idx + 5));
-        const pbtPat = extractStatementNumberTokens(lineAt(page22Lines, idx + 4));
-        const eps = decimalTokens(lineAt(page23Lines, p23Idx));
+        const p23Idx = findLineIndex(continuationLines, /^2022\s+0\.\d+/);
+        const p23PatIdx = findLineIndex(continuationLines, /COMPREHENSIVE\s+\d[\d,]*/);
+        const main = extractStatementNumberTokens(lineAt(mainLines, idx + 5));
+        const pbtPat = extractStatementNumberTokens(lineAt(mainLines, idx + 4));
+        const eps = decimalTokens(lineAt(continuationLines, p23Idx));
         return {
           "Revenue": main[0] || "",
-          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 6)),
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 6)),
           "Gross profit": main[1] || "",
-          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Other income": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 1)),
           "Administrative expenses": main[3] || "",
           "Selling and distribution expenses": main[4] || "",
-          "Other expenses": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 3)),
+          "Other expenses": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 3)),
           "Finance costs": main[5] || "",
           "Net (impairment losses)/reversal of impairment losses on financial assets": "-",
           "Profit before taxation": pbtPat[0] || "",
@@ -1044,17 +1093,17 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
       period: "FYE 2023",
       label: /^INCOME 2023$/,
       from: () => {
-        const idx = findLineIndex(page22Lines, /^INCOME 2023$/);
+        const idx = findLineIndex(mainLines, /^INCOME 2023$/);
         if (idx === -1) return null;
-        const p23Idx = findLineIndex(page23Lines, /INCOME 2023\s+0\.\d+/);
-        const main = extractStatementNumberTokens(lineAt(page22Lines, idx + 3));
-        const patLine = extractStatementNumberTokens(lineAt(page22Lines, idx + 2));
-        const eps = decimalTokens(lineAt(page23Lines, p23Idx));
+        const p23Idx = findLineIndex(continuationLines, /INCOME 2023\s+0\.\d+/);
+        const main = extractStatementNumberTokens(lineAt(mainLines, idx + 3));
+        const patLine = extractStatementNumberTokens(lineAt(mainLines, idx + 2));
+        const eps = decimalTokens(lineAt(continuationLines, p23Idx));
         return {
           "Revenue": main[0] || "",
-          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 4)),
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 4)),
           "Gross profit": main[1] || "",
-          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Other income": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 1)),
           "Administrative expenses": main[3] || "",
           "Selling and distribution expenses": main[4] || "",
           "Other expenses": main[5] || "",
@@ -1072,23 +1121,23 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
       period: "FYE 2024",
       label: /^2024$/,
       from: () => {
-        const idx = findLineIndex(page22Lines, /^2024$/);
+        const idx = findLineIndex(mainLines, /^2024$/);
         if (idx === -1) return null;
-        const p23Idx = findLineIndex(page23Lines, /^2024\s+0\.\d+/);
-        const main = extractStatementNumberTokens(lineAt(page22Lines, idx + 3));
-        const eps = decimalTokens(lineAt(page23Lines, p23Idx));
-        const patLine = extractStatementNumberTokens(lineAt(page23Lines, p23Idx + 2));
+        const p23Idx = findLineIndex(continuationLines, /^2024\s+0\.\d+/);
+        const main = extractStatementNumberTokens(lineAt(mainLines, idx + 3));
+        const eps = decimalTokens(lineAt(continuationLines, p23Idx));
+        const patLine = extractStatementNumberTokens(lineAt(continuationLines, p23Idx + 2));
         return {
-          "Revenue": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 5)),
-          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 4)),
+          "Revenue": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 5)),
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 4)),
           "Gross profit": main[0] || "",
-          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Other income": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 1)),
           "Administrative expenses": main[2] || "",
           "Selling and distribution expenses": main[3] || "",
           "Other expenses": main[4] || "",
           "Finance costs": main[5] || "",
           "Net (impairment losses)/reversal of impairment losses on financial assets": firstNonTrivialIntegerToken(
-            lineAt(page22Lines, idx + 2)
+            lineAt(mainLines, idx + 2)
           ),
           "Profit before taxation": main[6] || "",
           "Income tax expense": main[7] || "",
@@ -1102,20 +1151,20 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
       period: "FPE 2024",
       label: /^Unaudited 1\.1\.2024 to/,
       from: () => {
-        const idx = findLineIndex(page22Lines, /^Unaudited 1\.1\.2024 to/);
+        const idx = findLineIndex(mainLines, /^Unaudited 1\.1\.2024 to/);
         if (idx === -1) return null;
-        const main = extractStatementNumberTokens(lineAt(page22Lines, idx));
+        const main = extractStatementNumberTokens(lineAt(mainLines, idx));
         const patLine = extractStatementNumberTokens(
-          lineAt(page23Lines, findLineIndex(page23Lines, /^Unaudited 1\.1\.2024 to/))
+          lineAt(continuationLines, findLineIndex(continuationLines, /^Unaudited 1\.1\.2024 to/))
         );
         return {
           "Revenue": main[0] || "",
-          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 1)),
           "Gross profit": main[1] || "",
-          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx - 3)),
+          "Other income": firstNonTrivialIntegerToken(lineAt(mainLines, idx - 3)),
           "Administrative expenses": main[3] || "",
           "Selling and distribution expenses": main[4] || "",
-          "Other expenses": firstNonTrivialIntegerToken(lineAt(page22Lines, idx - 2)),
+          "Other expenses": firstNonTrivialIntegerToken(lineAt(mainLines, idx - 2)),
           "Finance costs": main[5] || "",
           "Net (impairment losses)/reversal of impairment losses on financial assets": "-",
           "Profit before taxation": main[6] || "",
@@ -1129,22 +1178,22 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
       period: "FPE 2025",
       label: /^1\.1\.2025 to/,
       from: () => {
-        const idx = findLineIndex(page22Lines, /^1\.1\.2025 to/);
+        const idx = findLineIndex(mainLines, /^1\.1\.2025 to/);
         if (idx === -1) return null;
-        const main = extractStatementNumberTokens(lineAt(page22Lines, idx));
-        const eps = decimalTokens(lineAt(page23Lines, findLineIndex(page23Lines, /^0\.6 0\.6$/)));
-        const patLine = extractStatementNumberTokens(lineAt(page22Lines, idx - 1));
+        const main = extractStatementNumberTokens(lineAt(mainLines, idx));
+        const eps = decimalTokens(lineAt(continuationLines, findLineIndex(continuationLines, /^0\.6 0\.6$/)));
+        const patLine = extractStatementNumberTokens(lineAt(mainLines, idx - 1));
         return {
           "Revenue": main[0] || "",
-          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(mainLines, idx + 1)),
           "Gross profit": main[1] || "",
-          "Other income": extractStatementNumberTokens(lineAt(page22Lines, idx - 3))[0] || "",
+          "Other income": extractStatementNumberTokens(lineAt(mainLines, idx - 3))[0] || "",
           "Administrative expenses": main[3] || "",
           "Selling and distribution expenses": ensureNegativeExpenseToken(patLine[0] || ""),
-          "Other expenses": firstNonTrivialIntegerToken(lineAt(page22Lines, idx - 2)),
+          "Other expenses": firstNonTrivialIntegerToken(lineAt(mainLines, idx - 2)),
           "Finance costs": main[4] || "",
           "Net (impairment losses)/reversal of impairment losses on financial assets":
-            extractStatementNumberTokens(lineAt(page22Lines, idx - 3))[1] || "",
+            extractStatementNumberTokens(lineAt(mainLines, idx - 3))[1] || "",
           "Profit before taxation": main[5] || "",
           "Income tax expense": main[6] || "",
           "Profit after taxation/Total comprehensive income": patLine[1] || "",
