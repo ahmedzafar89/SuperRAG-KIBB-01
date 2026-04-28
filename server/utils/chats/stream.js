@@ -14,13 +14,16 @@ const {
 } = require("./index");
 const {
   shouldUseIpoPromptInjection,
-  buildIpoPromptBlocks,
   injectIpoPromptBlocks,
 } = require("../evidence/buildIpoPromptBlocks");
 const {
-  getIpoPromptSources,
   mergeIpoPromptSources,
+  filterStyleReferenceSearchResults,
+  prepareIpoPromptInjection,
 } = require("../evidence/ipoPromptSearch");
+const {
+  isStyleReferenceSource,
+} = require("../evidence/formatStyleReferenceSnippets");
 
 const VALID_CHAT_MODE = ["chat", "query"];
 
@@ -108,6 +111,11 @@ async function streamChatWithWorkspace(
   let contextTexts = [];
   let sources = [];
   let pinnedDocIdentifiers = [];
+  const useIpoPromptInjection = shouldUseIpoPromptInjection(
+    workspace,
+    updatedMessage
+  );
+  const additionalStyleSources = [];
   const { rawHistory, chatHistory } = await recentChatHistory({
     user,
     workspace,
@@ -128,8 +136,13 @@ async function streamChatWithWorkspace(
     .pinnedDocs()
     .then((pinnedDocs) => {
       pinnedDocs.forEach((doc) => {
-        const { pageContent, ...metadata } = doc;
         pinnedDocIdentifiers.push(sourceIdentifier(doc));
+        if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+          additionalStyleSources.push(doc);
+          return;
+        }
+
+        const { pageContent, ...metadata } = doc;
         contextTexts.push(doc.pageContent);
         sources.push({
           text:
@@ -147,6 +160,11 @@ async function streamChatWithWorkspace(
     user || null
   );
   parsedFiles.forEach((doc) => {
+    if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+      additionalStyleSources.push(doc);
+      return;
+    }
+
     const { pageContent, ...metadata } = doc;
     contextTexts.push(doc.pageContent);
     sources.push({
@@ -186,10 +204,14 @@ async function streamChatWithWorkspace(
     return;
   }
 
+  const filteredVectorSearchResults = useIpoPromptInjection
+    ? filterStyleReferenceSearchResults(vectorSearchResults)
+    : vectorSearchResults;
+
   const { fillSourceWindow } = require("../helpers/chat");
   const filledSources = fillSourceWindow({
     nDocs: workspace?.topN || 4,
-    searchResults: vectorSearchResults.sources,
+    searchResults: filteredVectorSearchResults.sources,
     history: rawHistory,
     filterIdentifiers: pinnedDocIdentifiers,
   });
@@ -202,7 +224,7 @@ async function streamChatWithWorkspace(
   // and does not appear to the user that a new response used information that is otherwise irrelevant for a given prompt.
   // TLDR; reduces GitHub issues for "LLM citing document that has no answer in it" while keep answers highly accurate.
   contextTexts = [...contextTexts, ...filledSources.contextTexts];
-  sources = [...sources, ...vectorSearchResults.sources];
+  sources = [...sources, ...filteredVectorSearchResults.sources];
 
   // If in query mode and no context chunks are found from search, backfill, or pins -  do not
   // let the LLM try to hallucinate a response or use general knowledge and exit early
@@ -236,12 +258,12 @@ async function streamChatWithWorkspace(
   }
 
   // === IPO Evidence Injection (only for a workspace/chat mode you decide) ===
-  if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
+  if (useIpoPromptInjection) {
     console.log(
       "[IPO EVIDENCE INJECTION] Detected workspace and prompt for IPO evidence injection."
     );
 
-    const promptSources = await getIpoPromptSources({
+    const { factualSources, promptBlocks } = await prepareIpoPromptInjection({
       workspace,
       prompt: updatedMessage,
       VectorDb,
@@ -250,13 +272,11 @@ async function streamChatWithWorkspace(
       pinnedDocIdentifiers,
       existingSources: mergeIpoPromptSources(
         sources,
-        vectorSearchResults.sources
+        filteredVectorSearchResults.sources
       ),
+      additionalStyleSources,
     });
-    sources = promptSources;
-    const promptBlocks = buildIpoPromptBlocks(promptSources, {
-      userTemplate: updatedMessage,
-    });
+    sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 

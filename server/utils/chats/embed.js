@@ -4,7 +4,6 @@ const { chatPrompt, sourceIdentifier } = require("./index");
 const { EmbedChats } = require("../../models/embedChats");
 const {
   shouldUseIpoPromptInjection,
-  buildIpoPromptBlocks,
   injectIpoPromptBlocks,
 } = require("../evidence/buildIpoPromptBlocks");
 const {
@@ -12,6 +11,13 @@ const {
   writeResponseChunk,
 } = require("../helpers/chat/responses");
 const { DocumentManager } = require("../DocumentManager");
+const {
+  filterStyleReferenceSearchResults,
+  prepareIpoPromptInjection,
+} = require("../evidence/ipoPromptSearch");
+const {
+  isStyleReferenceSource,
+} = require("../evidence/formatStyleReferenceSnippets");
 
 async function streamChatWithForEmbed(
   response,
@@ -63,6 +69,11 @@ async function streamChatWithForEmbed(
   let contextTexts = [];
   let sources = [];
   let pinnedDocIdentifiers = [];
+  const useIpoPromptInjection = shouldUseIpoPromptInjection(
+    embed.workspace,
+    message
+  );
+  const additionalStyleSources = [];
   const { rawHistory, chatHistory } = await recentEmbedChatHistory(
     sessionId,
     embed,
@@ -77,8 +88,13 @@ async function streamChatWithForEmbed(
     .pinnedDocs()
     .then((pinnedDocs) => {
       pinnedDocs.forEach((doc) => {
-        const { pageContent, ...metadata } = doc;
         pinnedDocIdentifiers.push(sourceIdentifier(doc));
+        if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+          additionalStyleSources.push(doc);
+          return;
+        }
+
+        const { pageContent, ...metadata } = doc;
         contextTexts.push(doc.pageContent);
         sources.push({
           text:
@@ -119,10 +135,14 @@ async function streamChatWithForEmbed(
     return;
   }
 
+  const filteredVectorSearchResults = useIpoPromptInjection
+    ? filterStyleReferenceSearchResults(vectorSearchResults)
+    : vectorSearchResults;
+
   const { fillSourceWindow } = require("../helpers/chat");
   const filledSources = fillSourceWindow({
     nDocs: embed.workspace?.topN || 4,
-    searchResults: vectorSearchResults.sources,
+    searchResults: filteredVectorSearchResults.sources,
     history: rawHistory,
     filterIdentifiers: pinnedDocIdentifiers,
   });
@@ -135,7 +155,7 @@ async function streamChatWithForEmbed(
   // and does not appear to the user that a new response used information that is otherwise irrelevant for a given prompt.
   // TLDR; reduces GitHub issues for "LLM citing document that has no answer in it" while keep answers highly accurate.
   contextTexts = [...contextTexts, ...filledSources.contextTexts];
-  sources = [...sources, ...vectorSearchResults.sources];
+  sources = [...sources, ...filteredVectorSearchResults.sources];
 
   // If in query mode and no sources are found in current search or backfilled from history, do not
   // let the LLM try to hallucinate a response or use general knowledge
@@ -154,14 +174,18 @@ async function streamChatWithForEmbed(
   }
 
   let updatedMessage = message;
-  if (shouldUseIpoPromptInjection(embed.workspace, updatedMessage)) {
-    const promptBlocks = buildIpoPromptBlocks(
-      [
-        ...vectorSearchResults.sources,
-        ...sources,
-      ],
-      { userTemplate: updatedMessage }
-    );
+  if (useIpoPromptInjection) {
+    const { factualSources, promptBlocks } = await prepareIpoPromptInjection({
+      workspace: embed.workspace,
+      prompt: updatedMessage,
+      VectorDb,
+      LLMConnector,
+      embeddingsCount,
+      pinnedDocIdentifiers,
+      existingSources: sources,
+      additionalStyleSources,
+    });
+    sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 

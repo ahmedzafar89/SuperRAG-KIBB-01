@@ -20,13 +20,16 @@ const path = require("path");
 const { hotdirPath, normalizePath, isWithin } = require("../files");
 const {
   shouldUseIpoPromptInjection,
-  buildIpoPromptBlocks,
   injectIpoPromptBlocks,
 } = require("../evidence/buildIpoPromptBlocks");
 const {
-  getIpoPromptSources,
   mergeIpoPromptSources,
+  filterStyleReferenceSearchResults,
+  prepareIpoPromptInjection,
 } = require("../evidence/ipoPromptSearch");
+const {
+  isStyleReferenceSource,
+} = require("../evidence/formatStyleReferenceSnippets");
 /**
  * @typedef ResponseObject
  * @property {string} id - uuid of response
@@ -259,6 +262,8 @@ async function chatSync({
   let contextTexts = [];
   let sources = [];
   let pinnedDocIdentifiers = [];
+  const useIpoPromptInjection = shouldUseIpoPromptInjection(workspace, message);
+  const additionalStyleSources = [];
   const { rawHistory, chatHistory } = await recentChatHistory({
     user,
     workspace,
@@ -274,8 +279,13 @@ async function chatSync({
     .pinnedDocs()
     .then((pinnedDocs) => {
       pinnedDocs.forEach((doc) => {
-        const { pageContent, ...metadata } = doc;
         pinnedDocIdentifiers.push(sourceIdentifier(doc));
+        if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+          additionalStyleSources.push(doc);
+          return;
+        }
+
+        const { pageContent, ...metadata } = doc;
         contextTexts.push(doc.pageContent);
         sources.push({
           text:
@@ -290,6 +300,11 @@ async function chatSync({
   const parsedAttachments = processedAttachments.parsedDocuments;
   attachments = processedAttachments.imageAttachments;
   parsedAttachments.forEach((doc) => {
+    if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+      additionalStyleSources.push(doc);
+      return;
+    }
+
     if (doc.pageContent) {
       contextTexts.push(doc.pageContent);
       const { pageContent, ...metadata } = doc;
@@ -331,10 +346,14 @@ async function chatSync({
     };
   }
 
+  const filteredVectorSearchResults = useIpoPromptInjection
+    ? filterStyleReferenceSearchResults(vectorSearchResults)
+    : vectorSearchResults;
+
   const { fillSourceWindow } = require("../helpers/chat");
   const filledSources = fillSourceWindow({
     nDocs: workspace?.topN || 4,
-    searchResults: vectorSearchResults.sources,
+    searchResults: filteredVectorSearchResults.sources,
     history: rawHistory,
     filterIdentifiers: pinnedDocIdentifiers,
   });
@@ -347,7 +366,7 @@ async function chatSync({
   // and does not appear to the user that a new response used information that is otherwise irrelevant for a given prompt.
   // TLDR; reduces GitHub issues for "LLM citing document that has no answer in it" while keep answers highly accurate.
   contextTexts = [...contextTexts, ...filledSources.contextTexts];
-  sources = [...sources, ...vectorSearchResults.sources];
+  sources = [...sources, ...filteredVectorSearchResults.sources];
 
   // If in query mode and no context chunks are found from search, backfill, or pins -  do not
   // let the LLM try to hallucinate a response or use general knowledge and exit early
@@ -384,8 +403,8 @@ async function chatSync({
   }
 
   let updatedMessage = message;
-  if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
-    const promptSources = await getIpoPromptSources({
+  if (useIpoPromptInjection) {
+    const { factualSources, promptBlocks } = await prepareIpoPromptInjection({
       workspace,
       prompt: updatedMessage,
       VectorDb,
@@ -394,13 +413,11 @@ async function chatSync({
       pinnedDocIdentifiers,
       existingSources: mergeIpoPromptSources(
         sources,
-        vectorSearchResults.sources
+        filteredVectorSearchResults.sources
       ),
+      additionalStyleSources,
     });
-    sources = promptSources;
-    const promptBlocks = buildIpoPromptBlocks(promptSources, {
-      userTemplate: updatedMessage,
-    });
+    sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 
@@ -626,6 +643,8 @@ async function streamChat({
   let contextTexts = [];
   let sources = [];
   let pinnedDocIdentifiers = [];
+  const useIpoPromptInjection = shouldUseIpoPromptInjection(workspace, message);
+  const additionalStyleSources = [];
   const { rawHistory, chatHistory } = await recentChatHistory({
     user,
     workspace,
@@ -647,8 +666,13 @@ async function streamChat({
     .pinnedDocs()
     .then((pinnedDocs) => {
       pinnedDocs.forEach((doc) => {
-        const { pageContent, ...metadata } = doc;
         pinnedDocIdentifiers.push(sourceIdentifier(doc));
+        if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+          additionalStyleSources.push(doc);
+          return;
+        }
+
+        const { pageContent, ...metadata } = doc;
         contextTexts.push(doc.pageContent);
         sources.push({
           text:
@@ -663,6 +687,11 @@ async function streamChat({
   const parsedAttachments = processedAttachments.parsedDocuments;
   attachments = processedAttachments.imageAttachments;
   parsedAttachments.forEach((doc) => {
+    if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+      additionalStyleSources.push(doc);
+      return;
+    }
+
     if (doc.pageContent) {
       contextTexts.push(doc.pageContent);
       const { pageContent, ...metadata } = doc;
@@ -705,10 +734,14 @@ async function streamChat({
     return;
   }
 
+  const filteredVectorSearchResults = useIpoPromptInjection
+    ? filterStyleReferenceSearchResults(vectorSearchResults)
+    : vectorSearchResults;
+
   const { fillSourceWindow } = require("../helpers/chat");
   const filledSources = fillSourceWindow({
     nDocs: workspace?.topN || 4,
-    searchResults: vectorSearchResults.sources,
+    searchResults: filteredVectorSearchResults.sources,
     history: rawHistory,
     filterIdentifiers: pinnedDocIdentifiers,
   });
@@ -721,7 +754,7 @@ async function streamChat({
   // and does not appear to the user that a new response used information that is otherwise irrelevant for a given prompt.
   // TLDR; reduces GitHub issues for "LLM citing document that has no answer in it" while keep answers highly accurate.
   contextTexts = [...contextTexts, ...filledSources.contextTexts];
-  sources = [...sources, ...vectorSearchResults.sources];
+  sources = [...sources, ...filteredVectorSearchResults.sources];
 
   // If in query mode and no context chunks are found from search, backfill, or pins -  do not
   // let the LLM try to hallucinate a response or use general knowledge and exit early
@@ -758,8 +791,8 @@ async function streamChat({
   }
 
   let updatedMessage = message;
-  if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
-    const promptSources = await getIpoPromptSources({
+  if (useIpoPromptInjection) {
+    const { factualSources, promptBlocks } = await prepareIpoPromptInjection({
       workspace,
       prompt: updatedMessage,
       VectorDb,
@@ -768,13 +801,11 @@ async function streamChat({
       pinnedDocIdentifiers,
       existingSources: mergeIpoPromptSources(
         sources,
-        vectorSearchResults.sources
+        filteredVectorSearchResults.sources
       ),
+      additionalStyleSources,
     });
-    sources = promptSources;
-    const promptBlocks = buildIpoPromptBlocks(promptSources, {
-      userTemplate: updatedMessage,
-    });
+    sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 

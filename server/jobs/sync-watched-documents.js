@@ -5,6 +5,9 @@ const { fileData } = require("../utils/files");
 const { log, conclude, updateSourceDocument } = require('./helpers/index.js');
 const { getVectorDbClass } = require('../utils/helpers/index.js');
 const { DocumentSyncRun } = require('../models/documentSyncRun.js');
+const {
+  isStyleReferenceSource,
+} = require("../utils/evidence/formatStyleReferenceSnippets");
 
 (async () => {
   try {
@@ -89,14 +92,6 @@ const { DocumentSyncRun } = require('../models/documentSyncRun.js');
 
       // update the defined document and workspace vectorDB with the latest information
       // it will skip cache and create a new vectorCache file.
-      const vectorDatabase = getVectorDbClass();
-      await vectorDatabase.deleteDocumentFromNamespace(workspace.slug, document.docId);
-      await vectorDatabase.addDocumentToNamespace(
-        workspace.slug,
-        { ...currentDocumentData, pageContent: newContent, docId: document.docId },
-        document.docpath,
-        true
-      );
       updateSourceDocument(
         document.docpath,
         {
@@ -107,6 +102,34 @@ const { DocumentSyncRun } = require('../models/documentSyncRun.js');
           // Todo: Update word count and token_estimate?
         }
       )
+      const isStyleReference = isStyleReferenceSource({
+        ...currentDocumentData,
+        ...metadata,
+      });
+      if (isStyleReference) {
+        const nextRefresh = DocumentSyncQueue.calcNextSync(queue);
+        log(
+          `${source} is a style reference. Source document updated without vector re-embedding.`
+        );
+        await DocumentSyncQueue._update(queue.id, {
+          lastSyncedAt: new Date().toISOString(),
+          nextSyncAt: nextRefresh.toISOString(),
+        });
+        await DocumentSyncQueue.saveRun(queue.id, DocumentSyncRun.statuses.success, {
+          filename: document.filename,
+          workspacesModified: [workspace.slug],
+        });
+        continue;
+      }
+
+      const vectorDatabase = getVectorDbClass();
+      await vectorDatabase.deleteDocumentFromNamespace(workspace.slug, document.docId);
+      await vectorDatabase.addDocumentToNamespace(
+        workspace.slug,
+        { ...currentDocumentData, pageContent: newContent, docId: document.docId },
+        document.docpath,
+        true
+      );
       log(`Workspace "${workspace.name}" vectors of ${source} updated. Document and vector cache updated.`)
 
 

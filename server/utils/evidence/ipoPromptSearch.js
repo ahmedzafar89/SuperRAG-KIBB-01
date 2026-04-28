@@ -1,7 +1,11 @@
 const {
   shouldUseIpoPromptInjection,
+  buildIpoPromptBlocks,
   extractIpoPromptContext,
 } = require("./buildIpoPromptBlocks");
+const {
+  isStyleReferenceSource,
+} = require("./formatStyleReferenceSnippets");
 
 const IPO_PROMPT_EXPANDED_TOP_N = 50;
 
@@ -68,6 +72,32 @@ function mergeIpoPromptSources(...sourceLists) {
   return merged;
 }
 
+function filterStyleReferenceSources(sourceList = []) {
+  return (Array.isArray(sourceList) ? sourceList : []).filter(
+    (source) => !isStyleReferenceSource(source)
+  );
+}
+
+function filterStyleReferenceSearchResults(searchResults = {}) {
+  const filtered = { ...searchResults, contextTexts: [], sources: [] };
+  const contextTexts = Array.isArray(searchResults?.contextTexts)
+    ? searchResults.contextTexts
+    : [];
+  const sources = Array.isArray(searchResults?.sources)
+    ? searchResults.sources
+    : [];
+
+  sources.forEach((source, index) => {
+    if (isStyleReferenceSource(source)) return;
+    filtered.sources.push(source);
+    if (index < contextTexts.length) {
+      filtered.contextTexts.push(contextTexts[index]);
+    }
+  });
+
+  return filtered;
+}
+
 function expandedIpoTopN(workspace = {}) {
   const workspaceTopN = Number(workspace?.topN || 0);
   return Math.max(
@@ -127,10 +157,98 @@ async function getIpoPromptSources({
   }
 }
 
+async function getWorkspaceStyleReferenceSources({
+  workspace,
+  existingSources = [],
+} = {}) {
+  const styleSources = (Array.isArray(existingSources) ? existingSources : []).filter(
+    isStyleReferenceSource
+  );
+  if (!workspace?.id) return mergeIpoPromptSources(styleSources);
+
+  const { Document } = require("../../models/documents");
+  const { safeJsonParse } = require("../http");
+  const { fileData } = require("../files");
+
+  const workspaceDocuments = await Document.where(
+    { workspaceId: Number(workspace.id) },
+    null,
+    null,
+    null,
+    {
+      docId: true,
+      docpath: true,
+      filename: true,
+      metadata: true,
+    }
+  );
+
+  for (const document of workspaceDocuments) {
+    const metadata = safeJsonParse(document.metadata, {});
+    if (!isStyleReferenceSource(metadata)) continue;
+
+    const data = await fileData(document.docpath);
+    if (!data) continue;
+
+    styleSources.push({
+      ...data,
+      docId: document.docId,
+      docpath: document.docpath,
+      filename: document.filename,
+    });
+  }
+
+  return mergeIpoPromptSources(styleSources);
+}
+
+async function prepareIpoPromptInjection({
+  workspace,
+  prompt,
+  VectorDb,
+  LLMConnector,
+  embeddingsCount = 0,
+  pinnedDocIdentifiers = [],
+  existingSources = [],
+  additionalStyleSources = [],
+  expandedSearchAlreadyRun = false,
+} = {}) {
+  const factualExistingSources = filterStyleReferenceSources(existingSources);
+  const factualSources = filterStyleReferenceSources(
+    await getIpoPromptSources({
+      workspace,
+      prompt,
+      VectorDb,
+      LLMConnector,
+      embeddingsCount,
+      pinnedDocIdentifiers,
+      existingSources: factualExistingSources,
+      expandedSearchAlreadyRun,
+    })
+  );
+  const styleSources = await getWorkspaceStyleReferenceSources({
+    workspace,
+    existingSources: additionalStyleSources,
+  });
+  const promptSources = mergeIpoPromptSources(factualSources, styleSources);
+
+  return {
+    factualSources,
+    styleSources,
+    promptSources,
+    promptBlocks: buildIpoPromptBlocks(promptSources, {
+      userTemplate: prompt,
+    }),
+  };
+}
+
 module.exports = {
   IPO_PROMPT_EXPANDED_TOP_N,
   buildIpoRetrievalQuery,
   expandedIpoTopN,
+  filterStyleReferenceSearchResults,
+  filterStyleReferenceSources,
   getIpoPromptSources,
+  getWorkspaceStyleReferenceSources,
   mergeIpoPromptSources,
+  prepareIpoPromptInjection,
 };

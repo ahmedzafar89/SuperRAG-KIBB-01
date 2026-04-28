@@ -6,13 +6,16 @@ const { writeResponseChunk } = require("../helpers/chat/responses");
 const { chatPrompt, sourceIdentifier } = require("./index");
 const {
   shouldUseIpoPromptInjection,
-  buildIpoPromptBlocks,
   injectIpoPromptBlocks,
 } = require("../evidence/buildIpoPromptBlocks");
 const {
-  getIpoPromptSources,
   mergeIpoPromptSources,
+  filterStyleReferenceSearchResults,
+  prepareIpoPromptInjection,
 } = require("../evidence/ipoPromptSearch");
+const {
+  isStyleReferenceSource,
+} = require("../evidence/formatStyleReferenceSnippets");
 
 const { PassThrough } = require("stream");
 
@@ -72,6 +75,8 @@ async function chatSync({
   let contextTexts = [];
   let sources = [];
   let pinnedDocIdentifiers = [];
+  const useIpoPromptInjection = shouldUseIpoPromptInjection(workspace, prompt);
+  const additionalStyleSources = [];
   await new DocumentManager({
     workspace,
     maxTokens: LLMConnector.promptWindowLimit(),
@@ -79,8 +84,13 @@ async function chatSync({
     .pinnedDocs()
     .then((pinnedDocs) => {
       pinnedDocs.forEach((doc) => {
-        const { pageContent, ...metadata } = doc;
         pinnedDocIdentifiers.push(sourceIdentifier(doc));
+        if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+          additionalStyleSources.push(doc);
+          return;
+        }
+
+        const { pageContent, ...metadata } = doc;
         contextTexts.push(doc.pageContent);
         sources.push({
           text:
@@ -123,9 +133,13 @@ async function chatSync({
     );
   }
 
+  const filteredVectorSearchResults = useIpoPromptInjection
+    ? filterStyleReferenceSearchResults(vectorSearchResults)
+    : vectorSearchResults;
+
   // For OpenAI Compatible chats, we cannot do backfilling so we simply aggregate results here.
-  contextTexts = [...contextTexts, ...vectorSearchResults.contextTexts];
-  sources = [...sources, ...vectorSearchResults.sources];
+  contextTexts = [...contextTexts, ...filteredVectorSearchResults.contextTexts];
+  sources = [...sources, ...filteredVectorSearchResults.sources];
 
   // If in query mode and no context chunks are found from search, backfill, or pins -  do not
   // let the LLM try to hallucinate a response or use general knowledge and exit early
@@ -160,8 +174,8 @@ async function chatSync({
   }
 
   let updatedPrompt = String(prompt);
-  if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
-    const promptSources = await getIpoPromptSources({
+  if (useIpoPromptInjection) {
+    const { factualSources, promptBlocks } = await prepareIpoPromptInjection({
       workspace,
       prompt: updatedPrompt,
       VectorDb,
@@ -170,13 +184,11 @@ async function chatSync({
       pinnedDocIdentifiers,
       existingSources: mergeIpoPromptSources(
         sources,
-        vectorSearchResults.sources
+        filteredVectorSearchResults.sources
       ),
+      additionalStyleSources,
     });
-    sources = promptSources;
-    const promptBlocks = buildIpoPromptBlocks(promptSources, {
-      userTemplate: updatedPrompt,
-    });
+    sources = factualSources;
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
   }
 
@@ -319,6 +331,8 @@ async function streamChat({
   let contextTexts = [];
   let sources = [];
   let pinnedDocIdentifiers = [];
+  const useIpoPromptInjection = shouldUseIpoPromptInjection(workspace, prompt);
+  const additionalStyleSources = [];
   await new DocumentManager({
     workspace,
     maxTokens: LLMConnector.promptWindowLimit(),
@@ -326,8 +340,13 @@ async function streamChat({
     .pinnedDocs()
     .then((pinnedDocs) => {
       pinnedDocs.forEach((doc) => {
-        const { pageContent, ...metadata } = doc;
         pinnedDocIdentifiers.push(sourceIdentifier(doc));
+        if (useIpoPromptInjection && isStyleReferenceSource(doc)) {
+          additionalStyleSources.push(doc);
+          return;
+        }
+
+        const { pageContent, ...metadata } = doc;
         contextTexts.push(doc.pageContent);
         sources.push({
           text:
@@ -374,9 +393,13 @@ async function streamChat({
     return;
   }
 
+  const filteredVectorSearchResults = useIpoPromptInjection
+    ? filterStyleReferenceSearchResults(vectorSearchResults)
+    : vectorSearchResults;
+
   // For OpenAI Compatible chats, we cannot do backfilling so we simply aggregate results here.
-  contextTexts = [...contextTexts, ...vectorSearchResults.contextTexts];
-  sources = [...sources, ...vectorSearchResults.sources];
+  contextTexts = [...contextTexts, ...filteredVectorSearchResults.contextTexts];
+  sources = [...sources, ...filteredVectorSearchResults.sources];
 
   // If in query mode and no context chunks are found from search, backfill, or pins -  do not
   // let the LLM try to hallucinate a response or use general knowledge and exit early
@@ -415,8 +438,8 @@ async function streamChat({
   }
 
   let updatedPrompt = String(prompt);
-  if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
-    const promptSources = await getIpoPromptSources({
+  if (useIpoPromptInjection) {
+    const { factualSources, promptBlocks } = await prepareIpoPromptInjection({
       workspace,
       prompt: updatedPrompt,
       VectorDb,
@@ -425,13 +448,11 @@ async function streamChat({
       pinnedDocIdentifiers,
       existingSources: mergeIpoPromptSources(
         sources,
-        vectorSearchResults.sources
+        filteredVectorSearchResults.sources
       ),
+      additionalStyleSources,
     });
-    sources = promptSources;
-    const promptBlocks = buildIpoPromptBlocks(promptSources, {
-      userTemplate: updatedPrompt,
-    });
+    sources = factualSources;
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
   }
 

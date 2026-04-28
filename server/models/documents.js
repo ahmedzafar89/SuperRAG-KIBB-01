@@ -5,6 +5,9 @@ const { Telemetry } = require("./telemetry");
 const { EventLogs } = require("./eventLogs");
 const { safeJsonParse } = require("../utils/http");
 const { getModelTag } = require("../endpoints/utils");
+const {
+  isStyleReferenceSource,
+} = require("../utils/evidence/formatStyleReferenceSnippets");
 
 const Document = {
   writable: ["pinned", "watched", "lastUpdatedAt"],
@@ -94,13 +97,35 @@ const Document = {
 
       const docId = uuidv4();
       const { pageContent, ...metadata } = data;
+      const isStyleReference = isStyleReferenceSource(data);
+      const documentMetadata = isStyleReference
+        ? {
+            ...metadata,
+            promptRole: "style_reference",
+            embeddingSkipped: "style_reference",
+          }
+        : metadata;
       const newDoc = {
         docId,
         filename: path.split("/")[1],
         docpath: path,
         workspaceId: workspace.id,
-        metadata: JSON.stringify(metadata),
+        metadata: JSON.stringify(documentMetadata),
       };
+
+      if (isStyleReference) {
+        console.log(
+          "Skipping vectorization for style reference",
+          metadata?.title || newDoc.filename
+        );
+        try {
+          await prisma.workspace_documents.create({ data: newDoc });
+          embedded.push(path);
+        } catch (error) {
+          console.error(error.message);
+        }
+        continue;
+      }
 
       const { vectorized, error } = await VectorDb.addDocumentToNamespace(
         workspace.slug,
