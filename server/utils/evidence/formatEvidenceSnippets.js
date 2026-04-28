@@ -1,13 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 
-const CUSTOM_DOCUMENTS_DIR = path.join(
-  process.cwd(),
-  "server",
-  "storage",
-  "documents",
-  "custom-documents"
-);
+const CUSTOM_DOCUMENTS_DIR =
+  process.env.NODE_ENV === "development" || !process.env.STORAGE_DIR
+    ? path.resolve(__dirname, "../../storage/documents/custom-documents")
+    : path.resolve(process.env.STORAGE_DIR, "documents/custom-documents");
 const customDocumentIndexCache = new Map();
 const customDocumentPageTextCache = new Map();
 
