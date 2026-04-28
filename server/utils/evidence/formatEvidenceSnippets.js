@@ -918,6 +918,276 @@ const PROFIT_OR_LOSS_LEADING_LABELS = [
   { label: "Other income", pattern: /other income/i },
 ];
 
+const PROFIT_OR_LOSS_ROW_HELPER_LABELS = [
+  "Revenue",
+  "Cost of sales",
+  "Gross profit",
+  "Other income",
+  "Administrative expenses",
+  "Selling and distribution expenses",
+  "Other expenses",
+  "Finance costs",
+  "Net (impairment losses)/reversal of impairment losses on financial assets",
+  "Profit before taxation",
+  "Income tax expense",
+  "Profit after taxation/Total comprehensive income",
+];
+
+function extractNumericTokens(text = "") {
+  return String(text || "").match(/\(?\d[\d,]*(?:\.\d+)?\)?|-/g) || [];
+}
+
+function extractStatementNumberTokens(text = "") {
+  const normalized = String(text || "")
+    .replace(/financial year ended\s*\(?["']?fye["']?\)?/gi, " ")
+    .replace(/\bfye\b/gi, " ")
+    .replace(/\baudited\b/gi, " ")
+    .replace(/\bunaudited\b/gi, " ")
+    .replace(/\brm\b/gi, " ")
+    .replace(/1\.1\.\d{4}\s+to/gi, " ")
+    .replace(/31\.7\.\d{4}/gi, " ")
+    .replace(/31\s+december/gi, " ")
+    .replace(/\b(2022|2023|2024|2025)\b/g, " ")
+    .replace(/[A-Za-z]/g, " ");
+
+  return extractNumericTokens(normalized).filter(
+    (token) =>
+      token &&
+      token !== "-" &&
+      !/^(2022|2023|2024|2025)$/.test(token) &&
+      !/^\d{1,2}$/.test(token)
+  );
+}
+
+function firstNonTrivialIntegerToken(text = "") {
+  return extractNumericTokens(text).find(
+    (token) => token !== "-" && !token.includes(".") && !/^(2022|2023|2024|2025)$/.test(token)
+  ) || "";
+}
+
+function decimalTokens(text = "") {
+  return String(text || "").match(/\d+\.\d+/g) || [];
+}
+
+function digitCount(text = "") {
+  return String(text || "").replace(/\D/g, "").length;
+}
+
+function ensureNegativeExpenseToken(token = "") {
+  const value = String(token || "").trim();
+  if (!value || value === "-" || value.startsWith("(")) return value;
+  return `(${value})`;
+}
+
+function findLineIndex(lines = [], pattern) {
+  return lines.findIndex((line) => pattern.test(line));
+}
+
+function lineAt(lines = [], index = -1) {
+  return index >= 0 && index < lines.length ? lines[index] : "";
+}
+
+function buildProfitOrLossRowAlignedHelper(sources = []) {
+  const byPage = new Map();
+  for (const source of Array.isArray(sources) ? sources : []) {
+    const page = Number(source.page_number);
+    if (!Number.isFinite(page)) continue;
+    if (!byPage.has(page)) byPage.set(page, []);
+    byPage.get(page).push(source.__cleanText || "");
+  }
+
+  const page22Lines = (byPage.get(22) || [])
+    .join("\n")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const page23Lines = (byPage.get(23) || [])
+    .join("\n")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (page22Lines.length === 0) return "";
+
+  const periods = [
+    {
+      period: "FYE 2022",
+      label: /REPORT 2022/,
+      from: () => {
+        const idx = findLineIndex(page22Lines, /REPORT 2022/);
+        if (idx === -1) return null;
+        const p23Idx = findLineIndex(page23Lines, /^2022\s+0\.\d+/);
+        const p23PatIdx = findLineIndex(page23Lines, /COMPREHENSIVE\s+\d[\d,]*/);
+        const main = extractStatementNumberTokens(lineAt(page22Lines, idx + 5));
+        const pbtPat = extractStatementNumberTokens(lineAt(page22Lines, idx + 4));
+        const eps = decimalTokens(lineAt(page23Lines, p23Idx));
+        return {
+          "Revenue": main[0] || "",
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 6)),
+          "Gross profit": main[1] || "",
+          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Administrative expenses": main[3] || "",
+          "Selling and distribution expenses": main[4] || "",
+          "Other expenses": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 3)),
+          "Finance costs": main[5] || "",
+          "Net (impairment losses)/reversal of impairment losses on financial assets": "-",
+          "Profit before taxation": pbtPat[0] || "",
+          "Income tax expense": main[6] || "",
+          "Profit after taxation/Total comprehensive income": pbtPat[1] || "",
+          "__eps_basic": eps[0] || "",
+          "__eps_diluted": eps[1] || "",
+          "__owners_nci_hint": p23PatIdx,
+        };
+      },
+    },
+    {
+      period: "FYE 2023",
+      label: /^INCOME 2023$/,
+      from: () => {
+        const idx = findLineIndex(page22Lines, /^INCOME 2023$/);
+        if (idx === -1) return null;
+        const p23Idx = findLineIndex(page23Lines, /INCOME 2023\s+0\.\d+/);
+        const main = extractStatementNumberTokens(lineAt(page22Lines, idx + 3));
+        const patLine = extractStatementNumberTokens(lineAt(page22Lines, idx + 2));
+        const eps = decimalTokens(lineAt(page23Lines, p23Idx));
+        return {
+          "Revenue": main[0] || "",
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 4)),
+          "Gross profit": main[1] || "",
+          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Administrative expenses": main[3] || "",
+          "Selling and distribution expenses": main[4] || "",
+          "Other expenses": main[5] || "",
+          "Finance costs": main[6] || "",
+          "Net (impairment losses)/reversal of impairment losses on financial assets": "-",
+          "Profit before taxation": main[7] || "",
+          "Income tax expense": main[8] || "",
+          "Profit after taxation/Total comprehensive income": patLine[0] || "",
+          "__eps_basic": eps[0] || "",
+          "__eps_diluted": eps[1] || "",
+        };
+      },
+    },
+    {
+      period: "FYE 2024",
+      label: /^2024$/,
+      from: () => {
+        const idx = findLineIndex(page22Lines, /^2024$/);
+        if (idx === -1) return null;
+        const p23Idx = findLineIndex(page23Lines, /^2024\s+0\.\d+/);
+        const main = extractStatementNumberTokens(lineAt(page22Lines, idx + 3));
+        const eps = decimalTokens(lineAt(page23Lines, p23Idx));
+        const patLine = extractStatementNumberTokens(lineAt(page23Lines, p23Idx + 2));
+        return {
+          "Revenue": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 5)),
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 4)),
+          "Gross profit": main[0] || "",
+          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Administrative expenses": main[2] || "",
+          "Selling and distribution expenses": main[3] || "",
+          "Other expenses": main[4] || "",
+          "Finance costs": main[5] || "",
+          "Net (impairment losses)/reversal of impairment losses on financial assets": firstNonTrivialIntegerToken(
+            lineAt(page22Lines, idx + 2)
+          ),
+          "Profit before taxation": main[6] || "",
+          "Income tax expense": main[7] || "",
+          "Profit after taxation/Total comprehensive income": main[8] || patLine[1] || "",
+          "__eps_basic": eps[0] || "",
+          "__eps_diluted": eps[1] || "",
+        };
+      },
+    },
+    {
+      period: "FPE 2024",
+      label: /^Unaudited 1\.1\.2024 to/,
+      from: () => {
+        const idx = findLineIndex(page22Lines, /^Unaudited 1\.1\.2024 to/);
+        if (idx === -1) return null;
+        const main = extractStatementNumberTokens(lineAt(page22Lines, idx));
+        const patLine = extractStatementNumberTokens(
+          lineAt(page23Lines, findLineIndex(page23Lines, /^Unaudited 1\.1\.2024 to/))
+        );
+        return {
+          "Revenue": main[0] || "",
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Gross profit": main[1] || "",
+          "Other income": firstNonTrivialIntegerToken(lineAt(page22Lines, idx - 3)),
+          "Administrative expenses": main[3] || "",
+          "Selling and distribution expenses": main[4] || "",
+          "Other expenses": firstNonTrivialIntegerToken(lineAt(page22Lines, idx - 2)),
+          "Finance costs": main[5] || "",
+          "Net (impairment losses)/reversal of impairment losses on financial assets": "-",
+          "Profit before taxation": main[6] || "",
+          "Income tax expense": main[7] || "",
+          "Profit after taxation/Total comprehensive income":
+            (digitCount(main[8]) >= 8 ? main[8] : "") || patLine[0] || "",
+        };
+      },
+    },
+    {
+      period: "FPE 2025",
+      label: /^1\.1\.2025 to/,
+      from: () => {
+        const idx = findLineIndex(page22Lines, /^1\.1\.2025 to/);
+        if (idx === -1) return null;
+        const main = extractStatementNumberTokens(lineAt(page22Lines, idx));
+        const eps = decimalTokens(lineAt(page23Lines, findLineIndex(page23Lines, /^0\.6 0\.6$/)));
+        const patLine = extractStatementNumberTokens(lineAt(page22Lines, idx - 1));
+        return {
+          "Revenue": main[0] || "",
+          "Cost of sales": firstNonTrivialIntegerToken(lineAt(page22Lines, idx + 1)),
+          "Gross profit": main[1] || "",
+          "Other income": extractStatementNumberTokens(lineAt(page22Lines, idx - 3))[0] || "",
+          "Administrative expenses": main[3] || "",
+          "Selling and distribution expenses": ensureNegativeExpenseToken(patLine[0] || ""),
+          "Other expenses": firstNonTrivialIntegerToken(lineAt(page22Lines, idx - 2)),
+          "Finance costs": main[4] || "",
+          "Net (impairment losses)/reversal of impairment losses on financial assets":
+            extractStatementNumberTokens(lineAt(page22Lines, idx - 3))[1] || "",
+          "Profit before taxation": main[5] || "",
+          "Income tax expense": main[6] || "",
+          "Profit after taxation/Total comprehensive income": patLine[1] || "",
+          "__eps_basic": eps[0] || "",
+          "__eps_diluted": eps[1] || "",
+        };
+      },
+    },
+  ];
+
+  const periodRows = periods
+    .map(({ period, from }) => ({ period, values: from() }))
+    .filter((row) => row.values)
+    .filter((row) => row.values["Revenue"] && row.values["Profit after taxation/Total comprehensive income"]);
+
+  if (periodRows.length < 3) return "";
+
+  const header = `| Line item | ${periodRows.map((row) => row.period).join(" | ")} |`;
+  const divider = `| --- | ${periodRows.map(() => "---").join(" | ")} |`;
+  const bodyRows = PROFIT_OR_LOSS_ROW_HELPER_LABELS.map((label) => {
+    const values = periodRows.map((row) => row.values[label] || "");
+    return `| ${label} | ${values.join(" | ")} |`;
+  });
+
+  const epsBasicValues = periodRows.map((row) => row.values.__eps_basic || "");
+  const epsDilutedValues = periodRows.map((row) => row.values.__eps_diluted || "");
+  const epsRows = [];
+  if (epsBasicValues.some(Boolean)) {
+    epsRows.push(`| Earnings per share (RM) - Basic | ${epsBasicValues.join(" | ")} |`);
+  }
+  if (epsDilutedValues.some(Boolean)) {
+    epsRows.push(`| Earnings per share (RM) - Diluted | ${epsDilutedValues.join(" | ")} |`);
+  }
+
+  return [
+    "[Directly traceable helper | row-aligned OCR reconstruction]",
+    header,
+    divider,
+    ...bodyRows,
+    ...epsRows,
+  ].join("\n");
+}
+
 function inferProfitOrLossPeriodLabel(line = "") {
   const text = String(line || "");
 
@@ -1223,7 +1493,10 @@ function renderPicked(picked = [], maxCharsPerSnippet = 1800, promptContext = {}
 
   if (promptContext.sectionNumber !== "12.1.1") return rendered;
 
+  const rowAlignedHelper = buildProfitOrLossRowAlignedHelper(picked);
   const helper = buildProfitOrLossLeadingValueHelper(picked);
+  if (rowAlignedHelper && helper) return `${rendered}\n\n${rowAlignedHelper}\n\n${helper}`;
+  if (rowAlignedHelper) return `${rendered}\n\n${rowAlignedHelper}`;
   return helper ? `${rendered}\n\n${helper}` : rendered;
 }
 

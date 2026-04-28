@@ -963,6 +963,16 @@ describe("financial info evidence formatting", () => {
         "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
     });
 
+    expect(block).toContain("[Directly traceable helper | row-aligned OCR reconstruction]");
+    expect(block).toContain(
+      "| Revenue | 52,931,108 | 65,092,484 | 117,648,930 | 83,479,155 | 49,593,481 |"
+    );
+    expect(block).toContain(
+      "| Cost of sales | (34,291,582) | (38,213,897) | (80,645,701) | (60,132,445) | (28,970,540) |"
+    );
+    expect(block).toContain(
+      "| Profit after taxation/Total comprehensive income | 6,512,521 | 7,887,613 | 13,862,810 | 10,279,116 | 7,232,603 |"
+    );
     expect(block).toContain("83,479,155");
     expect(block).toContain("65,092,484");
     expect(block).toContain("6,511,013");
