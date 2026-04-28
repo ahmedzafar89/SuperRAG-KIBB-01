@@ -900,6 +900,41 @@ describe("financial info evidence formatting", () => {
     expect(block).not.toContain("ACCOUNTANTS’ REPORT");
   });
 
+  test("adds directly traceable leading-value helper for sparse profit or loss OCR pages", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 22,
+          table_candidate: true,
+          text: "PDF page: 22\nSource section: INCOME 2023\nUnaudited 1.1.2024 to 31.7.2024 83,479,155 23,346,710 23,699,076 (3,834,720)\nAudited FYE 31 December 2023 65,092,484 26,878,587 27,007,844 (7,512,980)\nFinancial Year Ended (\"FYE\") 31 December 2022 52,931,108 18,639,526 18,708,669 (4,751,086)\nCONSOLIDATED REVENUE COST OF SALES GROSS PROFIT OTHER INCOME ADMINISTRATIVE EXPENSES SELLING AND DISTRIBUTION EXPENSES OTHER EXPENSES FINANCE COSTS NET (IMPAIRMENT LOSSES)/REVERSAL OF IMPAIRMENT LOSSES ON FINANCIAL ASSETS PROFIT BEFORE TAXATION INCOME TAX EXPENSE PROFIT AFTER TAXATION/TOTAL COMPREHENSIVE INCOME FOR THE FINANCIAL YEAR/PERIOD",
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 23,
+          table_candidate: true,
+          text: "PDF page: 23\nSource section: COMPREHENSIVE\nAudited FYE 31 December 2023 6,511,013 1,376,600 7,887,613\nAudited FYE 31 December 2022 5,593,471 919,050 6,512,521\nCOMPREHENSIVE INCOME ATTRIBUTABLE TO: Owners of the Company Non-controlling interests Basic Diluted CONSOLIDATED PROFIT AFTER TAXATION/TOTAL EARNINGS PER SHARE (RM)",
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+      }
+    );
+
+    expect(block).toContain("[Directly traceable helper | leading line items only]");
+    expect(block).toContain("| Line item | FYE 2022 | FYE 2023 | FPE 2024 |");
+    expect(block).toContain(
+      "| Revenue | 52,931,108 | 65,092,484 | 83,479,155 |"
+    );
+    expect(block).toContain(
+      "| Other income | (4,751,086) | (7,512,980) | (3,834,720) |"
+    );
+  });
+
   test("allows pro forma pages for capitalisation and indebtedness", () => {
     const block = formatEvidenceSnippets(
       [

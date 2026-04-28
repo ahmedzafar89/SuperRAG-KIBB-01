@@ -798,6 +798,96 @@ function hasProfitOrLossMetricSupportSignals(text = "") {
   );
 }
 
+const PROFIT_OR_LOSS_LEADING_LABELS = [
+  { label: "Revenue", pattern: /revenue/i },
+  { label: "Cost of sales", pattern: /cost of sales/i },
+  { label: "Gross profit", pattern: /gross profit/i },
+  { label: "Other income", pattern: /other income/i },
+];
+
+function inferProfitOrLossPeriodLabel(line = "") {
+  const text = String(line || "");
+
+  const fpeMatch = text.match(/1\.1\.(20\d{2})\s+to\s+31\.7\.\1/i);
+  if (fpeMatch) return `FPE ${fpeMatch[1]}`;
+
+  const fyeMatch = text.match(/(?:fye|financial year ended).*?31\s+december\s+(20\d{2})/i);
+  if (fyeMatch) return `FYE ${fyeMatch[1]}`;
+
+  return "";
+}
+
+function extractProfitOrLossLeadingValueRows(sources = []) {
+  const rows = [];
+  const seenPeriods = new Set();
+  const combinedText = sources.map((source) => source.__cleanText || "").join("\n");
+
+  const hasLeadingLabels = PROFIT_OR_LOSS_LEADING_LABELS.every(({ pattern }) =>
+    pattern.test(combinedText)
+  );
+  if (!hasLeadingLabels) return [];
+
+  for (const source of Array.isArray(sources) ? sources : []) {
+    const text = source.__cleanText || "";
+    const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+
+    for (const line of lines) {
+      if (hasMdnaOrBusinessNarrativeSignals(line)) continue;
+
+      const period = inferProfitOrLossPeriodLabel(line);
+      if (!period || seenPeriods.has(period)) continue;
+
+      const valuePortion = line
+        .replace(/unaudited/gi, " ")
+        .replace(/audited/gi, " ")
+        .replace(/financial year ended\s*\(?["']?fye["']?\)?\s*/gi, " ")
+        .replace(/financial year ended/gi, " ")
+        .replace(/\(?["']?fye["']?\)?/gi, " ")
+        .replace(/1\.1\.\d{4}\s+to\s+31\.7\.\d{4}/gi, " ")
+        .replace(/31\s+december\s+\d{4}/gi, " ")
+        .replace(/[A-Za-z:]/g, " ");
+      const values =
+        valuePortion.match(/\(?\d[\d,]*(?:\.\d+)?\)?/g)?.filter(Boolean) || [];
+      if (values.length < PROFIT_OR_LOSS_LEADING_LABELS.length) continue;
+
+      seenPeriods.add(period);
+      rows.push({
+        period,
+        values: values.slice(0, PROFIT_OR_LOSS_LEADING_LABELS.length),
+      });
+    }
+  }
+
+  const order = ["FYE 2022", "FYE 2023", "FYE 2024", "FPE 2024", "FPE 2025"];
+  return rows.sort((a, b) => {
+    const aIndex = order.indexOf(a.period);
+    const bIndex = order.indexOf(b.period);
+    if (aIndex !== -1 || bIndex !== -1) {
+      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) -
+        (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+    }
+    return a.period.localeCompare(b.period);
+  });
+}
+
+function buildProfitOrLossLeadingValueHelper(sources = []) {
+  const rows = extractProfitOrLossLeadingValueRows(sources);
+  if (rows.length < 2) return "";
+
+  const periods = rows.map((row) => row.period);
+  const helperRows = PROFIT_OR_LOSS_LEADING_LABELS.map(({ label }, labelIndex) => {
+    const values = rows.map((row) => row.values[labelIndex] || "");
+    return `| ${label} | ${values.join(" | ")} |`;
+  });
+
+  return [
+    "[Directly traceable helper | leading line items only]",
+    `| Line item | ${periods.join(" | ")} |`,
+    `| --- | ${periods.map(() => "---").join(" | ")} |`,
+    ...helperRows,
+  ].join("\n");
+}
+
 function hasProfitOrLossStatementSignals(text = "") {
   if (
     /consolidated statements? of profit or loss|other comprehensive income/i.test(text)
@@ -1008,13 +1098,18 @@ function pruneCapitalisationPages(
   return hasCapitalisationCoverage(narrowed) ? narrowed : [];
 }
 
-function renderPicked(picked = [], maxCharsPerSnippet = 1800) {
-  return picked
+function renderPicked(picked = [], maxCharsPerSnippet = 1800, promptContext = {}) {
+  const rendered = picked
     .map((source) => {
       const txt = source.__cleanText.slice(0, maxCharsPerSnippet);
       return `${refLine(source)}\n${txt}`;
     })
     .join("\n\n");
+
+  if (promptContext.sectionNumber !== "12.1.1") return rendered;
+
+  const helper = buildProfitOrLossLeadingValueHelper(picked);
+  return helper ? `${rendered}\n\n${helper}` : rendered;
 }
 
 function formatEvidenceSnippets(sources = [], opts = {}) {
@@ -1104,7 +1199,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
         hardExcludeTransactions
       );
       if (narrowed.length) {
-        return renderPicked(narrowed, maxCharsPerSnippet);
+        return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
       }
     }
 
@@ -1115,7 +1210,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
         hardExcludeTransactions
       );
       if (narrowed.length) {
-        return renderPicked(narrowed, maxCharsPerSnippet);
+        return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
       }
     }
 
@@ -1126,7 +1221,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
         hardExcludeTransactions
       );
       if (narrowed.length) {
-        return renderPicked(narrowed, maxCharsPerSnippet);
+        return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
       }
     }
 
@@ -1137,7 +1232,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
         hardExcludeTransactions
       );
       if (narrowed.length) {
-        return renderPicked(narrowed, maxCharsPerSnippet);
+        return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
       }
     }
   }
@@ -1149,7 +1244,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       hardExcludeTransactions
     );
     if (narrowed.length) {
-      return renderPicked(narrowed, maxCharsPerSnippet);
+      return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
     }
   }
 
@@ -1160,7 +1255,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       hardExcludeTransactions
     );
     if (narrowed.length) {
-      return renderPicked(narrowed, maxCharsPerSnippet);
+      return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
     }
   }
 
@@ -1171,7 +1266,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       hardExcludeTransactions
     );
     if (narrowed.length) {
-      return renderPicked(narrowed, maxCharsPerSnippet);
+      return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
     }
   }
 
@@ -1182,7 +1277,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       hardExcludeTransactions
     );
     if (narrowed.length) {
-      return renderPicked(narrowed, maxCharsPerSnippet);
+      return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
     }
   }
 
@@ -1205,7 +1300,11 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
         })
         .sort((a, b) => Number(a.page_number || 0) - Number(b.page_number || 0));
 
-      return renderPicked(statementLike.slice(0, maxSnippets), maxCharsPerSnippet);
+      return renderPicked(
+        statementLike.slice(0, maxSnippets),
+        maxCharsPerSnippet,
+        promptContext
+      );
     }
   }
 
@@ -1214,7 +1313,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     addPicked(source);
   }
 
-  return renderPicked(picked, maxCharsPerSnippet);
+  return renderPicked(picked, maxCharsPerSnippet, promptContext);
 }
 
 module.exports = {
