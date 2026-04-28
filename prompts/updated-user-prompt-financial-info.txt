@@ -12,6 +12,7 @@ State the actual disclosed financial periods covered, the actual disclosed accou
 Keep the tone neutral and prospectus-style.
 Do not analyse performance, profitability, liquidity, cash flow, ratios, or trends.
 Do not reproduce the detailed statement tables in this section.
+Do not state that the historical financial information was prepared for inclusion in the prospectus or for listing purposes unless that purpose statement is expressly required for this section.
 Do not use generic regulatory wording such as "latest two financial years", "latest three financial years", "shorter period", or "latest practicable date" unless that wording is expressly disclosed in the factual evidence.
 Do not use stock introduction sentences such as "The selected financial information..." unless the factual evidence itself supports that sentence.
 Do not continue into section 12.1.1.

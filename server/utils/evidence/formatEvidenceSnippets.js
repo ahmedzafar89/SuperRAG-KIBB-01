@@ -300,6 +300,32 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
   let score = 0;
 
   switch (promptContext.sectionNumber) {
+    case "12.1":
+      if (
+        /historical financial information|comprise the consolidated statements|statements of financial position|statements of profit or loss and other comprehensive income|statements of changes in equity|statements of cash flows/.test(
+          normalized
+        )
+      )
+        score += 0.5;
+      if (
+        /31 december 2022|31 december 2023|31 december 2024|31 july 2025|fpe 31 july 2025|7-month financial period/.test(
+          normalized
+        )
+      )
+        score += 0.32;
+      if (
+        /malaysian financial reporting standards|mfrs|ifrs accounting standards|basis of preparation|accountants[’'] report/.test(
+          normalized
+        )
+      )
+        score += 0.34;
+      if (
+        /directors[’'] responsibilities|basis for opinion|ethical responsibilities|by-laws|iesba code|reporting accountants[’'] responsibilities/.test(
+          normalized
+        )
+      )
+        score -= 1.15;
+      break;
     case "12.1.1":
       if (/consolidated statements? of profit or loss/.test(normalized)) score += 0.55;
       if (/other comprehensive income/.test(normalized)) score += 0.3;
@@ -476,6 +502,11 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
   }
   if (promptContext.includeNotes && hasNoteSignals(text)) score += 0.12;
   score += sectionSpecificSignalScore(text, promptContext);
+  if (promptContext.sectionNumber === "12.1") {
+    const pageNumber = Number(source.page_number);
+    if (Number.isFinite(pageNumber) && pageNumber <= 40) score += 0.15;
+    if (Number.isFinite(pageNumber) && pageNumber > 60) score -= 0.45;
+  }
 
   for (const keyword of promptContext.keywords) {
     if (!keyword) continue;
@@ -544,6 +575,21 @@ function hasFinancialPositionStatementCoverage(picked = []) {
   );
 
   return hasAssetsPage && hasLiabilitiesPage;
+}
+
+function hasHistoricalFinancialIntroCoverage(picked = []) {
+  const combined = picked.map((source) => source.__cleanText.toLowerCase());
+  const hasPeriods = combined.some((text) =>
+    /31 december 2022|31 december 2023|31 december 2024|31 july 2025|fpe 31 july 2025/.test(
+      text
+    )
+  );
+  const hasFramework = combined.some((text) =>
+    /malaysian financial reporting standards|mfrs|ifrs accounting standards/.test(
+      text
+    )
+  );
+  return hasPeriods && hasFramework;
 }
 
 function hasProfitOrLossStatementCoverage(picked = []) {
@@ -651,6 +697,59 @@ function pruneProfitOrLossStatementPages(
   return hasProfitOrLossStatementCoverage(narrowed) ? narrowed : [];
 }
 
+function pruneHistoricalFinancialIntroPages(
+  picked = [],
+  promptContext = {},
+  hardExcludeTransactions = true
+) {
+  if (!Array.isArray(picked) || picked.length === 0) return [];
+
+  const introSignals = (text = "") =>
+    /historical financial information|comprise the consolidated statements|statements of financial position|statements of profit or loss and other comprehensive income|statements of changes in equity|statements of cash flows|31 december 2022|31 december 2023|31 december 2024|31 july 2025|fpe 31 july 2025|malaysian financial reporting standards|mfrs|ifrs accounting standards|basis of preparation|accountants[’'] report/i.test(
+      text
+    );
+  const excludeSignals = (text = "") =>
+    /directors[’'] responsibilities|basis for opinion|ethical responsibilities|by-laws|iesba code|reporting accountants[’'] responsibilities/i.test(
+      text
+    );
+
+  const rankedPicked = [...picked]
+    .filter((source) => {
+      const text = source.__cleanText || "";
+      return introSignals(text) && !excludeSignals(text);
+    })
+    .sort((a, b) => {
+      return (
+        scoreSource(b, promptContext, hardExcludeTransactions) -
+        scoreSource(a, promptContext, hardExcludeTransactions)
+      );
+    });
+
+  const bestByPage = new Map();
+  for (const source of rankedPicked) {
+    const pageKey = `${sourceDocKey(source)}|${source.page_number || "na"}`;
+    if (!bestByPage.has(pageKey)) {
+      bestByPage.set(pageKey, source);
+    }
+  }
+
+  const narrowed = Array.from(bestByPage.values())
+    .sort((a, b) => {
+      const aPage = Number(a.page_number);
+      const bPage = Number(b.page_number);
+      if (Number.isFinite(aPage) && Number.isFinite(bPage) && aPage !== bPage) {
+        return aPage - bPage;
+      }
+      return (
+        scoreSource(b, promptContext, hardExcludeTransactions) -
+        scoreSource(a, promptContext, hardExcludeTransactions)
+      );
+    })
+    .slice(0, 3);
+
+  return hasHistoricalFinancialIntroCoverage(narrowed) ? narrowed : [];
+}
+
 function renderPicked(picked = [], maxCharsPerSnippet = 1800) {
   return picked
     .map((source) => {
@@ -751,6 +850,17 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       }
     }
 
+    if (promptContext.sectionNumber === "12.1") {
+      const narrowed = pruneHistoricalFinancialIntroPages(
+        picked,
+        promptContext,
+        hardExcludeTransactions
+      );
+      if (narrowed.length) {
+        return renderPicked(narrowed, maxCharsPerSnippet);
+      }
+    }
+
     if (promptContext.sectionNumber === "12.1.2") {
       const narrowed = pruneFinancialPositionStatementPages(
         picked,
@@ -765,6 +875,17 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
 
   if (promptContext.sectionNumber === "12.1.1") {
     const narrowed = pruneProfitOrLossStatementPages(
+      picked,
+      promptContext,
+      hardExcludeTransactions
+    );
+    if (narrowed.length) {
+      return renderPicked(narrowed, maxCharsPerSnippet);
+    }
+  }
+
+  if (promptContext.sectionNumber === "12.1") {
+    const narrowed = pruneHistoricalFinancialIntroPages(
       picked,
       promptContext,
       hardExcludeTransactions

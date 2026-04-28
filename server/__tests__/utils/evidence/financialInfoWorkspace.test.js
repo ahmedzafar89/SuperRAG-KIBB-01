@@ -392,6 +392,38 @@ describe("financial info evidence formatting", () => {
     expect(block).not.toContain("STATEMENT OF CHANGES IN EQUITY");
   });
 
+  test("prefers historical financial information intro pages over directors responsibility pages", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 18,
+          table_candidate: false,
+          text: "DIRECTORS' RESPONSIBILITIES FOR THE CONSOLIDATED FINANCIAL INFORMATION. Ethical responsibilities in accordance with the By-Laws and IESBA Code.",
+          score: 0.95,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 17,
+          table_candidate: true,
+          text: "The historical financial information comprises the consolidated statements of financial position as at 31 December 2022, 31 December 2023, 31 December 2024 and 31 July 2025, and the consolidated statements of profit or loss and other comprehensive income, statements of changes in equity and cash flows for the FYE 31 December 2022, 2023 and 2024 and for the FPE 31 July 2025 in accordance with MFRS and IFRS Accounting Standards.",
+          score: 0.2,
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION",
+      }
+    );
+
+    expect(block).toContain("page:17");
+    expect(block).toContain("historical financial information");
+    expect(block).not.toContain("DIRECTORS' RESPONSIBILITIES");
+  });
+
   test("stops after core financial position statement coverage is present", () => {
     const block = formatEvidenceSnippets(
       [
@@ -439,6 +471,55 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("page:21");
     expect(block).not.toContain("page:27");
     expect(block).not.toContain("page:103");
+  });
+
+  test("stops after core historical financial intro coverage is present", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 17,
+          table_candidate: true,
+          text: "The historical financial information comprises the consolidated statements of financial position as at 31 December 2022, 31 December 2023, 31 December 2024 and 31 July 2025 and the consolidated statements of profit or loss and other comprehensive income, statements of changes in equity and cash flows for the FYE 31 December 2022, 2023 and 2024 and the FPE 31 July 2025.",
+          score: 0.9,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 30,
+          table_candidate: true,
+          text: "Basis of preparation. The consolidated financial statements are prepared in accordance with Malaysian Financial Reporting Standards and IFRS Accounting Standards.",
+          score: 0.8,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 109,
+          table_candidate: true,
+          text: "Duplicate late report page repeating the same periods and framework.",
+          score: 0.95,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 18,
+          table_candidate: false,
+          text: "Basis for opinion and ethical responsibilities.",
+          score: 0.85,
+        },
+      ],
+      {
+        maxSnippets: 8,
+        promptText:
+          "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION",
+      }
+    );
+
+    expect(block).toContain("page:17");
+    expect(block).toContain("page:30");
+    expect(block).not.toContain("page:18");
+    expect(block).not.toContain("page:109");
   });
 
   test("keeps multiple relevant chunks from the same financial position PDF page", () => {
