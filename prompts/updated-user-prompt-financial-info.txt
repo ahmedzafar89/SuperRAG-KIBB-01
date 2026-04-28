@@ -8,10 +8,13 @@ TARGET SECTION HEADING
 
 SECTION FOCUS
 Draft only section 12.1 as the chapter-level introduction.
-State the financial periods covered, the accounting framework, and that the historical financial information should be read together with the Accountants' Report where disclosed.
+State the actual disclosed financial periods covered, the actual disclosed accounting framework, and that the historical financial information should be read together with the Accountants' Report where disclosed.
 Keep the tone neutral and prospectus-style.
 Do not analyse performance, profitability, liquidity, cash flow, ratios, or trends.
 Do not reproduce the detailed statement tables in this section.
+Do not state that the historical financial information was prepared for inclusion in the prospectus or for listing purposes unless that purpose statement is expressly required for this section.
+Do not use generic regulatory wording such as "latest two financial years", "latest three financial years", "shorter period", or "latest practicable date" unless that wording is expressly disclosed in the factual evidence.
+Do not use stock introduction sentences such as "The selected financial information..." unless the factual evidence itself supports that sentence.
 Do not continue into section 12.1.1.
 
 STYLE REFERENCE
@@ -41,17 +44,24 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.1.1.
 Match the approved prospectus display pattern closely.
-Use a short introductory paragraph only if it is needed to orient the reader; otherwise start directly with one complete summary table.
+Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier.
 Present the disclosed periods exactly as supported by the evidence.
 Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
+Where the summary table is presented in RM'000, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025 where that mapping is exact from the factual evidence, instead of repeating full date phrases.
+Where concise prospectus-style period headers are used, place RM'000 as a separate unit row beneath the period headers rather than repeating the unit in every period column heading.
+Where audited and unaudited statuses are disclosed across the periods, prefer a separate audit-status row above the FYE/FPE row instead of folding the status text into each column heading.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 Include all line items expressly disclosed in the relevant statement or directly related summary disclosure for this section, in the same order as presented in the factual evidence.
 Do not stop after the first few rows if additional disclosed line items for the same statement are available in the evidence.
 Preserve any disclosed audited or unaudited labels, comparative FPE columns or rows, subtotals, totals, and note labels exactly as shown.
+If both a current FPE and comparative FPE are disclosed, include both exactly as disclosed and do not present the current FPE alone.
 Include optional summary rows such as EBITDA, margins, earnings per share, or similar metrics only if they are expressly disclosed in the factual evidence for the issuer.
 Condense disclosed notes to the minimum necessary summary form.
 Do not recompute totals or add presentation rows to make figures tie.
 Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
+If a row label and its period values cannot be aligned cleanly from the selected factual evidence, omit that row rather than shifting a value into the wrong row or period.
+Do not output unlabeled subtotal-only rows.
+Do not move a figure from one row label to another merely to complete the table.
 Do not explain movements or performance drivers.
 Do not continue into section 12.1.2.
 
@@ -65,15 +75,19 @@ OUTPUT CONTRACT
 - Output only section 12.1.1.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Use a short framing paragraph only if needed before the table.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
 - Present one complete table for this section.
 - The table must be in clean markdown using pipe characters.
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- When the evidence supports prospectus shorthand period labels, prefer column headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025, with a separate RM'000 unit row beneath them.
+- Where the evidence discloses audit status across periods, prefer a separate audit-status row such as `Audited | Audited | Audited | Unaudited | Audited` above the FYE/FPE row.
+- Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
+- If a row label and its values do not align cleanly across the selected factual evidence, omit that row rather than guessing or shifting values across labels or periods.
 - Do not invent figures, notes, ratios, margins, EBITDA, EPS, or any derived presentation row that is not expressly disclosed in the factual evidence.
 - Use the accountant report and retrieved evidence as the only factual source.
-- Use the style reference only for structure and tone.
+- Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
 
 
@@ -88,19 +102,25 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.1.2.
 Match the approved prospectus display pattern closely.
-Use a short introductory paragraph only if it is needed to orient the reader; otherwise start directly with one complete summary table.
+Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier.
 Present the disclosed periods exactly as supported by the evidence.
 Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
+Where the summary table is presented in RM'000, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025 where that mapping is exact from the factual evidence, instead of repeating full "As at ..." date phrases.
+Where concise prospectus-style period headers are used, place RM'000 as a separate unit row beneath the period headers rather than repeating the unit in every period column heading.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 Include all line items expressly disclosed in the relevant statement of financial position or directly related summary disclosure for this section, in the same order as presented in the factual evidence.
 Do not stop after the first few rows if additional disclosed line items for the same statement are available in the evidence.
 Keep classifications such as current and non-current exactly as disclosed.
 Preserve the distinction between assets, equity, and liabilities exactly as supported by the evidence.
 Preserve any disclosed audited or unaudited labels, comparative FPE columns or rows, subtotals, totals, and note labels exactly as shown.
+If both a current FPE and comparative FPE are disclosed, include both exactly as disclosed and do not present the current FPE alone.
 Include optional summary rows, subtotals, or directly related presentation rows only if they are expressly disclosed in the factual evidence for the issuer.
 Condense disclosed notes to the minimum necessary summary form.
 Do not recompute totals or add presentation rows to make figures tie.
 Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
+Do not output unlabeled subtotal-only rows.
+If a line-item cluster appears without its parent classification heading in the selected factual evidence, omit that cluster rather than inferring the missing classification.
+Do not relabel this section as "historical financial position" or any other alternative heading.
 Do not interpret balance sheet strength, capital position, solvency, or movements.
 Do not continue into section 12.1.3.
 
@@ -114,15 +134,18 @@ OUTPUT CONTRACT
 - Output only section 12.1.2.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Use a short framing paragraph only if needed before the table.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
 - Present one complete table for this section.
 - The table must be in clean markdown using pipe characters.
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- When the evidence supports prospectus shorthand period labels, prefer column headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025, with a separate RM'000 unit row beneath them.
+- Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
+- Do not output a bare numeric subtotal row unless the evidence also discloses the corresponding row label or classification heading in the selected factual evidence.
 - Do not invent figures, classifications, subtotals, notes, or presentation rows that are not expressly disclosed in the factual evidence.
 - Use the accountant report and retrieved evidence as the only factual source.
-- Use the style reference only for structure and tone.
+- Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
 
 
@@ -136,7 +159,7 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.1.3.
 Match the approved prospectus display pattern closely.
-Use a short introductory paragraph only if it is needed to orient the reader; otherwise start directly with one complete summary table.
+Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier.
 Present the disclosed periods exactly as supported by the evidence.
 Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
@@ -162,15 +185,16 @@ OUTPUT CONTRACT
 - Output only section 12.1.3.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Use a short framing paragraph only if needed before the table.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
 - Present one complete table for this section.
 - The table must be in clean markdown using pipe characters.
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not invent figures, classifications, subtotals, notes, or presentation rows that are not expressly disclosed in the factual evidence.
 - Use the accountant report and retrieved evidence as the only factual source.
-- Use the style reference only for structure and tone.
+- Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
 
 
@@ -186,7 +210,7 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.2.
 Match the approved prospectus display pattern closely.
-Use a short introductory paragraph only if it is needed to orient the reader; otherwise start directly with one complete summary table.
+Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or status qualifier.
 State the basis date and whether the information is audited, unaudited, pro forma, adjusted, or after a specific transaction only where expressly disclosed in the evidence.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 Include all line items, classifications, subtotals, totals, adjustment columns, and directly related summary disclosure expressly disclosed for capitalisation and indebtedness, in the same order as presented in the factual evidence.
@@ -211,15 +235,16 @@ OUTPUT CONTRACT
 - Output only section 12.2.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Use a short framing paragraph only if needed before the table.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
 - Present one complete table for this section.
 - The table must be in clean markdown using pipe characters.
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not invent figures, classifications, subtotals, totals, adjustment columns, notes, gearing, net debt, or any derived presentation row that is not expressly disclosed in the factual evidence.
 - Use the accountant report and retrieved evidence as the only factual source.
-- Use the style reference only for structure and tone.
+- Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
 
 
@@ -234,9 +259,10 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.3 as the chapter-level introduction to Management's Discussion and Analysis.
 Use short prospectus-style narrative only.
-State that the discussion below should be read together with the historical financial information and the Accountants' Report where expressly disclosed.
+State that the discussion below should be read together with the historical financial information and the Accountants' Report only where expressly disclosed.
 Do not include detailed financial analysis, numerical tables, or subsection-specific discussion in this section.
 Do not reproduce content that belongs in sections 12.3.1 onward.
+Do not use generic introductory boilerplate that is not supported by the factual evidence.
 Do not continue into section 12.3.1.
 
 STYLE REFERENCE
@@ -348,6 +374,8 @@ Summarise the issuer’s overall results of operations only to the extent expres
 Include the basis of revenue recognition, segment contribution, project contribution, customer type, geographic mix, cost structure, or other operating-result context only if expressly disclosed.
 Include comparative discussion only where the factual evidence expressly states the comparison, movement, or reason.
 Preserve the order and emphasis of the factual evidence where practical.
+Start with the general results-of-operations discussion first, then move to segment, category, customer, project, or geographic sub-breakdowns where the evidence supports both.
+Prefer disclosed operational drivers, composition, and calculation-basis commentary over bare increase or decrease narration.
 Do not calculate margins, growth rates, CAGR, or derived metrics unless expressly disclosed.
 Do not duplicate detailed line-item analysis that belongs more appropriately in later subsections unless the factual evidence presents it here as part of the overview.
 Do not continue into section 12.3.4.
@@ -787,9 +815,10 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.4 as the chapter-level introduction to liquidity and capital resources.
 Use short prospectus-style narrative only.
-State that the discussion below should be read together with the historical financial information and the Accountants' Report where expressly disclosed.
+State that the discussion below should be read together with the historical financial information and the Accountants' Report only where expressly disclosed.
 Do not include detailed subsection analysis, numerical tables, or borrowing breakdowns in this section.
 Do not reproduce content that belongs in sections 12.4.1 onward.
+Do not use generic working-capital sufficiency, LPD, or post-listing boilerplate unless that wording is expressly disclosed in the factual evidence.
 Do not continue into section 12.4.1.
 
 STYLE REFERENCE
@@ -824,6 +853,7 @@ Use neutral prospectus-style narrative only unless the factual evidence expressl
 Discuss working capital only to the extent expressly disclosed in the factual evidence.
 Include sources of funding, working capital position, current assets, current liabilities, banking facilities, net assets, gearing, funding sufficiency statements, or equivalent issuer-specific disclosures only if expressly disclosed.
 Preserve basis dates, LPD references, pro forma qualifiers, use-of-proceeds references, and time-qualified sufficiency statements exactly as disclosed.
+Do not infer any 12-month sufficiency statement, LPD statement, or post-listing funding statement from style convention.
 Do not calculate working capital, gearing, sufficiency, or any derived metric unless expressly disclosed.
 Do not independently conclude that working capital is sufficient.
 Do not continue into section 12.4.2.
@@ -856,7 +886,7 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.4.2.
 Match the approved prospectus display pattern closely.
-Use a short introductory paragraph only if it is needed to orient the reader; otherwise start directly with one complete summary table.
+Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier.
 Present the disclosed periods exactly as supported by the evidence.
 Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
@@ -885,15 +915,16 @@ OUTPUT CONTRACT
 - Output only section 12.4.2.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Use a short framing paragraph only if needed before the table.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
 - Present one complete table for this section.
 - The table must be in clean markdown using pipe characters.
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not invent figures, subtotals, comparison paragraphs, or explanations that are not expressly disclosed in the factual evidence.
 - Use the accountant report and retrieved evidence as the only factual source.
-- Use the style reference only for structure and tone.
+- Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
 
 
@@ -907,7 +938,7 @@ TARGET SECTION HEADING
 SECTION FOCUS
 Draft only section 12.4.3.
 Match the approved prospectus display pattern closely.
-Use neutral prospectus-style narrative and include a supporting table only if the factual evidence expressly supports one for this subsection.
+Use one complete supporting table where the factual evidence expressly supports a borrowing table, and use narrative only for the residual supported explanation.
 Discuss bank borrowings only to the extent expressly disclosed in the factual evidence.
 Include borrowing amounts, facility types, secured or unsecured status, repayment profile, tenure, interest basis, security, guarantees, purpose, covenant references, or equivalent issuer-specific borrowing disclosures only if expressly disclosed.
 Preserve classifications, basis dates, and borrowing labels exactly as disclosed.
@@ -925,8 +956,7 @@ OUTPUT CONTRACT
 - Output only section 12.4.3.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Use clean prospectus-style narrative.
-- Use a table only if expressly supported by the factual evidence.
+- Use a table where expressly supported by the factual evidence, followed by concise supporting narrative only where needed.
 - Do not invent figures, facility details, security terms, repayment terms, or explanations.
 - Use the accountant report and retrieved evidence as the only factual source.
 - Use the style reference only for structure and tone.
@@ -1008,41 +1038,6 @@ OUTPUT CONTRACT
 Draft only the following section of Section 12, Financial Information.
 
 TARGET SECTION HEADING
-12.6 MATERIAL COMMITMENT FOR CAPITAL EXPENDITURE
-
-SECTION FOCUS
-Draft only section 12.6.
-Match the approved prospectus display pattern closely.
-Use neutral prospectus-style narrative and include a supporting table only if the factual evidence expressly supports one for this subsection.
-Discuss material commitments for capital expenditure only to the extent expressly disclosed in the factual evidence.
-Include approved expenditure, project-related commitments, acquisition commitments, committed amounts, intended funding sources, timelines, or equivalent issuer-specific capital expenditure disclosures only if expressly disclosed.
-Preserve basis dates, categories, and labels exactly as disclosed.
-Do not calculate capital commitments, future expenditure, or funding allocations unless expressly disclosed.
-Do not continue into section 12.7.
-
-STYLE REFERENCE
-<<STYLE_REFERENCE_SNIPPETS>>
-
-EVIDENCE
-<<EVIDENCE_SNIPPETS_WITH_METADATA>>
-
-OUTPUT CONTRACT
-- Output only section 12.6.
-- Preserve the heading exactly as written above.
-- Do not add markdown heading markers.
-- Use clean prospectus-style narrative.
-- Use a table only if expressly supported by the factual evidence.
-- Do not invent commitments, amounts, timelines, or funding sources.
-- Use the accountant report and retrieved evidence as the only factual source.
-- Use the style reference only for structure and tone.
-- If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
-
-
----
-
-Draft only the following section of Section 12, Financial Information.
-
-TARGET SECTION HEADING
 12.8 KEY FINANCIAL RATIOS
 
 SECTION FOCUS
@@ -1075,9 +1070,10 @@ OUTPUT CONTRACT
 - Include a header row and separator row for each table.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not invent ratios, formulas, turnover periods, ageing analyses, or notes.
 - Use the accountant report and retrieved evidence as the only factual source.
-- Use the style reference only for structure and tone.
+- Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
 
 
@@ -1111,14 +1107,8 @@ OUTPUT CONTRACT
 - Output only section 12.9.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Begin with one short framing paragraph before the first table.
-- Present one complete main table for this section where supported by the factual evidence.
-- Use additional supporting tables only if expressly supported by the factual evidence.
-- The tables must be in clean markdown using pipe characters.
-- Include a header row and separator row for each table.
-- Do not output tab-separated text.
-- Do not output HTML tags such as <br>.
-- Do not invent ratios, formulas, turnover periods, ageing analyses, or notes.
+- Use clean prospectus-style narrative, with a table only if expressly supported by the factual evidence.
+- Do not invent exposures, sensitivities, scenario analysis, or notes.
 - Use the accountant report and retrieved evidence as the only factual source.
 - Use the style reference only for structure and tone.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.

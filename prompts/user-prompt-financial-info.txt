@@ -29,6 +29,7 @@ GLOBAL OUTPUT CONTRACT
 - Begin with one short framing paragraph before any table.
 - Present tables in clean markdown or plain aligned format appropriate to the requested section.
 - Where the section is a prospectus-style summary section, prefer a condensed summary table over a verbatim accountant-report statement dump.
+- For table-heavy sections, use the complete selected factual evidence block before drafting. If a row or continuation page is not present in the selected factual evidence, omit it rather than inventing or reconstructing it.
 - Keep table notes if they are expressly disclosed and necessary to preserve meaning, but condense them when the evidence supports summary presentation.
 - Do not perform validation, redlining, commentary on prompt quality, or cross-section QA.
 - Do not add bullets unless the evidence itself is presented as bullet-style disclosure and the requested section requires that format.
@@ -38,6 +39,7 @@ GLOBAL OUTPUT CONTRACT
 
 STYLE ANCHORS
 - Use these as structural examples only. They are not factual source material and must not be copied with invented facts.
+- The style reference controls only section ordering, table-introduction pattern, and writing cadence.
 - Example 1: "The following table sets out a summary of the consolidated statements for the Financial Years/Period Under Review. The consolidated financial statements have been prepared in accordance with [accounting framework] and should be read in conjunction with the Accountants' Report in Section [X] of this Prospectus."
 - Example 2: "The table below summarises our capitalisation and indebtedness based on the latest [audited/unaudited] financial information as at [date] and after adjusting the effects of [transaction], where applicable."
 - Example 3: "The following is our cash flow for the Financial Years/Period Under Review based on our audited consolidated financial statements. This should be read in conjunction with the Accountants' Report in Section [X] of this Prospectus."

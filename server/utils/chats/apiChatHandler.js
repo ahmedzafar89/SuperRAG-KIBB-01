@@ -23,6 +23,10 @@ const {
   buildIpoPromptBlocks,
   injectIpoPromptBlocks,
 } = require("../evidence/buildIpoPromptBlocks");
+const {
+  getIpoPromptSources,
+  mergeIpoPromptSources,
+} = require("../evidence/ipoPromptSearch");
 /**
  * @typedef ResponseObject
  * @property {string} id - uuid of response
@@ -381,13 +385,22 @@ async function chatSync({
 
   let updatedMessage = message;
   if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
-    const promptBlocks = buildIpoPromptBlocks(
-      [
-        ...vectorSearchResults.sources,
-        ...sources,
-      ],
-      { userTemplate: updatedMessage }
-    );
+    const promptSources = await getIpoPromptSources({
+      workspace,
+      prompt: updatedMessage,
+      VectorDb,
+      LLMConnector,
+      embeddingsCount,
+      pinnedDocIdentifiers,
+      existingSources: mergeIpoPromptSources(
+        sources,
+        vectorSearchResults.sources
+      ),
+    });
+    sources = promptSources;
+    const promptBlocks = buildIpoPromptBlocks(promptSources, {
+      userTemplate: updatedMessage,
+    });
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 
@@ -746,13 +759,22 @@ async function streamChat({
 
   let updatedMessage = message;
   if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
-    const promptBlocks = buildIpoPromptBlocks(
-      [
-        ...vectorSearchResults.sources,
-        ...sources,
-      ],
-      { userTemplate: updatedMessage }
-    );
+    const promptSources = await getIpoPromptSources({
+      workspace,
+      prompt: updatedMessage,
+      VectorDb,
+      LLMConnector,
+      embeddingsCount,
+      pinnedDocIdentifiers,
+      existingSources: mergeIpoPromptSources(
+        sources,
+        vectorSearchResults.sources
+      ),
+    });
+    sources = promptSources;
+    const promptBlocks = buildIpoPromptBlocks(promptSources, {
+      userTemplate: updatedMessage,
+    });
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
   }
 

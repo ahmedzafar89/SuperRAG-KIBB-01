@@ -20,12 +20,13 @@ function buildIpoPromptBlocks(allSources = [], opts = {}) {
   const promptContext = extractIpoPromptContext(opts.userTemplate || "");
   const evidenceMaxSnippets =
     opts.evidenceMaxSnippets ??
-    (promptContext.tableHeavy ? 18 : 12);
+    (promptContext.tableHeavy ? 24 : 12);
   const evidenceMaxCharsPerSnippet =
     opts.evidenceMaxCharsPerSnippet ??
-    (promptContext.tableHeavy ? 2200 : 1800);
-  const styleMaxSnippets = opts.styleMaxSnippets ?? 2;
-  const styleMaxCharsPerSnippet = opts.styleMaxCharsPerSnippet ?? 800;
+    (promptContext.tableHeavy ? 2600 : 1800);
+  const styleMaxSnippets = opts.styleMaxSnippets ?? (promptContext.tableHeavy ? 3 : 2);
+  const styleMaxCharsPerSnippet =
+    opts.styleMaxCharsPerSnippet ?? (promptContext.tableHeavy ? 1200 : 900);
 
   const normalizedSources = Array.isArray(allSources) ? allSources : [];
   const evidenceSources = normalizedSources.filter(
@@ -38,11 +39,13 @@ function buildIpoPromptBlocks(allSources = [], opts = {}) {
     maxCharsPerSnippet: evidenceMaxCharsPerSnippet,
     allowTransactions: false,
     promptText: opts.userTemplate || "",
+    promptContext,
   });
 
   const styleBlock = formatStyleReferenceSnippets(styleSources, {
     maxSnippets: styleMaxSnippets,
     maxCharsPerSnippet: styleMaxCharsPerSnippet,
+    promptContext,
   });
 
   return {

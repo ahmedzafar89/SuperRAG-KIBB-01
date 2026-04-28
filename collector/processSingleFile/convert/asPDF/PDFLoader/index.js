@@ -81,6 +81,59 @@ class PDFLoader {
     ];
   }
 
+  async loadPositionedPages() {
+    const buffer = await fs.readFile(this.filePath);
+    const { getDocument, version } = await this.getPdfJS();
+
+    const pdf = await getDocument({
+      data: new Uint8Array(buffer),
+      useWorkerFetch: false,
+      isEvalSupported: false,
+      useSystemFonts: true,
+    }).promise;
+
+    const meta = await pdf.getMetadata().catch(() => null);
+    const documents = [];
+
+    for (let i = 1; i <= pdf.numPages; i += 1) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+
+      if (content.items.length === 0) continue;
+
+      const items = content.items
+        .filter((item) => "str" in item && String(item.str || "").trim())
+        .map((item) => {
+          const transform = item.transform || [];
+          return {
+            str: String(item.str || ""),
+            x: Number(transform[4] || 0),
+            y: Number(transform[5] || 0),
+            width: Number(item.width || 0),
+            height: Number(item.height || 0),
+            fontName: item.fontName || null,
+          };
+        });
+
+      documents.push({
+        pageContent: items.map((item) => item.str).join(" ").trim(),
+        items,
+        metadata: {
+          source: this.filePath,
+          pdf: {
+            version,
+            info: meta?.info,
+            metadata: meta?.metadata,
+            totalPages: pdf.numPages,
+          },
+          loc: { pageNumber: i },
+        },
+      });
+    }
+
+    return documents;
+  }
+
   async getPdfJS() {
     try {
       const pdfjs = await import("pdf-parse/lib/pdf.js/v1.10.100/build/pdf.js");

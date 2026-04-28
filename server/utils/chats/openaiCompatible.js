@@ -9,6 +9,10 @@ const {
   buildIpoPromptBlocks,
   injectIpoPromptBlocks,
 } = require("../evidence/buildIpoPromptBlocks");
+const {
+  getIpoPromptSources,
+  mergeIpoPromptSources,
+} = require("../evidence/ipoPromptSearch");
 
 const { PassThrough } = require("stream");
 
@@ -157,13 +161,22 @@ async function chatSync({
 
   let updatedPrompt = String(prompt);
   if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
-    const promptBlocks = buildIpoPromptBlocks(
-      [
-        ...vectorSearchResults.sources,
-        ...sources,
-      ],
-      { userTemplate: updatedPrompt }
-    );
+    const promptSources = await getIpoPromptSources({
+      workspace,
+      prompt: updatedPrompt,
+      VectorDb,
+      LLMConnector,
+      embeddingsCount,
+      pinnedDocIdentifiers,
+      existingSources: mergeIpoPromptSources(
+        sources,
+        vectorSearchResults.sources
+      ),
+    });
+    sources = promptSources;
+    const promptBlocks = buildIpoPromptBlocks(promptSources, {
+      userTemplate: updatedPrompt,
+    });
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
   }
 
@@ -403,13 +416,22 @@ async function streamChat({
 
   let updatedPrompt = String(prompt);
   if (shouldUseIpoPromptInjection(workspace, updatedPrompt)) {
-    const promptBlocks = buildIpoPromptBlocks(
-      [
-        ...vectorSearchResults.sources,
-        ...sources,
-      ],
-      { userTemplate: updatedPrompt }
-    );
+    const promptSources = await getIpoPromptSources({
+      workspace,
+      prompt: updatedPrompt,
+      VectorDb,
+      LLMConnector,
+      embeddingsCount,
+      pinnedDocIdentifiers,
+      existingSources: mergeIpoPromptSources(
+        sources,
+        vectorSearchResults.sources
+      ),
+    });
+    sources = promptSources;
+    const promptBlocks = buildIpoPromptBlocks(promptSources, {
+      userTemplate: updatedPrompt,
+    });
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
   }
 
