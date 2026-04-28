@@ -1,8 +1,22 @@
 const {
   shouldUseIpoPromptInjection,
+  extractIpoPromptContext,
 } = require("./buildIpoPromptBlocks");
 
 const IPO_PROMPT_EXPANDED_TOP_N = 50;
+
+function buildIpoRetrievalQuery(prompt = "") {
+  const promptContext = extractIpoPromptContext(prompt);
+  const parts = [
+    promptContext.heading,
+    promptContext.sectionNumber,
+    ...(promptContext.keywords || []),
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  return Array.from(new Set(parts)).join(" ");
+}
 
 function sourceValue(source = {}, key) {
   return source?.[key] ?? source?.metadata?.[key] ?? "";
@@ -87,7 +101,7 @@ async function getIpoPromptSources({
   try {
     const expandedResults = await VectorDb.performSimilaritySearch({
       namespace: workspace.slug,
-      input: prompt,
+      input: buildIpoRetrievalQuery(prompt),
       LLMConnector,
       similarityThreshold: workspace?.similarityThreshold,
       topN: expandedIpoTopN(workspace),
@@ -115,6 +129,7 @@ async function getIpoPromptSources({
 
 module.exports = {
   IPO_PROMPT_EXPANDED_TOP_N,
+  buildIpoRetrievalQuery,
   expandedIpoTopN,
   getIpoPromptSources,
   mergeIpoPromptSources,

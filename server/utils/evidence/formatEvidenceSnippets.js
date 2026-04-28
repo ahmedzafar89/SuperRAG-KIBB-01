@@ -25,6 +25,15 @@ function extractIpoPromptContext(promptText = "") {
   const comparativeFpeSections = new Set(["12.1.3", "12.4.2"]);
   const proFormaAllowedSections = new Set(["12.2"]);
   const keywordMap = {
+    "12.1": [
+      "historical financial information",
+      "accountants report",
+      "financial years under review",
+      "financial period under review",
+      "malaysian financial reporting standards",
+      "international financial reporting standards",
+      "basis of preparation",
+    ],
     "12.1.1": [
       "profit or loss",
       "other comprehensive income",
@@ -37,7 +46,18 @@ function extractIpoPromptContext(promptText = "") {
       "earnings per share",
       "eps",
     ],
-    "12.1.2": ["financial position", "assets", "equity", "liabilities"],
+    "12.1.2": [
+      "financial position",
+      "consolidated statements of financial position",
+      "assets",
+      "equity",
+      "liabilities",
+      "non-current assets",
+      "current assets",
+      "total assets",
+      "equity and liabilities",
+      "total equity and liabilities",
+    ],
     "12.1.3": [
       "cash flow",
       "cash flows",
@@ -53,6 +73,13 @@ function extractIpoPromptContext(promptText = "") {
       "pro forma",
       "public issue",
     ],
+    "12.3": [
+      "management discussion and analysis",
+      "results of operations",
+      "financial condition",
+      "historical financial information",
+      "accountants report",
+    ],
     "12.3.4": ["revenue", "segment", "geographical"],
     "12.3.5": ["cost of sales", "cost", "project-related costs"],
     "12.3.6": ["gross profit", "gp margin", "gross profit margin"],
@@ -67,12 +94,38 @@ function extractIpoPromptContext(promptText = "") {
       "effective tax rate",
       "tax",
     ],
+    "12.4": [
+      "liquidity and capital resources",
+      "working capital",
+      "cash flow",
+      "bank borrowings",
+      "capital resources",
+    ],
+    "12.4.1": [
+      "working capital",
+      "sufficient for present requirements",
+      "12 months",
+      "current assets",
+      "current liabilities",
+      "banking facilities",
+      "funding requirements",
+    ],
     "12.4.2": [
       "cash flow",
       "cash flows",
       "operating activities",
       "investing activities",
       "financing activities",
+    ],
+    "12.4.3": [
+      "bank borrowings",
+      "banking facilities",
+      "term loans",
+      "overdraft",
+      "trade facilities",
+      "hire purchase",
+      "secured",
+      "unsecured",
     ],
     "12.8": [
       "ratio",
@@ -82,6 +135,14 @@ function extractIpoPromptContext(promptText = "") {
       "formula",
       "effective tax rate",
     ],
+    "12.9": [
+      "interest rates",
+      "commodity prices",
+      "foreign exchange",
+      "foreign currency",
+      "sensitivity",
+      "exposure",
+    ],
   };
   const headingTerms = heading
     .toLowerCase()
@@ -90,6 +151,7 @@ function extractIpoPromptContext(promptText = "") {
     .filter(
       (term) =>
         term &&
+        !/^\d+$/.test(term) &&
         ![
           "12",
           "and",
@@ -227,6 +289,76 @@ function hasComparativePeriodSignals(text = "") {
   );
 }
 
+function hasAccountantsReportBoilerplateSignals(text = "") {
+  return /(reporting accountants[’']?\s+(?:report|opinion|responsibilities)|restriction on distribution and use|compilation of pro forma|pro forma consolidated statements? of financial position|the purpose of the pro forma|this report is made solely|engagement circumstances|approved standards on auditing)/i.test(
+    text
+  );
+}
+
+function sectionSpecificSignalScore(text = "", promptContext = {}) {
+  const normalized = cleanText(text).toLowerCase();
+  let score = 0;
+
+  switch (promptContext.sectionNumber) {
+    case "12.1.1":
+      if (/consolidated statements? of profit or loss/.test(normalized)) score += 0.55;
+      if (/other comprehensive income/.test(normalized)) score += 0.3;
+      if (/revenue|cost of sales|gross profit|profit before taxation|profit after taxation|earnings per share/.test(normalized))
+        score += 0.28;
+      if (/fye 31 december|1\.1\.2024 to 31\.7\.2024|1\.1\.2025 to 31\.7\.2025|unaudited|audited/.test(normalized))
+        score += 0.2;
+      if (/income tax expense|basic|diluted|attributable to:|owners of the company|non-controlling interests/.test(normalized))
+        score += 0.22;
+      if (/dividends|balance at 1\.1|balance at 31\.12|distribution to owners|statement of changes in equity|acquisition of non/.test(normalized))
+        score -= 1.35;
+      break;
+    case "12.1.2":
+      const financialPositionMarkers = [
+        /consolidated statements? of financial position/,
+        /as at 31 december|as at 31 july/,
+        /non-current assets/,
+        /current assets/,
+        /current liabilities/,
+        /non-current liabilities/,
+        /total assets/,
+        /equity and liabilities/,
+        /total equity/,
+        /total liabilities/,
+        /total equity and liabilities/,
+      ].filter((pattern) => pattern.test(normalized)).length;
+      if (/consolidated statements? of financial position/.test(normalized)) score += 0.75;
+      if (/as at 31 december|as at 31 july/.test(normalized)) score += 0.22;
+      if (/non-current assets|current assets|total assets/.test(normalized)) score += 0.35;
+      if (/equity and liabilities|total equity|total liabilities|total equity and liabilities/.test(normalized)) score += 0.45;
+      if (/share capital|retained profits|retained earnings|trade payables|other payables|borrowings|bank overdrafts/.test(normalized))
+        score += 0.22;
+      if (/total assets/.test(normalized) && /total equity and liabilities/.test(normalized))
+        score += 1.1;
+      if (/current liabilities|non-current liabilities/.test(normalized)) score += 0.28;
+      if (financialPositionMarkers >= 5) score += 0.9;
+      else if (financialPositionMarkers >= 3) score += 0.45;
+      if (/classification of financial instruments|debt-to-equity ratio|capital management|net gains\/\(losses\) recognised in profit or loss|financial risk management policies|fair value of financial instruments|liquidity risk|maturity analysis|cash flow information/.test(normalized))
+        score -= 1.35;
+      if (/profit or loss|other comprehensive income|earnings per share|financial year ended/.test(normalized))
+        score -= 0.95;
+      break;
+    case "12.1.3":
+    case "12.4.2":
+      if (/consolidated statements? of cash flows|cash flows from operating activities|cash flows from investing activities|cash flows from financing activities/.test(normalized))
+        score += 0.7;
+      if (/net cash (?:generated|used|from|in)/.test(normalized)) score += 0.3;
+      break;
+    case "12.2":
+      if (/capitalisation and indebtedness|total indebtedness|total capitalisation|gearing ratio/.test(normalized))
+        score += 0.6;
+      break;
+    default:
+      break;
+  }
+
+  return score;
+}
+
 function sourceLocationKey(source = {}) {
   const doc = sourceDocKey(source);
   const sheet = (source.sheet || "").toString().trim().toLowerCase();
@@ -236,9 +368,13 @@ function sourceLocationKey(source = {}) {
       ? `${source.chunk_row_start}-${source.chunk_row_end}`
       : "";
   const page = source.page_number ? `p${source.page_number}` : "";
+  const pdfChunk =
+    source.filetype === "pdf" && page && !sheet && !table && !rows
+      ? source.__cleanText.replace(/\s+/g, " ").slice(0, 160).toLowerCase()
+      : "";
 
-  if (doc || sheet || table || rows || page) {
-    return `loc:${doc}|${sheet}|${table}|${rows}|${page}`;
+  if (doc || sheet || table || rows || page || pdfChunk) {
+    return `loc:${doc}|${sheet}|${table}|${rows}|${page}|${pdfChunk}`;
   }
 
   return `txt:${source.__cleanText
@@ -339,6 +475,7 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
     score += 0.16;
   }
   if (promptContext.includeNotes && hasNoteSignals(text)) score += 0.12;
+  score += sectionSpecificSignalScore(text, promptContext);
 
   for (const keyword of promptContext.keywords) {
     if (!keyword) continue;
@@ -347,6 +484,7 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
 
   if (!promptContext.proFormaAllowed && hasProFormaSignals(text)) score -= 1.25;
   if (promptContext.proFormaAllowed && hasProFormaSignals(text)) score += 0.35;
+  if (hasAccountantsReportBoilerplateSignals(text)) score -= 1.1;
 
   const tx = isLikelyTransactionDump(source);
   if (tx) score -= hardExcludeTransactions ? 10 : 0.25;
@@ -357,6 +495,15 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
 
 function isHelpfulCompanion(anchor, candidate, promptContext) {
   if (sourceDocKey(anchor) !== sourceDocKey(candidate)) return false;
+  if (
+    anchor.filetype === "pdf" &&
+    candidate.filetype === "pdf" &&
+    anchor.table_candidate &&
+    candidate.table_candidate &&
+    pageDistance(anchor, candidate) <= promptContext.adjacentPageWindow
+  ) {
+    return true;
+  }
   if (sourceGroupKey(anchor) === sourceGroupKey(candidate)) {
     if (rowDistance(anchor, candidate) <= promptContext.adjacentRowWindow) {
       return true;
@@ -378,6 +525,139 @@ function isHelpfulCompanion(anchor, candidate, promptContext) {
     (promptContext.includeComparativeFpe && hasComparativePeriodSignals(text)) ||
     (promptContext.includeNotes && hasNoteSignals(text))
   );
+}
+
+function hasFinancialPositionStatementCoverage(picked = []) {
+  const combined = picked.map((source) => source.__cleanText.toLowerCase());
+  const hasAssetsPage = combined.some(
+    (text) =>
+      text.includes("current assets") ||
+      text.includes("total assets") ||
+      (text.includes("non-current assets") && text.includes("total assets")) ||
+      (text.includes("fixed deposits") && text.includes("cash and bank balances"))
+  );
+  const hasLiabilitiesPage = combined.some(
+    (text) =>
+      text.includes("current liabilities") ||
+      text.includes("total equity and liabilities") ||
+      (text.includes("equity") && text.includes("total liabilities"))
+  );
+
+  return hasAssetsPage && hasLiabilitiesPage;
+}
+
+function hasProfitOrLossStatementCoverage(picked = []) {
+  const combined = picked.map((source) => source.__cleanText.toLowerCase());
+  const hasMainPage = combined.some(
+    (text) =>
+      text.includes("revenue") &&
+      text.includes("cost of sales") &&
+      text.includes("gross profit") &&
+      text.includes("profit before taxation")
+  );
+  const hasContinuationPage = combined.some(
+    (text) =>
+      text.includes("profit after taxation") ||
+      text.includes("total comprehensive") ||
+      text.includes("earnings per share") ||
+      text.includes("basic") ||
+      text.includes("diluted") ||
+      text.includes("attributable to:")
+  );
+
+  return hasMainPage && hasContinuationPage;
+}
+
+function pruneFinancialPositionStatementPages(
+  picked = [],
+  promptContext = {},
+  hardExcludeTransactions = true
+) {
+  if (!Array.isArray(picked) || picked.length === 0) return [];
+
+  const rankedPicked = [...picked].sort((a, b) => {
+    return (
+      scoreSource(b, promptContext, hardExcludeTransactions) -
+      scoreSource(a, promptContext, hardExcludeTransactions)
+    );
+  });
+  const anchor = rankedPicked[0];
+  if (!anchor) return [];
+
+  const narrowed = rankedPicked
+    .filter((source) => {
+      if (sourceDocKey(source) !== sourceDocKey(anchor)) return false;
+      if (source.filetype !== "pdf" || !source.table_candidate) return false;
+      return pageDistance(anchor, source) <= promptContext.adjacentPageWindow;
+    })
+    .sort((a, b) => {
+      const aPage = Number(a.page_number);
+      const bPage = Number(b.page_number);
+      if (Number.isFinite(aPage) && Number.isFinite(bPage) && aPage !== bPage) {
+        return aPage - bPage;
+      }
+      return (
+        scoreSource(b, promptContext, hardExcludeTransactions) -
+        scoreSource(a, promptContext, hardExcludeTransactions)
+      );
+    });
+
+  return hasFinancialPositionStatementCoverage(narrowed) ? narrowed : [];
+}
+
+function pruneProfitOrLossStatementPages(
+  picked = [],
+  promptContext = {},
+  hardExcludeTransactions = true
+) {
+  if (!Array.isArray(picked) || picked.length === 0) return [];
+
+  const rankedPicked = [...picked].sort((a, b) => {
+    return (
+      scoreSource(b, promptContext, hardExcludeTransactions) -
+      scoreSource(a, promptContext, hardExcludeTransactions)
+    );
+  });
+  const anchor = rankedPicked[0];
+  if (!anchor) return [];
+
+  const narrowed = rankedPicked
+    .filter((source) => {
+      if (sourceDocKey(source) !== sourceDocKey(anchor)) return false;
+      if (source.filetype !== "pdf" || !source.table_candidate) return false;
+      if (pageDistance(anchor, source) > 1) return false;
+      const text = source.__cleanText.toLowerCase();
+      if (
+        /dividends|balance at 1\.1|balance at 31\.12|distribution to owners|statement of changes in equity|acquisition of non/.test(
+          text
+        )
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const aPage = Number(a.page_number);
+      const bPage = Number(b.page_number);
+      if (Number.isFinite(aPage) && Number.isFinite(bPage) && aPage !== bPage) {
+        return aPage - bPage;
+      }
+      return (
+        scoreSource(b, promptContext, hardExcludeTransactions) -
+        scoreSource(a, promptContext, hardExcludeTransactions)
+      );
+    });
+
+  return hasProfitOrLossStatementCoverage(narrowed) ? narrowed : [];
+}
+
+function renderPicked(picked = [], maxCharsPerSnippet = 1800) {
+  return picked
+    .map((source) => {
+      const txt = source.__cleanText.slice(0, maxCharsPerSnippet);
+      return `${refLine(source)}\n${txt}`;
+    })
+    .join("\n\n");
 }
 
 function formatEvidenceSnippets(sources = [], opts = {}) {
@@ -459,6 +739,50 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       addPicked(companion);
       if (picked.length >= maxSnippets) break;
     }
+
+    if (promptContext.sectionNumber === "12.1.1") {
+      const narrowed = pruneProfitOrLossStatementPages(
+        picked,
+        promptContext,
+        hardExcludeTransactions
+      );
+      if (narrowed.length) {
+        return renderPicked(narrowed, maxCharsPerSnippet);
+      }
+    }
+
+    if (promptContext.sectionNumber === "12.1.2") {
+      const narrowed = pruneFinancialPositionStatementPages(
+        picked,
+        promptContext,
+        hardExcludeTransactions
+      );
+      if (narrowed.length) {
+        return renderPicked(narrowed, maxCharsPerSnippet);
+      }
+    }
+  }
+
+  if (promptContext.sectionNumber === "12.1.1") {
+    const narrowed = pruneProfitOrLossStatementPages(
+      picked,
+      promptContext,
+      hardExcludeTransactions
+    );
+    if (narrowed.length) {
+      return renderPicked(narrowed, maxCharsPerSnippet);
+    }
+  }
+
+  if (promptContext.sectionNumber === "12.1.2") {
+    const narrowed = pruneFinancialPositionStatementPages(
+      picked,
+      promptContext,
+      hardExcludeTransactions
+    );
+    if (narrowed.length) {
+      return renderPicked(narrowed, maxCharsPerSnippet);
+    }
   }
 
   for (const source of ranked) {
@@ -466,12 +790,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     addPicked(source);
   }
 
-  return picked
-    .map((source) => {
-      const txt = source.__cleanText.slice(0, maxCharsPerSnippet);
-      return `${refLine(source)}\n${txt}`;
-    })
-    .join("\n\n");
+  return renderPicked(picked, maxCharsPerSnippet);
 }
 
 module.exports = {

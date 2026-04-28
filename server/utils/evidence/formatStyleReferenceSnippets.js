@@ -49,6 +49,19 @@ function normalizeSource(source = {}) {
 function sanitizeStyleReferenceText(txt = "") {
   return cleanText(txt)
     .replace(/\u00a0/g, " ")
+    .replace(
+      /\b(?:The following table sets out|The table below (?:sets out|summaris(?:es|es))|Set out below is)\b[^.\n]*[.\n]?/gi,
+      "[TABLE_INTRO_PATTERN]. "
+    )
+    .replace(
+      /\bThe selected financial information\b[^.\n]*[.\n]?/gi,
+      ""
+    )
+    .replace(
+      /\b(?:This should be read together with|The following discussion should be read together with)\b[^.\n]*[.\n]?/gi,
+      "[READING_REFERENCE_PATTERN]. "
+    )
+    .replace(/\bReaders are referred to\b[^.\n]*[.\n]?/gi, "")
     .replace(/●|\[●\]/g, "[PLACEHOLDER]")
     .replace(
       /\b[A-Z][A-Za-z&.\-]*(?:\s+[A-Z][A-Za-z&.\-]*){0,4}\s+(?:Berhad|Bhd|Sdn\.?\s*Bhd\.?|Ltd\.?|Limited|Inc\.?|Corp\.?|Corporation|PLC)\b/g,

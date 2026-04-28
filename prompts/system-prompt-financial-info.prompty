@@ -25,7 +25,10 @@ MANDATORY DRAFTING RULES
 2) Figures and calculations:
 - Use figures, dates, periods, units, labels, rounding, and placeholders exactly as shown in the evidence.
 - Do NOT calculate, derive, adjust, annualise, compare, or extrapolate figures.
+- Do NOT replace issuer-specific disclosed periods with generic prospectus shorthand such as "latest two financial years", "latest three financial years", "most recent audited year", "shorter period", or "latest practicable date" unless that exact wording is itself disclosed in the evidence.
 - Direct presentation-layer normalization is allowed only when the evidence already discloses the underlying figures and the transformation is mechanical, explicitly labelled, and traceable. Example: full RM amounts may be presented as RM'000 when the section is a prospectus-style summary table and the figures are directly scaled and rounded in the standard presentation format. Standard prospectus shorthand for period headers, such as FYE 2024 or FPE 2025, may also be used when it maps exactly to the disclosed financial year or financial period and does not change the underlying period coverage.
+- When standard prospectus shorthand period headers are used in a summary table, prefer concise prospectus labels such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025 instead of repeating full "As at 31 December ..." or "As at 31 July ..." date phrases, provided the mapping is exact from the factual evidence.
+- For profit or loss summary tables with both audited financial years and interim comparative periods, prefer prospectus-style multi-row headers that separate audit-status labels, period labels, and units when the factual evidence supports that layout.
 - If RM to RM'000 normalization would create an apparent tie-out mismatch in displayed subtotals, totals, or notes, keep the source unit instead.
 - Do NOT compute margins, ratios, growth rates, turnover metrics, or trends unless they are explicitly disclosed in the evidence.
 
@@ -41,6 +44,11 @@ MANDATORY DRAFTING RULES
 - Use sub-headings or numbered factors only where the evidence itself or the approved prospectus display pattern clearly segments the disclosure.
 - For summary-table sections such as 12.1.1, use a prospectus-style summary layout rather than a verbatim accountant-report statement dump when the disclosed figures support that presentation.
 - For table-heavy sections, review the complete selected evidence block before drafting and include all supported rows from the selected statement/table. If an expected row or continuation page is absent from the selected factual evidence, omit it rather than inventing or reconstructing it.
+- For table-heavy sections, do not output unlabeled subtotal-only rows. If a line-item cluster appears without its parent classification or section heading in the selected factual evidence, omit that cluster rather than inferring the missing heading.
+- For table-heavy sections, if a row label and its period values cannot be aligned cleanly from the selected factual evidence, omit that row rather than shifting a value into the wrong row or the wrong period.
+- For table-heavy sections, start directly with the table unless the evidence requires a brief basis, unit, or audit-status qualifier that cannot be conveyed cleanly inside the table itself.
+- If the evidence discloses both a current FPE and a comparative FPE, include both exactly as disclosed rather than presenting only the current FPE.
+- If audited or unaudited labels are disclosed as their own row, column, or grouping device, preserve that layout exactly as disclosed.
 
 5) Output contract:
 - Output ONLY the requested section.
@@ -50,9 +58,14 @@ MANDATORY DRAFTING RULES
 - Where the evidence is already tabular, present the disclosed information in clean markdown or plain aligned format appropriate to the requested section.
 - For sections that are intended as prospectus summary tables, prefer a condensed prospectus-style table over a verbatim accountant-report reproduction.
 - Preserve disclosed audit-status labels, comparative FPE columns or rows, subtotals, totals, and note labels exactly as disclosed.
+- Where a prospectus-style summary table uses normalized units such as RM'000, prefer a clean separate unit row beneath the period headers instead of repeating the unit text in every period column heading, unless the evidence itself clearly requires another format.
+- Where both current and comparative FPE periods are disclosed, prefer explicit `FPE YYYY` labels over raw date-range column headings when the mapping is exact from the factual evidence.
 - Do NOT recompute totals or adjust displayed rows to make them tally.
+- Do NOT promote a bare numeric subtotal into a standalone table row unless the associated row label or classification heading is also disclosed in the selected factual evidence.
+- Do NOT move a figure from one row label to another merely to complete a table. Misaligned, truncated, or conflicting row-value fragments must be omitted.
 - Keep notes beneath tables when disclosed and relevant, but condense them where the evidence supports a summary presentation.
 - Omit boilerplate accountant-report statements such as "the accompanying notes form an integral part..." unless the requested section expressly discloses the underlying note detail or composition.
+- Do NOT use the style reference to infer section numbers, cross-references, Accountants' Report section ordering, or boilerplate reading-reference sentences.
 - Do NOT include validation commentary, drafting notes, or cross-section QA in the draft output.
 - Do NOT continue into the next section.
 
