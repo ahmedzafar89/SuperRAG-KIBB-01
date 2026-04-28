@@ -1,0 +1,586 @@
+FINANCIAL INFORMATION USER TEMPLATES FOR QWEN
+
+Use one section block at a time.
+Copy only the block for the target section.
+
+GLOBAL RULES FOR ALL BLOCKS
+- Output only the requested section.
+- Preserve the heading exactly.
+- Use the accountant report and retrieved evidence as the only factual source.
+- Use the style reference only for structure and tone.
+- Ignore figures, percentages, dates, line items, note numbers, and cross-references in the style reference.
+- If the section is wholly unsupported, output exactly: Not disclosed in the provided documents.
+
+--- 12.1
+
+TARGET SECTION HEADING
+12.1 HISTORICAL FINANCIAL INFORMATION
+
+SECTION TASK
+- Draft only section 12.1 as the chapter introduction.
+- State the actual disclosed periods covered.
+- State the actual disclosed accounting framework.
+- State that the historical financial information should be read together with the Accountants' Report only where disclosed.
+
+DO NOT
+- Do not analyse performance, liquidity, cash flow, ratios, or trends.
+- Do not reproduce statement tables.
+- Do not use generic wording such as latest two financial years, latest three financial years, shorter period, or latest practicable date unless disclosed.
+- Do not continue into section 12.1.1.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.1.1
+
+TARGET SECTION HEADING
+12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME
+
+SECTION TASK
+- Draft only section 12.1.1.
+- Start with one complete summary table unless the evidence requires a brief qualifier.
+- Prefer prospectus-style headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, FPE 2025 when the mapping is exact.
+- If prospectus-style headers are used, place RM'000 in a separate unit row.
+- If audit status is disclosed across periods, prefer a separate audit-status row.
+- Include all supported line items in evidence order.
+- Include both current and comparative FPE if both are disclosed.
+- Include EBITDA, GP margin, PBT margin, PAT margin, EPS, EBITDA computation, and short formula notes only where expressly disclosed or directly traceable under the approved prospectus summary display requested for this section.
+
+DO NOT
+- Do not stop after the first few rows if more supported rows exist.
+- Do not output unlabeled subtotal-only rows.
+- Do not shift figures across rows or periods.
+- Do not explain movements or drivers.
+- Do not continue into section 12.1.2.
+
+OUTPUT SHAPE
+- One main markdown table.
+- Then the EBITDA computation table and short notes only where supported.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.1.2
+
+TARGET SECTION HEADING
+12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION
+
+SECTION TASK
+- Draft only section 12.1.2.
+- Start with one complete summary table unless the evidence requires a brief qualifier.
+- Prefer prospectus-style headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025 when the mapping is exact.
+- If prospectus-style headers are used, place RM'000 in a separate unit row.
+- Include all supported line items in evidence order.
+- Keep current and non-current classifications exactly as disclosed.
+- Preserve assets, equity, and liabilities structure exactly as supported.
+
+DO NOT
+- Do not output unlabeled subtotal-only rows.
+- Do not keep a row cluster if the parent heading is missing from selected evidence.
+- Do not relabel the section.
+- Do not interpret solvency, capital strength, or movements.
+- Do not continue into section 12.1.3.
+
+OUTPUT SHAPE
+- One complete markdown table.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.1.3
+
+TARGET SECTION HEADING
+12.1.3 CONSOLIDATED STATEMENTS OF CASH FLOWS
+
+SECTION TASK
+- Draft only section 12.1.3.
+- Start with one complete summary table unless the evidence requires a brief qualifier.
+- Include all supported operating, investing, and financing cash flow rows.
+- Include current and comparative FPE if both are disclosed.
+- Include opening and closing cash balance rows only if disclosed.
+
+DO NOT
+- Do not explain movements or causes.
+- Do not continue into section 12.2.
+
+OUTPUT SHAPE
+- One complete markdown table.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.2
+
+TARGET SECTION HEADING
+12.2 CAPITALISATION AND INDEBTEDNESS
+
+SECTION TASK
+- Draft only section 12.2.
+- Start with one complete summary table unless the evidence requires a brief qualifier.
+- State the basis date and status only where disclosed.
+- Preserve pro forma, adjusted, post-transaction, and note labels exactly as disclosed.
+- Include all supported line items, columns, subtotals, and totals in evidence order.
+
+DO NOT
+- Do not calculate totals, gearing, net debt, or post-issue values.
+- Do not explain capital structure implications.
+- Do not continue into section 12.3.
+
+OUTPUT SHAPE
+- One complete markdown table.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3
+
+TARGET SECTION HEADING
+12.3 MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+SECTION TASK
+- Draft only section 12.3 as the chapter introduction.
+- Use short prospectus-style narrative only.
+- State that the discussion should be read together with the historical financial information and the Accountants' Report only where disclosed.
+
+DO NOT
+- Do not include subsection analysis.
+- Do not include tables.
+- Do not use unsupported introductory boilerplate.
+- Do not continue into section 12.3.1.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.1
+
+TARGET SECTION HEADING
+12.3.1 OVERVIEW OF OUR BUSINESS
+
+SECTION TASK
+- Draft only section 12.3.1.
+- Use neutral prospectus-style narrative.
+- Describe principal activities, business model, segments, projects, markets, geography, or scope only where disclosed.
+
+DO NOT
+- Do not use promotional wording.
+- Do not analyse financial performance.
+- Do not continue into section 12.3.2.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.2
+
+TARGET SECTION HEADING
+12.3.2 SIGNIFICANT FACTORS MATERIALLY AFFECTING OUR OPERATIONS AND FINANCIAL RESULTS
+
+SECTION TASK
+- Draft only section 12.3.2.
+- Include only factors expressly disclosed as affecting operations or financial results.
+- Preserve evidence order and emphasis where practical.
+
+DO NOT
+- Do not generalise business or macro risks.
+- Do not quantify impacts unless disclosed.
+- Do not continue into section 12.3.3.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.3
+
+TARGET SECTION HEADING
+12.3.3 OVERVIEW OF OUR RESULTS OF OPERATIONS
+
+SECTION TASK
+- Draft only section 12.3.3.
+- Start with general results-of-operations discussion.
+- Then move to segment, category, customer, project, or geography only where supported.
+- Prefer disclosed drivers, composition, and basis commentary over bare increase/decrease wording.
+
+DO NOT
+- Do not calculate growth, CAGR, margins, or derived metrics.
+- Do not continue into section 12.3.4.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.4
+
+TARGET SECTION HEADING
+12.3.4 REVENUE
+
+SECTION TASK
+- Draft only section 12.3.4.
+- Start with general revenue discussion.
+- Then move to segment, category, customer, or geography only where supported.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not invent splits, drivers, or comparisons.
+- Do not continue into section 12.3.5.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.5
+
+TARGET SECTION HEADING
+12.3.5 COST OF SALES
+
+SECTION TASK
+- Draft only section 12.3.5.
+- Start with general cost-of-sales discussion.
+- Then move to components or breakdowns only where supported.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not invent components, comparisons, or reasons.
+- Do not continue into section 12.3.6.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.6
+
+TARGET SECTION HEADING
+12.3.6 GP AND GP MARGIN
+
+SECTION TASK
+- Draft only section 12.3.6.
+- Discuss GP and GP margin only where disclosed.
+- Start with general GP discussion, then move to breakdowns only where supported.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not calculate margins.
+- Do not continue into section 12.3.7.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.7
+
+TARGET SECTION HEADING
+12.3.7 OTHER INCOME
+
+SECTION TASK
+- Draft only section 12.3.7.
+- Discuss composition and narrative only where disclosed.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not invent categories or explanations.
+- Do not continue into section 12.3.8.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.8
+
+TARGET SECTION HEADING
+12.3.8 ADMINISTRATIVE EXPENSES
+
+SECTION TASK
+- Draft only section 12.3.8.
+- Discuss composition and narrative only where disclosed.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not invent categories or explanations.
+- Do not continue into section 12.3.9.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.9
+
+TARGET SECTION HEADING
+12.3.9 SELLING AND DISTRIBUTION EXPENSES
+
+SECTION TASK
+- Draft only section 12.3.9.
+- Discuss composition and narrative only where disclosed.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not invent categories or explanations.
+- Do not continue into section 12.3.10.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.10
+
+TARGET SECTION HEADING
+12.3.10 OTHER EXPENSES AND IMPAIRMENT LOSS ON FINANCIAL ASSETS
+
+SECTION TASK
+- Draft only section 12.3.10.
+- Keep impairment terminology exactly as disclosed.
+- Discuss composition or narrative only where disclosed.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not invent categories, reversals, or explanations.
+- Do not continue into section 12.3.11.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.11
+
+TARGET SECTION HEADING
+12.3.11 FINANCE COSTS
+
+SECTION TASK
+- Draft only section 12.3.11.
+- Discuss finance-cost composition or narrative only where disclosed.
+- Include comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not invent borrowing items or explanations.
+- Do not continue into section 12.3.12.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.3.12
+
+TARGET SECTION HEADING
+12.3.12 PBT, PAT AND EFFECTIVE TAX RATE
+
+SECTION TASK
+- Draft only section 12.3.12.
+- Discuss PBT, PAT, and effective tax rate only where disclosed.
+- Include tax notes or comparison paragraphs only where expressly supported.
+
+DO NOT
+- Do not calculate effective tax rate.
+- Do not continue into section 12.4.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.4
+
+TARGET SECTION HEADING
+12.4 LIQUIDITY AND CAPITAL RESOURCES
+
+SECTION TASK
+- Draft only section 12.4 as the chapter introduction.
+- Use short prospectus-style narrative only.
+- State the reading reference only where disclosed.
+
+DO NOT
+- Do not include tables.
+- Do not use unsupported working-capital sufficiency or LPD boilerplate.
+- Do not continue into section 12.4.1.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.4.1
+
+TARGET SECTION HEADING
+12.4.1 WORKING CAPITAL
+
+SECTION TASK
+- Draft only section 12.4.1.
+- Use narrative unless the evidence clearly supports a necessary table.
+- Discuss working capital, funding sources, facilities, or sufficiency only where disclosed.
+- Preserve basis dates, LPD references, pro forma qualifiers, and time-qualified sufficiency statements exactly as disclosed.
+
+DO NOT
+- Do not infer any 12-month sufficiency statement.
+- Do not calculate working capital or gearing.
+- Do not continue into section 12.4.2.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.4.2
+
+TARGET SECTION HEADING
+12.4.2 CASH FLOW
+
+SECTION TASK
+- Draft only section 12.4.2.
+- Start with one complete summary cash flow table.
+- Include both current and comparative FPE if both are disclosed.
+- After the table, include operating, investing, and financing cash flow narrative only where the evidence expressly provides the explanation.
+
+DO NOT
+- Do not invent comparison paragraphs or explanations.
+- Do not continue into section 12.4.3.
+
+OUTPUT SHAPE
+- One complete markdown table first.
+- Then short supported narrative only where expressly disclosed.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.4.3
+
+TARGET SECTION HEADING
+12.4.3 BANK BORROWINGS
+
+SECTION TASK
+- Draft only section 12.4.3.
+- Use a table where the evidence supports a borrowing table.
+- Follow with short narrative only where needed and supported.
+- Preserve basis date, borrowing labels, facility types, security, repayment profile, tenure, and interest basis exactly as disclosed.
+
+DO NOT
+- Do not invent facility details or explanations.
+- Do not continue into section 12.5.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.5
+
+TARGET SECTION HEADING
+12.5 FINANCIAL INSTRUMENTS, TREASURY POLICIES AND OBJECTIVES
+
+SECTION TASK
+- Draft only section 12.5.
+- Discuss policies, instruments, exposures, or objectives only where disclosed.
+
+DO NOT
+- Do not invent treasury or hedging policies.
+- Do not continue into section 12.6.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.6
+
+TARGET SECTION HEADING
+12.6 MATERIAL COMMITMENT FOR CAPITAL EXPENDITURE
+
+SECTION TASK
+- Draft only section 12.6.
+- Discuss commitments, amounts, categories, timelines, and funding sources only where disclosed.
+- Use a table only where the evidence supports it.
+
+DO NOT
+- Do not invent commitments or funding allocations.
+- Do not continue into section 12.7.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.8
+
+TARGET SECTION HEADING
+12.8 KEY FINANCIAL RATIOS
+
+SECTION TASK
+- Draft only section 12.8.
+- Start with one short framing paragraph.
+- Then present one main ratio table where supported.
+- Add supporting turnover or ageing tables only where expressly supported.
+- Preserve ratio names, formula notes, period labels, and ordering exactly as disclosed.
+
+DO NOT
+- Do not calculate new ratios.
+- Do not continue into section 12.9.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+--- 12.9
+
+TARGET SECTION HEADING
+12.9 IMPACT OF INTEREST RATES, COMMODITY PRICES AND/OR FOREIGN EXCHANGE
+
+SECTION TASK
+- Draft only section 12.9.
+- Discuss exposures, immateriality, pricing dependencies, or sensitivities only where disclosed.
+
+DO NOT
+- Do not invent exposures or scenario analysis.
+- Do not continue into section 12.10.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
