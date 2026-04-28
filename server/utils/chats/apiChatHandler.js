@@ -30,6 +30,11 @@ const {
 const {
   isStyleReferenceSource,
 } = require("../evidence/formatStyleReferenceSnippets");
+
+function logIpoPromptDebug(label, payload = {}) {
+  if (!process.env.DEBUG_IPO_PROMPT_INJECTION) return;
+  console.log(`[IPO DEBUG] ${label}`, payload);
+}
 /**
  * @typedef ResponseObject
  * @property {string} id - uuid of response
@@ -420,6 +425,13 @@ async function chatSync({
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
     contextTexts = [];
+    logIpoPromptDebug("apiChatHandler.chatSync", {
+      workspace: workspace?.slug,
+      factualSources: factualSources.length,
+      evidencePreview: String(promptBlocks?.evidenceBlock || "").slice(0, 2000),
+      updatedMessagePreview: String(updatedMessage || "").slice(0, 2500),
+      contextTextsCleared: contextTexts.length === 0,
+    });
   }
 
   // Compress & Assemble message to ensure prompt passes token limit with room for response
@@ -809,6 +821,13 @@ async function streamChat({
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
     contextTexts = [];
+    logIpoPromptDebug("apiChatHandler.streamChat", {
+      workspace: workspace?.slug,
+      factualSources: factualSources.length,
+      evidencePreview: String(promptBlocks?.evidenceBlock || "").slice(0, 2000),
+      updatedMessagePreview: String(updatedMessage || "").slice(0, 2500),
+      contextTextsCleared: contextTexts.length === 0,
+    });
   }
 
   // Compress & Assemble message to ensure prompt passes token limit with room for response

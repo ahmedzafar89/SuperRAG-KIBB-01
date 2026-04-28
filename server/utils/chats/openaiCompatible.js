@@ -19,6 +19,11 @@ const {
 
 const { PassThrough } = require("stream");
 
+function logIpoPromptDebug(label, payload = {}) {
+  if (!process.env.DEBUG_IPO_PROMPT_INJECTION) return;
+  console.log(`[IPO DEBUG] ${label}`, payload);
+}
+
 async function chatSync({
   workspace,
   systemPrompt = null,
@@ -191,6 +196,13 @@ async function chatSync({
     sources = factualSources;
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
     contextTexts = [];
+    logIpoPromptDebug("openaiCompatible.chatSync", {
+      workspace: workspace?.slug,
+      factualSources: factualSources.length,
+      evidencePreview: String(promptBlocks?.evidenceBlock || "").slice(0, 2000),
+      updatedPromptPreview: String(updatedPrompt || "").slice(0, 2500),
+      contextTextsCleared: contextTexts.length === 0,
+    });
   }
 
   // Compress & Assemble message to ensure prompt passes token limit with room for response
@@ -456,6 +468,13 @@ async function streamChat({
     sources = factualSources;
     updatedPrompt = injectIpoPromptBlocks(updatedPrompt, promptBlocks);
     contextTexts = [];
+    logIpoPromptDebug("openaiCompatible.streamChat", {
+      workspace: workspace?.slug,
+      factualSources: factualSources.length,
+      evidencePreview: String(promptBlocks?.evidenceBlock || "").slice(0, 2000),
+      updatedPromptPreview: String(updatedPrompt || "").slice(0, 2500),
+      contextTextsCleared: contextTexts.length === 0,
+    });
   }
 
   // Compress & Assemble message to ensure prompt passes token limit with room for response

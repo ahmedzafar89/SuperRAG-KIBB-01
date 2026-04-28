@@ -19,6 +19,11 @@ const {
   isStyleReferenceSource,
 } = require("../evidence/formatStyleReferenceSnippets");
 
+function logIpoPromptDebug(label, payload = {}) {
+  if (!process.env.DEBUG_IPO_PROMPT_INJECTION) return;
+  console.log(`[IPO DEBUG] ${label}`, payload);
+}
+
 async function streamChatWithForEmbed(
   response,
   /** @type {import("@prisma/client").embed_configs & {workspace?: import("@prisma/client").workspaces}} */
@@ -188,6 +193,13 @@ async function streamChatWithForEmbed(
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
     contextTexts = [];
+    logIpoPromptDebug("embed.streamChatWithForEmbed", {
+      workspace: embed?.workspace?.slug,
+      factualSources: factualSources.length,
+      evidencePreview: String(promptBlocks?.evidenceBlock || "").slice(0, 2000),
+      updatedMessagePreview: String(updatedMessage || "").slice(0, 2500),
+      contextTextsCleared: contextTexts.length === 0,
+    });
   }
 
   // Compress message to ensure prompt passes token limit with room for response

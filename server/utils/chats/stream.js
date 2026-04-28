@@ -25,6 +25,11 @@ const {
   isStyleReferenceSource,
 } = require("../evidence/formatStyleReferenceSnippets");
 
+function logIpoPromptDebug(label, payload = {}) {
+  if (!process.env.DEBUG_IPO_PROMPT_INJECTION) return;
+  console.log(`[IPO DEBUG] ${label}`, payload);
+}
+
 const VALID_CHAT_MODE = ["chat", "query"];
 
 async function streamChatWithWorkspace(
@@ -279,6 +284,14 @@ async function streamChatWithWorkspace(
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
     contextTexts = [];
+    logIpoPromptDebug("streamChatWithWorkspace", {
+      workspace: workspace?.slug,
+      factualSources: factualSources.length,
+      evidencePreview: String(promptBlocks?.evidenceBlock || "").slice(0, 2000),
+      stylePreview: String(promptBlocks?.styleBlock || "").slice(0, 800),
+      updatedMessagePreview: String(updatedMessage || "").slice(0, 2500),
+      contextTextsCleared: contextTexts.length === 0,
+    });
   }
 
   const systemPrompt = await chatPrompt(workspace, user);
