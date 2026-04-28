@@ -24,6 +24,28 @@ function cleanText(txt = "") {
     .trim();
 }
 
+function normalizeSource(source = {}) {
+  const metadata =
+    source && source.metadata && typeof source.metadata === "object"
+      ? source.metadata
+      : {};
+  const merged = { ...metadata, ...source };
+  delete merged.metadata;
+  const text = cleanText(
+    source.text ||
+      source.pageContent ||
+      metadata.text ||
+      metadata.pageContent ||
+      ""
+  );
+
+  return {
+    ...merged,
+    text,
+    __cleanText: text,
+  };
+}
+
 function sanitizeStyleReferenceText(txt = "") {
   return cleanText(txt)
     .replace(/\u00a0/g, " ")
@@ -68,29 +90,123 @@ function refLine(source = {}) {
     source.chunk_row_start && source.chunk_row_end
       ? `rows:${source.chunk_row_start}-${source.chunk_row_end}`
       : null;
+  const page = source.page_number ? `page:${source.page_number}` : null;
+  const section = source.source_section
+    ? `section:${source.source_section}`
+    : null;
 
-  const loc = [sheet, table, rows].filter(Boolean).join(", ");
+  const loc = [sheet, table, rows, page, section].filter(Boolean).join(", ");
   return `[Style reference | ${loc || "section: n/a"}]`;
 }
 
+function normalizeTerms(text = "") {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/^\s*\d+(?:\.\d+)*\s+/, "")
+    .replace(/\b(?:consolidated|combined|our|group|section|statements?|of|and|the)\b/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function lineStartIndexes(text = "") {
+  const lines = String(text || "").split(/\r?\n/);
+  const indexed = [];
+  let cursor = 0;
+  for (const line of lines) {
+    indexed.push({ line, index: cursor });
+    cursor += line.length + 1;
+  }
+  return indexed;
+}
+
+function scoreHeadingLine(line = "", promptContext = {}) {
+  if (!/^\s*\d{1,2}(?:\.\d+){0,3}\s+/.test(line)) return 0;
+
+  const targetTerms = new Set(normalizeTerms(promptContext.heading));
+  const lineTerms = new Set(normalizeTerms(line));
+  let overlap = 0;
+  for (const term of targetTerms) {
+    if (lineTerms.has(term)) overlap += 1;
+  }
+
+  const targetSuffix = (promptContext.sectionNumber || "")
+    .split(".")
+    .slice(1)
+    .join(".");
+  const sourceSuffix = (line.match(/^\s*\d{1,2}((?:\.\d+){0,3})/)?.[1] || "")
+    .replace(/^\./, "");
+  if (targetSuffix && sourceSuffix === targetSuffix) overlap += 2;
+
+  return overlap;
+}
+
+function extractRelevantStyleText(source = {}, promptContext = {}, maxChars = 1200) {
+  const text = cleanText(source.text || "");
+  if (!text || !promptContext?.heading) return text;
+
+  const indexedLines = lineStartIndexes(text);
+  const scored = indexedLines
+    .map(({ line, index }) => ({
+      line,
+      index,
+      score: scoreHeadingLine(line, promptContext),
+    }))
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.index - b.index);
+
+  if (!scored.length) return text;
+
+  const start = scored[0].index;
+  const nextHeading = indexedLines.find(
+    ({ index, line }) =>
+      index > start && /^\s*\d{1,2}(?:\.\d+){0,3}\s+/.test(line)
+  );
+  const end = nextHeading ? nextHeading.index : start + maxChars;
+  return text.slice(start, Math.min(end, start + maxChars * 2)).trim();
+}
+
 function formatStyleReferenceSnippets(sources = [], opts = {}) {
-  const { maxSnippets = 3, maxCharsPerSnippet = 1200 } = opts;
+  const {
+    maxSnippets = 3,
+    maxCharsPerSnippet = 1200,
+    promptContext = null,
+  } = opts;
+
+  const candidates = (Array.isArray(sources) ? sources : [])
+    .map(normalizeSource)
+    .filter((source) => source.__cleanText && isStyleReferenceSource(source))
+    .map((source) => {
+      const relevantText = extractRelevantStyleText(
+        source,
+        promptContext,
+        maxCharsPerSnippet
+      );
+      return {
+        ...source,
+        __relevantText: relevantText,
+        __score: promptContext
+          ? scoreHeadingLine(relevantText.split(/\r?\n/)[0] || "", promptContext)
+          : 0,
+      };
+    })
+    .sort((a, b) => b.__score - a.__score);
+
   const picked = [];
   const seen = new Set();
-
-  for (const source of Array.isArray(sources) ? sources : []) {
-    const text = cleanText(source?.text);
-    if (!text || !isStyleReferenceSource(source)) continue;
-
-    const key = styleReferenceKey(source).toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-
+  for (const source of candidates) {
+    const locationKey = [
+      styleReferenceKey(source).toLowerCase(),
+      source.page_number || "",
+      source.source_section || "",
+      source.__relevantText.slice(0, 120).toLowerCase(),
+    ].join("|");
+    if (seen.has(locationKey)) continue;
+    seen.add(locationKey);
     picked.push({
       ...source,
-      __cleanText: sanitizeStyleReferenceText(text),
+      __cleanText: sanitizeStyleReferenceText(source.__relevantText),
     });
-
     if (picked.length >= maxSnippets) break;
   }
 
@@ -104,6 +220,8 @@ function formatStyleReferenceSnippets(sources = [], opts = {}) {
 
 module.exports = {
   STYLE_REFERENCE_PREFIX,
+  cleanText,
+  extractRelevantStyleText,
   isStyleReferenceSource,
   sanitizeStyleReferenceText,
   styleReferenceKey,

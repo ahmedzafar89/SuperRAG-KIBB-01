@@ -23,10 +23,16 @@ function extractIpoPromptContext(promptText = "") {
     "12.8",
   ]);
   const comparativeFpeSections = new Set(["12.1.3", "12.4.2"]);
+  const proFormaAllowedSections = new Set(["12.2"]);
   const keywordMap = {
     "12.1.1": [
       "profit or loss",
       "other comprehensive income",
+      "revenue",
+      "cost of sales",
+      "gross profit",
+      "profit before tax",
+      "profit after tax",
       "ebitda",
       "earnings per share",
       "eps",
@@ -40,7 +46,13 @@ function extractIpoPromptContext(promptText = "") {
       "financing activities",
       "cash and cash equivalents",
     ],
-    "12.2": ["capitalisation", "indebtedness", "capitalisation and indebtedness"],
+    "12.2": [
+      "capitalisation",
+      "indebtedness",
+      "capitalisation and indebtedness",
+      "pro forma",
+      "public issue",
+    ],
     "12.3.4": ["revenue", "segment", "geographical"],
     "12.3.5": ["cost of sales", "cost", "project-related costs"],
     "12.3.6": ["gross profit", "gp margin", "gross profit margin"],
@@ -49,7 +61,12 @@ function extractIpoPromptContext(promptText = "") {
     "12.3.9": ["selling", "distribution", "marketing", "commission"],
     "12.3.10": ["other expenses", "impairment", "financial assets"],
     "12.3.11": ["finance costs", "interest", "borrowings"],
-    "12.3.12": ["profit before tax", "profit after tax", "effective tax rate", "tax"],
+    "12.3.12": [
+      "profit before tax",
+      "profit after tax",
+      "effective tax rate",
+      "tax",
+    ],
     "12.4.2": [
       "cash flow",
       "cash flows",
@@ -57,7 +74,14 @@ function extractIpoPromptContext(promptText = "") {
       "investing activities",
       "financing activities",
     ],
-    "12.8": ["ratio", "ratios", "turnover", "ageing", "formula", "effective tax rate"],
+    "12.8": [
+      "ratio",
+      "ratios",
+      "turnover",
+      "ageing",
+      "formula",
+      "effective tax rate",
+    ],
   };
   const headingTerms = heading
     .toLowerCase()
@@ -74,7 +98,10 @@ function extractIpoPromptContext(promptText = "") {
           "the",
           "information",
           "statements",
+          "statement",
           "section",
+          "consolidated",
+          "combined",
         ].includes(term)
     );
   const keywords = Array.from(
@@ -88,8 +115,269 @@ function extractIpoPromptContext(promptText = "") {
     tableHeavy: tableHeavySections.has(sectionNumber),
     includeNotes: noteHeavySections.has(sectionNumber),
     includeComparativeFpe: comparativeFpeSections.has(sectionNumber),
-    adjacentRowWindow: tableHeavySections.has(sectionNumber) ? 24 : 12,
+    proFormaAllowed: proFormaAllowedSections.has(sectionNumber),
+    adjacentPageWindow: tableHeavySections.has(sectionNumber) ? 2 : 1,
+    adjacentRowWindow: tableHeavySections.has(sectionNumber) ? 40 : 12,
   };
+}
+
+function cleanText(txt = "") {
+  return String(txt || "")
+    .replace(/<document_metadata>[\s\S]*?<\/document_metadata>\s*/g, "")
+    .replace(/\s+\n/g, "\n")
+    .trim();
+}
+
+function normalizeSource(source = {}) {
+  const metadata =
+    source && source.metadata && typeof source.metadata === "object"
+      ? source.metadata
+      : {};
+  const merged = { ...metadata, ...source };
+  delete merged.metadata;
+  const text = cleanText(
+    source.text ||
+      source.pageContent ||
+      metadata.text ||
+      metadata.pageContent ||
+      ""
+  );
+
+  return {
+    ...merged,
+    text,
+    __cleanText: text,
+  };
+}
+
+function sourceDocKey(source = {}) {
+  return (
+    source.sourceDocument ||
+    source.docTitle ||
+    source.title ||
+    source.filename ||
+    source.docSource ||
+    source.url ||
+    ""
+  )
+    .toString()
+    .trim()
+    .toLowerCase();
+}
+
+function sourceSectionKey(source = {}) {
+  return (source.source_section || source.section || "")
+    .toString()
+    .trim()
+    .toLowerCase();
+}
+
+function isAccountantReportSource(source = {}) {
+  const key = sourceDocKey(source);
+  return key.includes("accountant") || key.includes("accountants");
+}
+
+function hasProFormaSignals(text = "") {
+  return /pro\s*forma|public issue|utilisation of proceeds|after pro\s*forma|compilation of pro\s*forma/i.test(
+    text
+  );
+}
+
+function countDateRows(text = "") {
+  const matches = cleanText(text).match(/^\|\s*\d{4}-\d{2}-\d{2}\s*\|/gm);
+  return matches ? matches.length : 0;
+}
+
+function isLikelyTransactionDump(source = {}, minDateRowsToFlag = 3) {
+  const text = source?.text || "";
+  const hits = countDateRows(text);
+  const cols = Array.isArray(source.columns)
+    ? source.columns.join(" | ").toLowerCase()
+    : "";
+  const headerSignals =
+    cols.includes("post date") ||
+    cols.includes("invoice") ||
+    cols.includes("receipt") ||
+    cols.includes("transaction") ||
+    cols.includes("date");
+
+  return hits >= minDateRowsToFlag || headerSignals;
+}
+
+function hasTableMetadata(source = {}) {
+  return Boolean(
+    source?.sheet ||
+      source?.table_index ||
+      source?.table_candidate ||
+      source?.page_number ||
+      (source?.chunk_row_start && source?.chunk_row_end) ||
+      (Array.isArray(source?.columns) && source.columns.length > 0)
+  );
+}
+
+function hasNoteSignals(text = "") {
+  return /(^|\b)(note|notes|formula|annualis|annualiz|audited|unaudited|earnings per share|effective tax rate|comprise|comprised of)\b/i.test(
+    text
+  );
+}
+
+function hasComparativePeriodSignals(text = "") {
+  return /(fpe|financial period ended|comparative period|corresponding period)/i.test(
+    text
+  );
+}
+
+function sourceLocationKey(source = {}) {
+  const doc = sourceDocKey(source);
+  const sheet = (source.sheet || "").toString().trim().toLowerCase();
+  const table = (source.table_index || "").toString().trim().toLowerCase();
+  const rows =
+    source.chunk_row_start && source.chunk_row_end
+      ? `${source.chunk_row_start}-${source.chunk_row_end}`
+      : "";
+  const page = source.page_number ? `p${source.page_number}` : "";
+
+  if (doc || sheet || table || rows || page) {
+    return `loc:${doc}|${sheet}|${table}|${rows}|${page}`;
+  }
+
+  return `txt:${source.__cleanText
+    .replace(/\s+/g, " ")
+    .slice(0, 250)
+    .toLowerCase()}`;
+}
+
+function sourceGroupKey(source = {}) {
+  return `grp:${sourceDocKey(source)}|${(source.sheet || "")
+    .toString()
+    .trim()
+    .toLowerCase()}|${(source.table_index || "")
+    .toString()
+    .trim()
+    .toLowerCase()}|${sourceSectionKey(source)}`;
+}
+
+function rowDistance(a, b) {
+  const aStart = Number(a.chunk_row_start);
+  const aEnd = Number(a.chunk_row_end);
+  const bStart = Number(b.chunk_row_start);
+  const bEnd = Number(b.chunk_row_end);
+
+  if (![aStart, aEnd, bStart, bEnd].every(Number.isFinite)) {
+    return Number.POSITIVE_INFINITY;
+  }
+  if (aEnd >= bStart && bEnd >= aStart) return 0;
+  if (aEnd < bStart) return bStart - aEnd;
+  return aStart - bEnd;
+}
+
+function pageDistance(a, b) {
+  const aPage = Number(a.page_number);
+  const bPage = Number(b.page_number);
+  if (![aPage, bPage].every(Number.isFinite)) return Number.POSITIVE_INFINITY;
+  return Math.abs(aPage - bPage);
+}
+
+function refLine(source = {}) {
+  const doc =
+    source.sourceDocument ||
+    source.docTitle ||
+    source.title ||
+    source.filename ||
+    source.docSource ||
+    "Unknown document";
+
+  const sheet = source.sheet ? `sheet:${source.sheet}` : null;
+  const table = source.table_index ? `table:${source.table_index}` : null;
+  const rows =
+    source.chunk_row_start && source.chunk_row_end
+      ? `rows:${source.chunk_row_start}-${source.chunk_row_end}`
+      : null;
+  const page = source.page_number ? `page:${source.page_number}` : null;
+  const section = source.source_section
+    ? `section:${source.source_section}`
+    : null;
+
+  const loc = [sheet, table, rows, page, section].filter(Boolean).join(", ");
+  return `[${doc} | ${loc || "section: n/a"}]`;
+}
+
+function scoreSource(source, promptContext, hardExcludeTransactions) {
+  const sheet = (source.sheet || "").toLowerCase();
+  const title = (source.title || source.docTitle || "").toLowerCase();
+  const sourceSection = sourceSectionKey(source);
+  const cols = Array.isArray(source.columns)
+    ? source.columns.join(" | ").toLowerCase()
+    : "";
+  const text = cleanText(source.text || "").toLowerCase();
+  const combined = `${sheet} ${title} ${sourceSection} ${cols} ${text}`;
+
+  let score = typeof source.score === "number" ? source.score : 0;
+
+  if (isAccountantReportSource(source)) score += 0.24;
+  if (promptContext.tableHeavy && hasTableMetadata(source)) score += 0.2;
+  if (source.table_candidate) score += 0.12;
+  if (sourceSection && promptContext.heading.toLowerCase().includes(sourceSection)) {
+    score += 0.15;
+  }
+
+  if (sheet.includes("revenue") || title.includes("revenue")) score += 0.15;
+  if (
+    sheet.includes("cos") ||
+    title.includes("cost of sales") ||
+    title.includes("cos")
+  )
+    score += 0.15;
+  if (sheet.includes("gross") || title.includes("gross")) score += 0.12;
+  if (sheet.includes("profit") || title.includes("profit")) score += 0.08;
+  if (sheet.includes("margin") || title.includes("margin")) score += 0.06;
+  if (text.includes("fy202") || text.includes("fye")) score += 0.08;
+  if (cols.includes("revenue") || cols.includes("cost") || cols.includes("gross")) {
+    score += 0.06;
+  }
+  if (promptContext.includeComparativeFpe && hasComparativePeriodSignals(text)) {
+    score += 0.16;
+  }
+  if (promptContext.includeNotes && hasNoteSignals(text)) score += 0.12;
+
+  for (const keyword of promptContext.keywords) {
+    if (!keyword) continue;
+    if (combined.includes(keyword)) score += 0.05;
+  }
+
+  if (!promptContext.proFormaAllowed && hasProFormaSignals(text)) score -= 1.25;
+  if (promptContext.proFormaAllowed && hasProFormaSignals(text)) score += 0.35;
+
+  const tx = isLikelyTransactionDump(source);
+  if (tx) score -= hardExcludeTransactions ? 10 : 0.25;
+  if (cleanText(source.text || "").length < 120) score -= 0.05;
+
+  return score;
+}
+
+function isHelpfulCompanion(anchor, candidate, promptContext) {
+  if (sourceDocKey(anchor) !== sourceDocKey(candidate)) return false;
+  if (sourceGroupKey(anchor) === sourceGroupKey(candidate)) {
+    if (rowDistance(anchor, candidate) <= promptContext.adjacentRowWindow) {
+      return true;
+    }
+    if (pageDistance(anchor, candidate) <= promptContext.adjacentPageWindow) {
+      return true;
+    }
+  }
+
+  if (
+    sourceSectionKey(anchor) &&
+    sourceSectionKey(anchor) === sourceSectionKey(candidate)
+  ) {
+    return true;
+  }
+
+  const text = candidate.__cleanText;
+  return (
+    (promptContext.includeComparativeFpe && hasComparativePeriodSignals(text)) ||
+    (promptContext.includeNotes && hasNoteSignals(text))
+  );
 }
 
 function formatEvidenceSnippets(sources = [], opts = {}) {
@@ -97,202 +385,47 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     maxSnippets = 12,
     maxCharsPerSnippet = 1800,
     promptText = "",
-
-    // Finance-grade defaults:
-    allowTransactions = false,          // keep raw transaction row chunks OUT by default
-    minDateRowsToFlag = 3,              // how many date-like rows means "transaction dump"
-    hardExcludeTransactions = true,     // if true, exclude; else just downscore
+    promptContext: suppliedPromptContext = null,
+    allowTransactions = false,
+    minDateRowsToFlag = 3,
+    hardExcludeTransactions = true,
   } = opts;
-  const promptContext = extractIpoPromptContext(promptText);
+  const promptContext =
+    suppliedPromptContext || extractIpoPromptContext(promptText);
 
-  const cleanText = (txt = "") =>
-    String(txt || "")
-      // remove AnythingLLM / TextSplitter metadata wrappers
-      .replace(/<document_metadata>[\s\S]*?<\/document_metadata>\s*/g, "")
-      .replace(/\s+\n/g, "\n")
-      .trim();
-
-  // Detect transaction-like chunks: markdown rows that start with a date in first column.
-  function countDateRows(text) {
-    // matches lines like: | 2023-05-12 | ...
-    const matches = cleanText(text).match(/^\|\s*\d{4}-\d{2}-\d{2}\s*\|/gm);
-    return matches ? matches.length : 0;
-  }
-
-  function isLikelyTransactionDump(s) {
-    const text = s?.text || "";
-    const hits = countDateRows(text);
-
-    // also catch if header column names exist (when present)
-    const cols = Array.isArray(s.columns) ? s.columns.join(" | ").toLowerCase() : "";
-    const headerSignals =
-      cols.includes("post date") ||
-      cols.includes("invoice") ||
-      cols.includes("receipt") ||
-      cols.includes("transaction") ||
-      cols.includes("date");
-
-    return hits >= minDateRowsToFlag || headerSignals;
-  }
-
-  function hasTableMetadata(s) {
-    return Boolean(
-      s?.sheet ||
-        s?.table_index ||
-        (s?.chunk_row_start && s?.chunk_row_end) ||
-        (Array.isArray(s?.columns) && s.columns.length > 0)
-    );
-  }
-
-  function hasNoteSignals(text = "") {
-    return /(^|\b)(note|notes|formula|annualis|annualiz|audited|unaudited|earnings per share|effective tax rate|comprise|comprised of)\b/i.test(
-      text
-    );
-  }
-
-  function hasComparativePeriodSignals(text = "") {
-    return /(fpe|financial period ended|comparative period|corresponding period)/i.test(
-      text
-    );
-  }
-
-  function scoreSource(s) {
-    const sheet = (s.sheet || "").toLowerCase();
-    const title = (s.title || s.docTitle || "").toLowerCase();
-    const cols = Array.isArray(s.columns) ? s.columns.join(" | ").toLowerCase() : "";
-    const text = cleanText(s.text || "").toLowerCase();
-
-    let score = typeof s.score === "number" ? s.score : 0;
-
-    // Boost statement-style / disclosure-ish tables
-    if (sheet.includes("revenue") || title.includes("revenue")) score += 0.15;
-    if (sheet.includes("cos") || title.includes("cost of sales") || title.includes("cos")) score += 0.15;
-    if (sheet.includes("gross") || title.includes("gross")) score += 0.12;
-    if (sheet.includes("profit") || title.includes("profit")) score += 0.08;
-    if (sheet.includes("margin") || title.includes("margin")) score += 0.06;
-
-    // FY / FYE hints
-    if (text.includes("fy202") || text.includes("fye")) score += 0.08;
-
-    // Column hints
-    if (cols.includes("revenue") || cols.includes("cost") || cols.includes("gross")) score += 0.06;
-
-    if (promptContext.tableHeavy && hasTableMetadata(s)) score += 0.08;
-    if (promptContext.includeComparativeFpe && hasComparativePeriodSignals(text))
-      score += 0.16;
-    if (promptContext.includeNotes && hasNoteSignals(text)) score += 0.12;
-
-    for (const keyword of promptContext.keywords) {
-      if (!keyword) continue;
-      if (sheet.includes(keyword) || title.includes(keyword)) score += 0.05;
-      else if (text.includes(keyword)) score += 0.03;
-    }
-
-    // Penalize transaction dumps (usually not prospectus table evidence)
-    const tx = isLikelyTransactionDump(s);
-    if (tx) score -= hardExcludeTransactions ? 10 : 0.25;
-
-    // Slight penalty if the snippet is extremely short (often just separators/noise)
-    if (cleanText(s.text || "").length < 120) score -= 0.05;
-
-    return score;
-  }
-
-  // 1) Clean + filter empty
   const cleaned = (Array.isArray(sources) ? sources : [])
-    .filter((s) => s && s.text && cleanText(s.text).length > 0)
-    .map((s) => ({ ...s, __cleanText: cleanText(s.text) }));
+    .map(normalizeSource)
+    .filter((source) => source && source.__cleanText.length > 0);
 
-  // 2) Optionally exclude transactions
   const eligible = allowTransactions
     ? cleaned
-    : cleaned.filter((s) => !isLikelyTransactionDump(s));
+    : cleaned.filter(
+        (source) =>
+          !isLikelyTransactionDump(source, minDateRowsToFlag) &&
+          (promptContext.proFormaAllowed || !hasProFormaSignals(source.__cleanText))
+      );
 
-  // 3) Rank
-  const ranked = [...eligible].sort((a, b) => scoreSource(b) - scoreSource(a));
-
-  // 4) Dedupe
-  const seen = new Set();
-  const picked = [];
-
-  function sourceDocKey(s) {
+  const ranked = [...eligible].sort((a, b) => {
     return (
-      s.sourceDocument ||
-      s.docTitle ||
-      s.title ||
-      s.filename ||
-      s.docSource ||
-      s.url ||
-      ""
-    )
-      .toString()
-      .trim()
-      .toLowerCase();
-  }
-
-  function sourceLocationKey(s) {
-    const doc = sourceDocKey(s);
-    const sheet = (s.sheet || "").toString().trim().toLowerCase();
-    const table = (s.table_index || "").toString().trim().toLowerCase();
-    const rows =
-      s.chunk_row_start && s.chunk_row_end
-        ? `${s.chunk_row_start}-${s.chunk_row_end}`
-        : "";
-
-    if (doc || sheet || table || rows) {
-      return `loc:${doc}|${sheet}|${table}|${rows}`;
-    }
-
-    // fallback: normalized prefix of text
-    return `txt:${s.__cleanText.replace(/\s+/g, " ").slice(0, 250).toLowerCase()}`;
-  }
-
-  function sourceGroupKey(s) {
-    return `grp:${sourceDocKey(s)}|${(s.sheet || "").toString().trim().toLowerCase()}|${(
-      s.table_index || ""
-    )
-      .toString()
-      .trim()
-      .toLowerCase()}`;
-  }
-
-  function rowDistance(a, b) {
-    const aStart = Number(a.chunk_row_start);
-    const aEnd = Number(a.chunk_row_end);
-    const bStart = Number(b.chunk_row_start);
-    const bEnd = Number(b.chunk_row_end);
-
-    if (![aStart, aEnd, bStart, bEnd].every(Number.isFinite)) return Number.POSITIVE_INFINITY;
-    if (aEnd >= bStart && bEnd >= aStart) return 0;
-    if (aEnd < bStart) return bStart - aEnd;
-    return aStart - bEnd;
-  }
-
-  function isHelpfulCompanion(anchor, candidate) {
-    if (sourceGroupKey(anchor) !== sourceGroupKey(candidate)) return false;
-    const distance = rowDistance(anchor, candidate);
-    if (distance <= promptContext.adjacentRowWindow) return true;
-
-    const text = candidate.__cleanText;
-    return (
-      (promptContext.includeComparativeFpe && hasComparativePeriodSignals(text)) ||
-      (promptContext.includeNotes && hasNoteSignals(text))
+      scoreSource(b, promptContext, hardExcludeTransactions) -
+      scoreSource(a, promptContext, hardExcludeTransactions)
     );
-  }
+  });
 
   const seedLimit = promptContext.tableHeavy
-    ? Math.min(maxSnippets, Math.max(3, Math.ceil(maxSnippets * 0.6)))
+    ? Math.max(1, Math.min(5, Math.ceil(maxSnippets * 0.25)))
     : maxSnippets;
-
   const seeds = [];
-  for (const s of ranked) {
-    const key = sourceLocationKey(s);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    seeds.push(s);
+  const seenSeeds = new Set();
+  for (const source of ranked) {
+    const key = sourceLocationKey(source);
+    if (seenSeeds.has(key)) continue;
+    seenSeeds.add(key);
+    seeds.push(source);
     if (seeds.length >= seedLimit) break;
   }
 
+  const picked = [];
   const chosen = new Set();
   const addPicked = (source) => {
     const key = sourceLocationKey(source);
@@ -308,55 +441,42 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     const companions = ranked
       .filter((candidate) => {
         const key = sourceLocationKey(candidate);
-        return !chosen.has(key) && isHelpfulCompanion(seed, candidate);
+        return !chosen.has(key) && isHelpfulCompanion(seed, candidate, promptContext);
       })
       .sort((a, b) => {
-        const distanceDelta = rowDistance(seed, a) - rowDistance(seed, b);
-        if (distanceDelta !== 0) return distanceDelta;
-        return scoreSource(b) - scoreSource(a);
+        const pageDelta = pageDistance(seed, a) - pageDistance(seed, b);
+        if (pageDelta !== 0 && Number.isFinite(pageDelta)) return pageDelta;
+        const rowDelta = rowDistance(seed, a) - rowDistance(seed, b);
+        if (rowDelta !== 0 && Number.isFinite(rowDelta)) return rowDelta;
+        return (
+          scoreSource(b, promptContext, hardExcludeTransactions) -
+          scoreSource(a, promptContext, hardExcludeTransactions)
+        );
       });
 
-    for (const companion of companions.slice(0, 2)) {
+    const companionLimit = Math.max(2, Math.ceil(maxSnippets / seedLimit) - 1);
+    for (const companion of companions.slice(0, companionLimit)) {
       addPicked(companion);
       if (picked.length >= maxSnippets) break;
     }
   }
 
-  for (const s of ranked) {
+  for (const source of ranked) {
     if (picked.length >= maxSnippets) break;
-    const key = sourceLocationKey(s);
-    if (chosen.has(key)) continue;
-    addPicked(s);
-    if (picked.length >= maxSnippets) break;
-  }
-
-  // 5) Format [doc | sheet/table/rows]
-  function refLine(s) {
-    const doc =
-      s.sourceDocument ||
-      s.docTitle ||
-      s.title ||
-      s.filename ||
-      s.docSource ||
-      "Unknown document";
-
-    const sheet = s.sheet ? `sheet:${s.sheet}` : null;
-    const table = s.table_index ? `table:${s.table_index}` : null;
-    const rows =
-      s.chunk_row_start && s.chunk_row_end
-        ? `rows:${s.chunk_row_start}-${s.chunk_row_end}`
-        : null;
-
-    const loc = [sheet, table, rows].filter(Boolean).join(", ");
-    return `[${doc} | ${loc || "section: n/a"}]`;
+    addPicked(source);
   }
 
   return picked
-    .map((s) => {
-      const txt = s.__cleanText.slice(0, maxCharsPerSnippet);
-      return `${refLine(s)}\n${txt}`;
+    .map((source) => {
+      const txt = source.__cleanText.slice(0, maxCharsPerSnippet);
+      return `${refLine(source)}\n${txt}`;
     })
     .join("\n\n");
 }
 
-module.exports = { extractIpoPromptContext, formatEvidenceSnippets };
+module.exports = {
+  cleanText,
+  extractIpoPromptContext,
+  formatEvidenceSnippets,
+  normalizeSource,
+};

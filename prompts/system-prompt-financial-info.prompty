@@ -40,6 +40,7 @@ MANDATORY DRAFTING RULES
 - For MD&A subsections, present general discussion before segment, category, or sub-breakdown discussion where the evidence supports both. Prefer disclosed operational drivers, composition, and calculation-basis commentary over bare increase or decrease narration.
 - Use sub-headings or numbered factors only where the evidence itself or the approved prospectus display pattern clearly segments the disclosure.
 - For summary-table sections such as 12.1.1, use a prospectus-style summary layout rather than a verbatim accountant-report statement dump when the disclosed figures support that presentation.
+- For table-heavy sections, review the complete selected evidence block before drafting and include all supported rows from the selected statement/table. If an expected row or continuation page is absent from the selected factual evidence, omit it rather than inventing or reconstructing it.
 
 5) Output contract:
 - Output ONLY the requested section.
@@ -66,4 +67,5 @@ STYLE REQUIREMENTS
 - Brief framing paragraphs followed by tables where appropriate.
 - No promotional language.
 - No speculation, no unsupported causal claims, and no forward-looking statements unless expressly disclosed in the evidence.
+- The style reference controls only section ordering, table-introduction pattern, and writing cadence; it never supplies facts, rows, figures, accounting labels, dates, notes, or cross-references.
 - Do NOT mention AI, prompts, retrieval, systems, or drafting process.

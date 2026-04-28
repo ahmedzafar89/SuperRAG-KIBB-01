@@ -156,6 +156,102 @@ describe("financial info evidence formatting", () => {
     expect(context.keywords).toContain("cash flow");
   });
 
+  test.each([
+    ["12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME", "Revenue"],
+    ["12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION", "TOTAL ASSETS"],
+    ["12.1.3 CONSOLIDATED STATEMENTS OF CASH FLOWS", "Net cash generated"],
+    ["12.2 CAPITALISATION AND INDEBTEDNESS", "Total indebtedness"],
+    ["12.4.2 CASH FLOW", "Net cash used"],
+    ["12.8 KEY FINANCIAL RATIOS", "Current ratio"],
+  ])("keeps nearby PDF page companions for %s", (heading, anchorText) => {
+    const sources = [
+      {
+        title: "accountants-report.pdf",
+        filetype: "pdf",
+        page_number: 10,
+        table_candidate: true,
+        source_section: heading,
+        text: `${anchorText}\nFYE 2023 100\nFYE 2024 200\nFYE 2025 300`,
+        score: 0.9,
+      },
+      {
+        title: "accountants-report.pdf",
+        filetype: "pdf",
+        page_number: 11,
+        table_candidate: true,
+        source_section: heading,
+        text: `Continuation page\nSubtotal 400 500 600\nTotal 700 800 900`,
+        score: 0.1,
+      },
+      {
+        title: "unrelated.pdf",
+        filetype: "pdf",
+        page_number: 1,
+        text: "Unrelated high scoring market disclosure.",
+        score: 0.8,
+      },
+    ];
+
+    const block = formatEvidenceSnippets(sources, {
+      maxSnippets: 2,
+      promptText: `TARGET SECTION HEADING\n${heading}`,
+    });
+
+    expect(block).toContain("page:10");
+    expect(block).toContain("page:11");
+    expect(block).toContain("Continuation page");
+    expect(block).not.toContain("Unrelated high scoring market disclosure");
+  });
+
+  test("de-prioritizes pro forma pages for ordinary historical statement sections", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountants-report.pdf",
+          page_number: 30,
+          table_candidate: true,
+          text: "PRO FORMA COMBINED STATEMENTS OF FINANCIAL POSITION\nPublic Issue\nAfter Pro Forma I\nTOTAL ASSETS 999",
+          score: 0.99,
+        },
+        {
+          title: "accountants-report.pdf",
+          page_number: 12,
+          table_candidate: true,
+          text: "CONSOLIDATED STATEMENTS OF FINANCIAL POSITION\nASSETS\nTOTAL ASSETS 100",
+          score: 0.2,
+        },
+      ],
+      {
+        maxSnippets: 1,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION",
+      }
+    );
+
+    expect(block).toContain("TOTAL ASSETS 100");
+    expect(block).not.toContain("TOTAL ASSETS 999");
+  });
+
+  test("allows pro forma pages for capitalisation and indebtedness", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountants-report.pdf",
+          page_number: 30,
+          table_candidate: true,
+          text: "PRO FORMA CAPITALISATION AND INDEBTEDNESS\nPublic Issue\nTotal indebtedness 999",
+          score: 0.2,
+        },
+      ],
+      {
+        maxSnippets: 1,
+        promptText: "TARGET SECTION HEADING\n12.2 CAPITALISATION AND INDEBTEDNESS",
+      }
+    );
+
+    expect(block).toContain("Total indebtedness 999");
+  });
+
   test("sanitizes style reference snippets before injection", () => {
     const styleBlock = formatStyleReferenceSnippets(
       [
@@ -197,6 +293,39 @@ describe("financial info evidence formatting", () => {
 
     expect(blocks.styleBlock).toContain("[DATE]");
     expect(blocks.styleBlock).not.toContain("30 June 2024");
+  });
+
+  test("style formatter picks matching section text when source section numbers differ", () => {
+    const styleBlock = formatStyleReferenceSnippets(
+      [
+        {
+          docTitle: "style_ref_financial-info_sample",
+          text: [
+            "11.1 HISTORICAL FINANCIAL INFORMATION",
+            "This is the chapter introduction.",
+            "",
+            "11.1.1 Combined statements of profit or loss and other comprehensive income",
+            "The following table sets out a summary of our Group's audited combined statements of profit or loss.",
+            "Revenue RM20.05 million for FYE 2025.",
+            "",
+            "11.1.2 Combined statements of financial position",
+            "The following table sets out financial position.",
+          ].join("\n"),
+        },
+      ],
+      {
+        maxSnippets: 1,
+        maxCharsPerSnippet: 800,
+        promptContext: extractIpoPromptContext(
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME"
+        ),
+      }
+    );
+
+    expect(styleBlock).toContain("profit or loss");
+    expect(styleBlock).not.toContain("chapter introduction");
+    expect(styleBlock).toContain("[CURRENCY_AMOUNT]");
+    expect(styleBlock).toContain("FYE [YEAR]");
   });
 });
 
