@@ -55,8 +55,10 @@ Include all line items expressly disclosed in the relevant statement or directly
 Do not stop after the first few rows if additional disclosed line items for the same statement are available in the evidence.
 Preserve any disclosed audited or unaudited labels, comparative FPE columns or rows, subtotals, totals, and note labels exactly as shown.
 If both a current FPE and comparative FPE are disclosed, include both exactly as disclosed and do not present the current FPE alone.
-Include optional summary rows such as EBITDA, margins, earnings per share, or similar metrics only if they are expressly disclosed in the factual evidence for the issuer.
-Condense disclosed notes to the minimum necessary summary form.
+Include the approved prospectus summary rows for EBITDA, GP margin, PBT margin, PAT margin, and basic and diluted EPS where the row labels and period values are expressly disclosed or are directly traceable from the Accountants' Report figures selected as factual evidence.
+Where EBITDA is presented, include the disclosed EBITDA computation immediately beneath the main table using the supported Accountants' Report line items, such as PAT, finance income, taxation, depreciation, finance cost, and EBITDA, only when every component value is available for the relevant periods.
+Where GP margin, PBT margin, PAT margin, EPS, or similar metrics are not expressly disclosed as values in the factual evidence, omit those rows unless the user has specifically requested this 12.1.1 approved prospectus summary display and the calculation basis is directly traceable from the selected Accountants' Report figures.
+Condense disclosed notes and formula notes to the minimum necessary summary form, including the GP margin, PBT margin, PAT margin, EPS share-base, after-subdivision, before-IPO, and after-IPO notes where supported, and preserving the numbering pattern where it is part of the approved prospectus display.
 Do not recompute totals or add presentation rows to make figures tie.
 Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
 If a row label and its period values cannot be aligned cleanly from the selected factual evidence, omit that row rather than shifting a value into the wrong row or period.
@@ -76,8 +78,8 @@ OUTPUT CONTRACT
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
 - Use a short framing paragraph only if the factual evidence requires it before the table.
-- Present one complete table for this section.
-- The table must be in clean markdown using pipe characters.
+- Present one complete main table for this section, followed by the EBITDA computation table and formula notes where supported.
+- Tables must be in clean markdown using pipe characters.
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
@@ -85,9 +87,10 @@ OUTPUT CONTRACT
 - Where the evidence discloses audit status across periods, prefer a separate audit-status row such as `Audited | Audited | Audited | Unaudited | Audited` above the FYE/FPE row.
 - Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - If a row label and its values do not align cleanly across the selected factual evidence, omit that row rather than guessing or shifting values across labels or periods.
-- Do not invent figures, notes, ratios, margins, EBITDA, EPS, or any derived presentation row that is not expressly disclosed in the factual evidence.
+- Do not invent figures, notes, ratios, margins, EBITDA, EPS, or any derived presentation row that is not expressly disclosed or directly traceable from the selected Accountants' Report figures under the specific 12.1.1 approved prospectus summary display requested by the user.
 - Use the accountant report and retrieved evidence as the only factual source.
 - Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
+- Ignore any figures, amounts, percentages, dates, line items, note numbers, and cross-references appearing in the style reference. Use only the evidence block for those.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.
 
 

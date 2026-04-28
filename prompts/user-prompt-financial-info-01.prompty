@@ -11,6 +11,7 @@ RULES
 - Do not add markdown heading markers such as #, ##, or ###.
 - Use the accountant report and retrieved evidence as the only factual source.
 - Use the completed financial information chapter only as a style and structure reference if it is provided separately.
+- Ignore any figures, amounts, percentages, dates, line items, note numbers, and cross-references appearing in the style reference. Use only the evidence block for those.
 - Start with one short framing paragraph before any table.
 - Present tables in clean markdown or aligned text appropriate to the requested section.
 - Use "Not disclosed in the provided documents." only when the requested section is wholly unsupported.
