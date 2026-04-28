@@ -229,6 +229,12 @@ SECTION TASK
 - Start with general results-of-operations discussion.
 - Then move to segment, category, customer, project, or geography only where supported.
 - Prefer disclosed drivers, composition, and basis commentary over bare increase/decrease wording.
+- Include comparison discussion only where expressly supported by the evidence.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not calculate growth, CAGR, margins, or derived metrics.
@@ -250,6 +256,11 @@ SECTION TASK
 - Start with general revenue discussion.
 - Then move to segment, category, customer, or geography only where supported.
 - Include comparison paragraphs only where expressly supported.
+- After the main revenue disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not invent splits, drivers, or comparisons.
@@ -271,6 +282,11 @@ SECTION TASK
 - Start with general cost-of-sales discussion.
 - Then move to components or breakdowns only where supported.
 - Include comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not invent components, comparisons, or reasons.
@@ -292,6 +308,11 @@ SECTION TASK
 - Discuss GP and GP margin only where disclosed.
 - Start with general GP discussion, then move to breakdowns only where supported.
 - Include comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not calculate margins.
@@ -312,6 +333,11 @@ SECTION TASK
 - Draft only section 12.3.7.
 - Discuss composition and narrative only where disclosed.
 - Include comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not invent categories or explanations.
@@ -332,6 +358,11 @@ SECTION TASK
 - Draft only section 12.3.8.
 - Discuss composition and narrative only where disclosed.
 - Include comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not invent categories or explanations.
@@ -352,6 +383,11 @@ SECTION TASK
 - Draft only section 12.3.9.
 - Discuss composition and narrative only where disclosed.
 - Include comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not invent categories or explanations.
@@ -373,6 +409,11 @@ SECTION TASK
 - Keep impairment terminology exactly as disclosed.
 - Discuss composition or narrative only where disclosed.
 - Include comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not invent categories, reversals, or explanations.
@@ -393,6 +434,11 @@ SECTION TASK
 - Draft only section 12.3.11.
 - Discuss finance-cost composition or narrative only where disclosed.
 - Include comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not invent borrowing items or explanations.
@@ -413,6 +459,11 @@ SECTION TASK
 - Draft only section 12.3.12.
 - Discuss PBT, PAT, and effective tax rate only where disclosed.
 - Include tax notes or comparison paragraphs only where expressly supported.
+- After the main disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported by the evidence, using:
+- (a) FYE [latest earlier year] compared to FYE [prior year]
+- (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+- (c) FPE [current period] compared to FPE [comparative period]
+- Omit any comparison paragraph that is not supported by the evidence.
 
 DO NOT
 - Do not calculate effective tax rate.

@@ -100,6 +100,12 @@ describe("financial info prompt guards", () => {
     expect(userPrompt).toContain(
       "basic and diluted EPS after subdivision but before IPO"
     );
+    expect(userPrompt).toContain(
+      "After the main revenue disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported"
+    );
+    expect(userPrompt).toContain(
+      "(a) FYE [latest earlier year] compared to FYE [prior year]"
+    );
   });
 
   test("updated section templates cover finance costs and MD&A commentary rules", () => {
