@@ -14,7 +14,29 @@ function styleReferenceKey(source = {}) {
 }
 
 function isStyleReferenceSource(source = {}) {
-  return styleReferenceKey(source).toLowerCase().startsWith(STYLE_REFERENCE_PREFIX);
+  const metadataSignals = [
+    styleReferenceKey(source),
+    source.docSource,
+    source.chunkSource,
+    source.sourceType,
+    source.source_type,
+    source.collection,
+    source.folder,
+    source.workspace_slug,
+    source.tag,
+    source.category,
+    source.label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    metadataSignals.startsWith(STYLE_REFERENCE_PREFIX) ||
+    metadataSignals.includes("style_ref_financial-info") ||
+    /\bstyle(?:[_\s-]+ref(?:erence)?)\b/i.test(metadataSignals) ||
+    metadataSignals.includes("completed financial information chapter")
+  );
 }
 
 function cleanText(txt = "") {
@@ -47,7 +69,7 @@ function normalizeSource(source = {}) {
 }
 
 function sanitizeStyleReferenceText(txt = "") {
-  return cleanText(txt)
+  const sanitized = cleanText(txt)
     .replace(/\u00a0/g, " ")
     .replace(
       /\b(?:The following table sets out|The table below (?:sets out|summaris(?:es|es))|Set out below is)\b[^.\n]*[.\n]?/gi,
@@ -94,6 +116,53 @@ function sanitizeStyleReferenceText(txt = "") {
     .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+
+  return sanitizeStyleTablePatterns(sanitized);
+}
+
+function sanitizeStyleTableCell(cell = "", index = 0) {
+  const trimmed = String(cell || "").trim();
+  if (!trimmed) return "";
+  if (/^:?-{3,}:?$/.test(trimmed)) return "---";
+  if (
+    /\[table_intro_pattern\]|\[reading_reference_pattern\]|\[placeholder\]/i.test(
+      trimmed
+    )
+  ) {
+    return trimmed;
+  }
+  if (/\[currency_unit\]/i.test(trimmed)) return "[UNIT]";
+  if (
+    /\b(?:fye|fpe|fy)\b/i.test(trimmed) ||
+    /\[year\]|\[date\]|\[audited\]|\[unaudited\]/i.test(trimmed)
+  ) {
+    return "[PERIOD]";
+  }
+  if (/\[note\]|\[section\]/i.test(trimmed)) return "[NOTE]";
+  return index === 0 ? "[ROW_LABEL]" : "[VALUE]";
+}
+
+function sanitizeStyleTableLine(line = "") {
+  const raw = String(line || "");
+  if (!raw.includes("|")) return raw;
+
+  const parts = raw.split("|");
+  if (parts.length < 3) return raw;
+
+  const innerCells = parts.slice(1, -1);
+  const sanitizedCells = innerCells.map((cell, index) =>
+    sanitizeStyleTableCell(cell, index)
+  );
+
+  return `| ${sanitizedCells.join(" | ")} |`;
+}
+
+function sanitizeStyleTablePatterns(text = "") {
+  return String(text || "")
+    .split(/\r?\n/)
+    .map((line) => sanitizeStyleTableLine(line))
+    .join("\n")
+    .replace(/(?:\| --- )+\|/g, (match) => match.replace(/---/g, "---"));
 }
 
 function refLine(source = {}) {
@@ -109,7 +178,7 @@ function refLine(source = {}) {
     : null;
 
   const loc = [sheet, table, rows, page, section].filter(Boolean).join(", ");
-  return `[Style reference | ${loc || "section: n/a"}]`;
+  return `[Style reference - non-factual | ${loc || "section: n/a"}]`;
 }
 
 function normalizeTerms(text = "") {
@@ -237,6 +306,7 @@ module.exports = {
   extractRelevantStyleText,
   isStyleReferenceSource,
   sanitizeStyleReferenceText,
+  sanitizeStyleTablePatterns,
   styleReferenceKey,
   formatStyleReferenceSnippets,
 };

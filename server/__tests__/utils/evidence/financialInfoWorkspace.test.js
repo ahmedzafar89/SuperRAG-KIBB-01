@@ -43,6 +43,9 @@ describe("financial info prompt guards", () => {
       "Do NOT recompute totals or adjust displayed rows to make them tally."
     );
     expect(systemPrompt).toContain(
+      "The only exception is the 12.1.1 approved prospectus summary display"
+    );
+    expect(systemPrompt).toContain(
       'Do NOT replace issuer-specific disclosed periods with generic prospectus shorthand such as "latest two financial years"'
     );
     expect(systemPrompt).toContain(
@@ -72,6 +75,9 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       "Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier."
+    );
+    expect(userPrompt).toContain(
+      "Where EBITDA is presented, include the disclosed EBITDA computation immediately beneath the main table"
     );
     expect(userPrompt).toContain(
       "Do not infer any 12-month sufficiency statement, LPD statement, or post-listing funding statement from style convention."
@@ -522,6 +528,101 @@ describe("financial info evidence formatting", () => {
     expect(block).not.toContain("page:109");
   });
 
+  test("prefers capitalisation statement pages over pro forma opinion pages", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 1,
+          table_candidate: true,
+          text: "REPORT ON THE COMPILATION OF PRO FORMA CONSOLIDATED STATEMENTS OF FINANCIAL POSITION. Prospectus Guidelines. Opinion.",
+          score: 0.95,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 5,
+          table_candidate: true,
+          text: "PRO FORMA CONSOLIDATED STATEMENTS OF FINANCIAL POSITION AS AT 31 JULY 2025\nAfter Public Issue\nUtilisation of Proceeds\nCURRENT ASSETS",
+          score: 0.2,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 7,
+          table_candidate: true,
+          text: "EQUITY AND LIABILITIES\nShare capital\nRetained profits\nTOTAL EQUITY\nNON-CURRENT LIABILITIES\nLong-term borrowings",
+          score: 0.2,
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText: "TARGET SECTION HEADING\n12.2 CAPITALISATION AND INDEBTEDNESS",
+      }
+    );
+
+    expect(block).toContain("page:5");
+    expect(block).toContain("page:7");
+    expect(block).not.toContain("page:1");
+    expect(block).not.toContain("Prospectus Guidelines. Opinion.");
+  });
+
+  test("stops after core capitalisation coverage is present", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 5,
+          table_candidate: true,
+          text: "PRO FORMA CONSOLIDATED STATEMENTS OF FINANCIAL POSITION AS AT 31 JULY 2025\nAfter Public Issue\nUtilisation of Proceeds\nCURRENT ASSETS",
+          score: 0.9,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 6,
+          table_candidate: true,
+          text: "CURRENT ASSETS\nTrade receivables\nOther receivables\nTOTAL ASSETS",
+          score: 0.85,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 7,
+          table_candidate: true,
+          text: "EQUITY AND LIABILITIES\nShare capital\nRetained profits\nTOTAL EQUITY\nNON-CURRENT LIABILITIES\nLong-term borrowings",
+          score: 0.8,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 8,
+          table_candidate: true,
+          text: "CURRENT LIABILITIES\nTrade payables\nShort-term borrowings\nBank overdrafts\nTOTAL LIABILITIES\nTOTAL EQUITY AND LIABILITIES",
+          score: 0.75,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 9,
+          table_candidate: true,
+          text: "ABBREVIATIONS\nPublic Issue\nIPO\nLPD",
+          score: 0.95,
+        },
+      ],
+      {
+        maxSnippets: 10,
+        promptText: "TARGET SECTION HEADING\n12.2 CAPITALISATION AND INDEBTEDNESS",
+      }
+    );
+
+    expect(block).toContain("page:5");
+    expect(block).toContain("page:8");
+    expect(block).not.toContain("page:9");
+  });
+
   test("keeps multiple relevant chunks from the same financial position PDF page", () => {
     const block = formatEvidenceSnippets(
       [
@@ -611,6 +712,56 @@ describe("financial info evidence formatting", () => {
     expect(block).not.toContain("page:71");
   });
 
+  test("keeps nearby EBITDA computation support for profit or loss summaries", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 22,
+          table_candidate: true,
+          text: "Revenue\nCost of sales\nGross profit\nOther income\nAdministrative expenses\nProfit before taxation",
+          score: 0.9,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 23,
+          table_candidate: true,
+          text: "Profit after taxation/Total comprehensive income attributable to:\nOwners of the Company\nNon-controlling interests\nBasic\nDiluted\nEarnings per share",
+          score: 0.8,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 24,
+          table_candidate: true,
+          text: "EBITDA is computed as follows:\nPAT\nLess: Finance income\nAdd: Taxation\nDepreciation\nFinance cost\nEBITDA",
+          score: 0.1,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 71,
+          table_candidate: true,
+          text: "Earnings per share note page with note support only.",
+          score: 0.7,
+        },
+      ],
+      {
+        maxSnippets: 8,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+      }
+    );
+
+    expect(block).toContain("page:22");
+    expect(block).toContain("page:23");
+    expect(block).toContain("page:24");
+    expect(block).toContain("EBITDA is computed as follows");
+    expect(block).not.toContain("page:71");
+  });
+
   test("allows pro forma pages for capitalisation and indebtedness", () => {
     const block = formatEvidenceSnippets(
       [
@@ -642,12 +793,9 @@ describe("financial info evidence formatting", () => {
       { maxSnippets: 1, maxCharsPerSnippet: 500 }
     );
 
-    expect(styleBlock).toContain("[Style reference |");
+    expect(styleBlock).toContain("[Style reference - non-factual |");
     expect(styleBlock).toContain("[TABLE_INTRO_PATTERN]");
     expect(styleBlock).toContain("[READING_REFERENCE_PATTERN]");
-    expect(styleBlock).toContain("FYE [YEAR]");
-    expect(styleBlock).toContain("Section [SECTION]");
-    expect(styleBlock).toContain("Note [NOTE]");
     expect(styleBlock).toContain("[CURRENCY_AMOUNT]");
     expect(styleBlock).toContain("[DATE]");
     expect(styleBlock).toContain("[PERCENTAGE]");
@@ -659,6 +807,41 @@ describe("financial info evidence formatting", () => {
     expect(styleBlock).not.toContain("24.55%");
     expect(styleBlock).not.toContain("The following table sets out");
     expect(styleBlock).not.toContain("This should be read together with");
+  });
+
+  test("treats loosely named style reference files as style-only sources", () => {
+    const blocks = buildIpoPromptBlocks(
+      [
+        {
+          title: "Financial Information Style Reference Sample.pdf",
+          text: "Revenue RM999.00 million\nProfit after tax RM111.00 million",
+        },
+        {
+          title: "accountant-report.pdf",
+          filetype: "pdf",
+          page_number: 22,
+          table_candidate: true,
+          text: "CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME\nRevenue\nCost of sales\nGross profit\nProfit before taxation",
+        },
+        {
+          title: "accountant-report.pdf",
+          filetype: "pdf",
+          page_number: 23,
+          table_candidate: true,
+          text: "Profit after taxation\nEarnings per share\nBasic\nDiluted",
+        },
+      ],
+      {
+        userTemplate:
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+      }
+    );
+
+    expect(blocks.evidenceBlock).toContain("accountant-report.pdf");
+    expect(blocks.evidenceBlock).not.toContain("Style Reference Sample");
+    expect(blocks.evidenceBlock).not.toContain("RM999.00 million");
+    expect(blocks.styleBlock).toContain("[CURRENCY_AMOUNT]");
+    expect(blocks.styleBlock).not.toContain("RM999.00 million");
   });
 
   test("buildIpoPromptBlocks returns a sanitized style block", () => {
@@ -674,7 +857,7 @@ describe("financial info evidence formatting", () => {
       }
     );
 
-    expect(blocks.styleBlock).toContain("[DATE]");
+    expect(blocks.styleBlock).toContain("[TABLE_INTRO_PATTERN]");
     expect(blocks.styleBlock).not.toContain("30 June 2024");
   });
 
@@ -727,5 +910,21 @@ describe("style reference sanitization", () => {
     expect(sanitized).not.toContain("Section 14");
     expect(sanitized).not.toContain("The following table sets out");
     expect(sanitized).not.toContain("This should be read together with");
+  });
+
+  test("sanitizes markdown table bodies into non-factual placeholders", () => {
+    const sanitized = sanitizeStyleReferenceText(
+      [
+        "| Item | FYE 2024 | FYE 2025 |",
+        "| --- | --- | --- |",
+        "| Revenue | RM20.05 million | RM30.07 million |",
+      ].join("\n")
+    );
+
+    expect(sanitized).toContain("| [ROW_LABEL] | [PERIOD] | [PERIOD] |");
+    expect(sanitized).toContain("| --- | --- | --- |");
+    expect(sanitized).toContain("| [ROW_LABEL] | [VALUE] | [VALUE] |");
+    expect(sanitized).not.toContain("Revenue");
+    expect(sanitized).not.toContain("RM20.05 million");
   });
 });

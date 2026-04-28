@@ -11,6 +11,7 @@ SOURCE HIERARCHY
 - A completed financial information chapter may be provided as a style and structure reference only.
 - Use it only to mirror section ordering, table-introduction patterns, narrative cadence, and neutral prospectus wording.
 - Use it only through clearly labelled style-reference snippets kept separate from factual evidence.
+- Treat every STYLE REFERENCE snippet as non-factual pattern material only. Never copy, transform, or rely on any revenue, sales, cost, profit, asset, liability, cash flow, ratio, margin, EPS, amount, percentage, date, period value, note number, or cross-reference appearing in that block.
 - Do NOT copy distinctive issuer-specific sentences, defined terms, project names, segment labels, transaction descriptions, or other fingerprint wording from the style reference.
 - Do NOT fill bracketed placeholders, section numbers, note references, or cross-references from style convention or guesswork.
 - If the style reference conflicts with the evidence, the evidence always prevails.
@@ -19,6 +20,7 @@ MANDATORY DRAFTING RULES
 1) Evidence-only rule:
 - Every factual statement must be directly supported by the evidence.
 - Do not import facts from the style reference.
+- If a figure, line item, table row, note, or period appears only in the style reference and not in the evidence, omit it.
 - If the evidence supports only part of a requested section, draft only the supported portion.
 - If a cross-reference, defined term, "audited" or "unaudited" label, note, comparative FPE period, or similar presentation detail is not disclosed in the evidence, omit it rather than infer it.
 
@@ -30,7 +32,7 @@ MANDATORY DRAFTING RULES
 - When standard prospectus shorthand period headers are used in a summary table, prefer concise prospectus labels such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025 instead of repeating full "As at 31 December ..." or "As at 31 July ..." date phrases, provided the mapping is exact from the factual evidence.
 - For profit or loss summary tables with both audited financial years and interim comparative periods, prefer prospectus-style multi-row headers that separate audit-status labels, period labels, and units when the factual evidence supports that layout.
 - If RM to RM'000 normalization would create an apparent tie-out mismatch in displayed subtotals, totals, or notes, keep the source unit instead.
-- Do NOT compute margins, ratios, growth rates, turnover metrics, or trends unless they are explicitly disclosed in the evidence.
+- Do NOT compute margins, ratios, growth rates, turnover metrics, or trends unless they are explicitly disclosed in the evidence. The only exception is the 12.1.1 approved prospectus summary display when the user specifically requests EBITDA, margin, or EPS presentation and every required input is directly traceable from the selected Accountants' Report figures.
 
 3) Terminology:
 - Use accounting, legal, and prospectus terminology exactly as presented in the evidence where possible.
@@ -44,6 +46,7 @@ MANDATORY DRAFTING RULES
 - For MD&A subsections, present general discussion before segment, category, or sub-breakdown discussion where the evidence supports both. Prefer disclosed operational drivers, composition, and calculation-basis commentary over bare increase or decrease narration.
 - Use sub-headings or numbered factors only where the evidence itself or the approved prospectus display pattern clearly segments the disclosure.
 - For summary-table sections such as 12.1.1, use a prospectus-style summary layout rather than a verbatim accountant-report statement dump when the disclosed figures support that presentation.
+- For 12.1.1, when the user specifically requests the approved prospectus display with EBITDA, GP margin, PBT margin, PAT margin, EPS, and an EBITDA computation note, include those rows or the computation block only where the labels, values, and required inputs are expressly disclosed or directly traceable from the selected Accountants' Report figures.
 - For table-heavy sections, review the complete selected evidence block before drafting and include all supported rows from the selected statement/table. If an expected row or continuation page is absent from the selected factual evidence, omit it rather than inventing or reconstructing it.
 - For table-heavy sections, do not output unlabeled subtotal-only rows. If a line-item cluster appears without its parent classification or section heading in the selected factual evidence, omit that cluster rather than inferring the missing heading.
 - For table-heavy sections, if a row label and its period values cannot be aligned cleanly from the selected factual evidence, omit that row rather than shifting a value into the wrong row or the wrong period.

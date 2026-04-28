@@ -43,8 +43,15 @@ function extractIpoPromptContext(promptText = "") {
       "profit before tax",
       "profit after tax",
       "ebitda",
+      "gp margin",
+      "pbt margin",
+      "pat margin",
       "earnings per share",
       "eps",
+      "finance income",
+      "taxation",
+      "depreciation",
+      "finance cost",
     ],
     "12.1.2": [
       "financial position",
@@ -278,7 +285,7 @@ function hasTableMetadata(source = {}) {
 }
 
 function hasNoteSignals(text = "") {
-  return /(^|\b)(note|notes|formula|annualis|annualiz|audited|unaudited|earnings per share|effective tax rate|comprise|comprised of)\b/i.test(
+  return /(^|\b)(note|notes|formula|annualis|annualiz|audited|unaudited|earnings per share|effective tax rate|comprise|comprised of|gp margin|pbt margin|pat margin|ebitda is computed|finance income|depreciation)\b/i.test(
     text
   );
 }
@@ -331,6 +338,10 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
       if (/other comprehensive income/.test(normalized)) score += 0.3;
       if (/revenue|cost of sales|gross profit|profit before taxation|profit after taxation|earnings per share/.test(normalized))
         score += 0.28;
+      if (/ebitda|gp margin|pbt margin|pat margin|basic and diluted eps/.test(normalized))
+        score += 0.32;
+      if (/finance income|taxation|depreciation|finance cost|ebitda is computed/.test(normalized))
+        score += 0.26;
       if (/fye 31 december|1\.1\.2024 to 31\.7\.2024|1\.1\.2025 to 31\.7\.2025|unaudited|audited/.test(normalized))
         score += 0.2;
       if (/income tax expense|basic|diluted|attributable to:|owners of the company|non-controlling interests/.test(normalized))
@@ -377,6 +388,24 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
     case "12.2":
       if (/capitalisation and indebtedness|total indebtedness|total capitalisation|gearing ratio/.test(normalized))
         score += 0.6;
+      if (
+        /pro forma consolidated statements? of financial position|as at 31 july 2025|after public issue|utilisation of proceeds|after pro forma|subsequent adjustment/.test(
+          normalized
+        )
+      )
+        score += 0.48;
+      if (
+        /share capital|retained profits|total equity|current liabilities|non-current liabilities|short-term borrowings|long-term borrowings|bank overdrafts|total liabilities|total equity and liabilities/.test(
+          normalized
+        )
+      )
+        score += 0.24;
+      if (
+        /reporting accountants[’'] responsibilities|report on the compilation|other matter|abbreviations|the board of directors[’'] responsibilities|opinion|prospectus guidelines/.test(
+          normalized
+        )
+      )
+        score -= 1.1;
       break;
     default:
       break;
@@ -507,6 +536,13 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
     if (Number.isFinite(pageNumber) && pageNumber <= 40) score += 0.15;
     if (Number.isFinite(pageNumber) && pageNumber > 60) score -= 0.45;
   }
+  if (promptContext.sectionNumber === "12.2") {
+    const pageNumber = Number(source.page_number);
+    if (Number.isFinite(pageNumber) && pageNumber >= 5 && pageNumber <= 8)
+      score += 0.45;
+    if (Number.isFinite(pageNumber) && pageNumber <= 4) score -= 0.65;
+    if (Number.isFinite(pageNumber) && pageNumber === 9) score -= 0.4;
+  }
 
   for (const keyword of promptContext.keywords) {
     if (!keyword) continue;
@@ -592,6 +628,24 @@ function hasHistoricalFinancialIntroCoverage(picked = []) {
   return hasPeriods && hasFramework;
 }
 
+function hasCapitalisationCoverage(picked = []) {
+  const combined = picked.map((source) => source.__cleanText.toLowerCase());
+  const hasBasis = combined.some((text) =>
+    /pro forma consolidated statements? of financial position|as at 31 july 2025|after public issue|utilisation of proceeds/.test(
+      text
+    )
+  );
+  const hasCapital = combined.some((text) =>
+    /share capital|retained profits|total equity/.test(text)
+  );
+  const hasDebt = combined.some((text) =>
+    /long-term borrowings|short-term borrowings|bank overdrafts|total liabilities/.test(
+      text
+    )
+  );
+  return hasBasis && (hasCapital || hasDebt);
+}
+
 function hasProfitOrLossStatementCoverage(picked = []) {
   const combined = picked.map((source) => source.__cleanText.toLowerCase());
   const hasMainPage = combined.some(
@@ -612,6 +666,18 @@ function hasProfitOrLossStatementCoverage(picked = []) {
   );
 
   return hasMainPage && hasContinuationPage;
+}
+
+function hasProfitOrLossExcludedSignals(text = "") {
+  return /dividends|balance at 1\.1|balance at 31\.12|distribution to owners|statement of changes in equity|acquisition of non/i.test(
+    text
+  );
+}
+
+function hasProfitOrLossMetricSupportSignals(text = "") {
+  return /ebitda|gp margin|pbt margin|pat margin|basic and diluted eps|finance income|taxation|depreciation|finance cost|ebitda is computed/i.test(
+    text
+  );
 }
 
 function pruneFinancialPositionStatementPages(
@@ -671,16 +737,16 @@ function pruneProfitOrLossStatementPages(
     .filter((source) => {
       if (sourceDocKey(source) !== sourceDocKey(anchor)) return false;
       if (source.filetype !== "pdf" || !source.table_candidate) return false;
-      if (pageDistance(anchor, source) > 1) return false;
       const text = source.__cleanText.toLowerCase();
-      if (
-        /dividends|balance at 1\.1|balance at 31\.12|distribution to owners|statement of changes in equity|acquisition of non/.test(
-          text
-        )
-      ) {
+      if (hasProfitOrLossExcludedSignals(text)) {
         return false;
       }
-      return true;
+      const distance = pageDistance(anchor, source);
+      if (distance <= 1) return true;
+      return (
+        distance <= promptContext.adjacentPageWindow &&
+        hasProfitOrLossMetricSupportSignals(text)
+      );
     })
     .sort((a, b) => {
       const aPage = Number(a.page_number);
@@ -748,6 +814,49 @@ function pruneHistoricalFinancialIntroPages(
     .slice(0, 3);
 
   return hasHistoricalFinancialIntroCoverage(narrowed) ? narrowed : [];
+}
+
+function pruneCapitalisationPages(
+  picked = [],
+  promptContext = {},
+  hardExcludeTransactions = true
+) {
+  if (!Array.isArray(picked) || picked.length === 0) return [];
+
+  const excludeSignals = (text = "") =>
+    /reporting accountants[’'] responsibilities|report on the compilation|other matter|abbreviations|the board of directors[’'] responsibilities|opinion|prospectus guidelines/i.test(
+      text
+    );
+  const includeSignals = (text = "") =>
+    /pro forma consolidated statements? of financial position|as at 31 july 2025|after public issue|utilisation of proceeds|after pro forma|subsequent adjustment|share capital|retained profits|total equity|current liabilities|non-current liabilities|short-term borrowings|long-term borrowings|bank overdrafts|total liabilities|total equity and liabilities/i.test(
+      text
+    );
+
+  const rankedPicked = [...picked]
+    .filter((source) => {
+      const text = source.__cleanText || "";
+      return includeSignals(text) && !excludeSignals(text);
+    })
+    .sort((a, b) => {
+      return (
+        scoreSource(b, promptContext, hardExcludeTransactions) -
+        scoreSource(a, promptContext, hardExcludeTransactions)
+      );
+    });
+
+  const anchor = rankedPicked[0];
+  if (!anchor) return [];
+
+  const narrowed = rankedPicked
+    .filter((source) => {
+      if (sourceDocKey(source) !== sourceDocKey(anchor)) return false;
+      if (source.filetype !== "pdf" || !source.table_candidate) return false;
+      const page = Number(source.page_number);
+      return Number.isFinite(page) && page >= 5 && page <= 8;
+    })
+    .sort((a, b) => Number(a.page_number || 0) - Number(b.page_number || 0));
+
+  return hasCapitalisationCoverage(narrowed) ? narrowed : [];
 }
 
 function renderPicked(picked = [], maxCharsPerSnippet = 1800) {
@@ -861,6 +970,17 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       }
     }
 
+    if (promptContext.sectionNumber === "12.2") {
+      const narrowed = pruneCapitalisationPages(
+        picked,
+        promptContext,
+        hardExcludeTransactions
+      );
+      if (narrowed.length) {
+        return renderPicked(narrowed, maxCharsPerSnippet);
+      }
+    }
+
     if (promptContext.sectionNumber === "12.1.2") {
       const narrowed = pruneFinancialPositionStatementPages(
         picked,
@@ -886,6 +1006,17 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
 
   if (promptContext.sectionNumber === "12.1") {
     const narrowed = pruneHistoricalFinancialIntroPages(
+      picked,
+      promptContext,
+      hardExcludeTransactions
+    );
+    if (narrowed.length) {
+      return renderPicked(narrowed, maxCharsPerSnippet);
+    }
+  }
+
+  if (promptContext.sectionNumber === "12.2") {
+    const narrowed = pruneCapitalisationPages(
       picked,
       promptContext,
       hardExcludeTransactions
