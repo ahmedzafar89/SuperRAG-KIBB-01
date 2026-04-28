@@ -51,7 +51,7 @@ SECTION TASK
 - If audit status is disclosed across periods, prefer a separate audit-status row.
 - Include all supported line items in evidence order.
 - Include both current and comparative FPE if both are disclosed.
-- Include EBITDA, GP margin, PBT margin, PAT margin, EPS, EBITDA computation, and short formula notes only where expressly disclosed or directly traceable under the approved prospectus summary display requested for this section.
+- Include EBITDA, GP margin, PBT margin, PAT margin, EPS, basic and diluted EPS after subdivision but before IPO, basic and diluted EPS after IPO, the EBITDA computation, and short formula notes only where expressly disclosed or directly traceable under the approved prospectus summary display requested for this section.
 - Review all snippets for the same statement together before deciding that this section is unsupported.
 - If period headers, figures, and line items are split across nearby snippets or continuation pages, assemble only the rows that align cleanly from the evidence.
 

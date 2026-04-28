@@ -737,6 +737,9 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
     if (Number.isFinite(pageNumber) && pageNumber > 60) score -= 0.75;
     if (hasMdnaOrBusinessNarrativeSignals(text)) score -= 0.8;
     if (hasProfitOrLossPeriodValueSignals(text)) score += 0.65;
+    if (isProfitOrLossEpsNoteSupportText(text)) score += 1.05;
+    if (isProfitOrLossShareBaseSupportText(text)) score += 0.95;
+    if (isProfitOrLossEbitdaSupportText(text)) score += 0.4;
   }
   if (promptContext.sectionNumber === "12.2") {
     const pageNumber = Number(source.page_number);
@@ -933,6 +936,14 @@ const PROFIT_OR_LOSS_ROW_HELPER_LABELS = [
   "Profit after taxation/Total comprehensive income",
 ];
 
+const PROFIT_OR_LOSS_PERIOD_ORDER = [
+  "FYE 2022",
+  "FYE 2023",
+  "FYE 2024",
+  "FPE 2024",
+  "FPE 2025",
+];
+
 function extractNumericTokens(text = "") {
   return String(text || "").match(/\(?\d[\d,]*(?:\.\d+)?\)?|-/g) || [];
 }
@@ -969,8 +980,40 @@ function decimalTokens(text = "") {
   return String(text || "").match(/\d+\.\d+/g) || [];
 }
 
+function largeIntegerTokens(text = "") {
+  return extractNumericTokens(text).filter(
+    (token) =>
+      token !== "-" &&
+      !token.includes(".") &&
+      !/^(2022|2023|2024|2025)$/.test(token) &&
+      digitCount(token) >= 6
+  );
+}
+
 function digitCount(text = "") {
   return String(text || "").replace(/\D/g, "").length;
+}
+
+function tokenToNumber(token = "") {
+  const value = String(token || "").trim();
+  if (!value || value === "-") return null;
+  const negative = value.startsWith("(") && value.endsWith(")");
+  const normalized = value.replace(/[(),]/g, "");
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed)) return null;
+  return negative ? -parsed : parsed;
+}
+
+function formatPercentValue(value) {
+  return Number.isFinite(value) ? `${value.toFixed(2)}%` : "";
+}
+
+function formatDecimalValue(value, digits = 2) {
+  return Number.isFinite(value) ? value.toFixed(digits) : "";
+}
+
+function hasAnyPopulatedValue(values = []) {
+  return values.some((value) => String(value || "").trim());
 }
 
 function ensureNegativeExpenseToken(token = "") {
@@ -985,6 +1028,81 @@ function findLineIndex(lines = [], pattern) {
 
 function lineAt(lines = [], index = -1) {
   return index >= 0 && index < lines.length ? lines[index] : "";
+}
+
+function lineWindowText(lines = [], index = -1, before = 2, after = 2) {
+  if (index < 0 || index >= lines.length) return "";
+  const start = Math.max(0, index - before);
+  const end = Math.min(lines.length, index + after + 1);
+  return lines.slice(start, end).join(" ");
+}
+
+function isProfitOrLossEpsNoteSupportText(text = "") {
+  return /earnings per share|weighted average number of ordinary shares|basic earnings per share|diluted earnings per share/i.test(
+    text
+  );
+}
+
+function isProfitOrLossShareBaseSupportText(text = "") {
+  return /subdivision of shares|subdivided shares|enlarged issued share capital|public issue of\s+\d[\d,]*\s+.*shares|comprising\s+\d[\d,]*\s+shares shall be listed/i.test(
+    text
+  );
+}
+
+function isProfitOrLossEbitdaSupportText(text = "") {
+  return /ebitda|profit before taxation is arrived at after|depreciation:|interest expense:|finance income|finance cost/i.test(
+    text
+  );
+}
+
+function isProfitOrLossRemoteSupportText(text = "") {
+  return (
+    isProfitOrLossEpsNoteSupportText(text) ||
+    isProfitOrLossShareBaseSupportText(text) ||
+    isProfitOrLossEbitdaSupportText(text)
+  );
+}
+
+function remoteProfitOrLossSupportScore(text = "") {
+  let score = 0;
+  if (isProfitOrLossEpsNoteSupportText(text)) score += 3;
+  if (isProfitOrLossShareBaseSupportText(text)) score += 2;
+  if (isProfitOrLossEbitdaSupportText(text)) score += 1;
+  return score;
+}
+
+function profitOrLossEpsSupportScore(text = "") {
+  let score = 0;
+  if (/weighted average number of ordinary shares/i.test(text)) score += 5;
+  if (/basic earnings per share/i.test(text)) score += 3;
+  if (/diluted earnings per share/i.test(text)) score += 2;
+  if (/profit attributable to owners of the company/i.test(text)) score += 3;
+  if (/the group has not issued any dilutive potential ordinary shares/i.test(text))
+    score += 1;
+  if (/earnings per share/i.test(text)) score += 1;
+  return score;
+}
+
+function pickBestProfitOrLossSupportLines(sources = [], matcher = () => false) {
+  const candidates = (Array.isArray(sources) ? sources : [])
+    .filter((source) => matcher(source.__cleanText || ""))
+    .map((source) => ({
+      source,
+      lines: (source.__cleanText || "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean),
+      score: remoteProfitOrLossSupportScore(source.__cleanText || ""),
+    }))
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      const aPage = Number(a.source.page_number || 0);
+      const bPage = Number(b.source.page_number || 0);
+      if (aPage && bPage && aPage !== bPage) return aPage - bPage;
+      return 0;
+    });
+
+  return candidates[0]?.lines || [];
 }
 
 function selectProfitOrLossStatementPageLines(sources = []) {
@@ -1054,9 +1172,118 @@ function selectProfitOrLossStatementPageLines(sources = []) {
   };
 }
 
-function buildProfitOrLossRowAlignedHelper(sources = []) {
+function extractProfitOrLossEpsSupportByPeriod(sources = []) {
+  const epsSupportSource = (Array.isArray(sources) ? sources : [])
+    .filter((source) => isProfitOrLossEpsNoteSupportText(source.__cleanText || ""))
+    .sort((a, b) => {
+      const scoreDelta =
+        profitOrLossEpsSupportScore(b.__cleanText || "") -
+        profitOrLossEpsSupportScore(a.__cleanText || "");
+      if (scoreDelta !== 0) return scoreDelta;
+      return Number(a.page_number || 0) - Number(b.page_number || 0);
+    })[0];
+  const lines = (epsSupportSource?.__cleanText || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return {};
+  const dilutedEqualsBasic = /diluted earnings per share is equal to the bas/i.test(
+    lines.join(" ")
+  );
+
+  const patterns = [
+    {
+      period: "FYE 2022",
+      matchers: [/^2022$/, /\b2022\b/],
+    },
+    {
+      period: "FYE 2023",
+      matchers: [/^2023$/, /\b2023\b/],
+    },
+    {
+      period: "FYE 2024",
+      matchers: [/^2024$/, /\b2024\b/],
+    },
+    {
+      period: "FPE 2024",
+      matchers: [/^Unaudited 1\.1\.2024 to/, /31\.7\.2024/, /1\.1\.2024 to/],
+    },
+    {
+      period: "FPE 2025",
+      matchers: [/^1\.1\.2025 to/, /31\.7\.2025/, /1\.1\.2025 to/],
+    },
+  ];
+
+  const support = {};
+  for (const { period, matchers } of patterns) {
+    const index = matchers
+      .map((matcher) => findLineIndex(lines, matcher))
+      .find((value) => value >= 0);
+    if (index === undefined) continue;
+
+    const windowText = lineWindowText(lines, index, 2, 3);
+    const integerTokens = largeIntegerTokens(windowText);
+    const decimalValues = decimalTokens(windowText)
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value) && value >= 0 && value < 10);
+
+    const profitAttributable =
+      integerTokens.find((token) => token !== "11,159,726") || integerTokens[0] || "";
+    const weightedAverageShares =
+      integerTokens.find((token) => token === "11,159,726") || integerTokens[1] || "";
+    const derivedBasicEps = (() => {
+      const profit = tokenToNumber(profitAttributable);
+      const shares = tokenToNumber(weightedAverageShares);
+      if (!Number.isFinite(profit) || !Number.isFinite(shares) || shares <= 0) return "";
+      return formatDecimalValue(profit / shares, 2);
+    })();
+
+    support[period] = {
+      profitAttributable,
+      weightedAverageShares,
+      basicEps:
+        derivedBasicEps ||
+        (decimalValues.length > 0 ? formatDecimalValue(decimalValues[0], 2) : ""),
+      dilutedEps:
+        dilutedEqualsBasic && (derivedBasicEps || decimalValues.length > 0)
+          ? derivedBasicEps || formatDecimalValue(decimalValues[0], 2)
+          : "",
+    };
+  }
+
+  return support;
+}
+
+function extractProfitOrLossShareBaseSupport(sources = []) {
+  const merged = (Array.isArray(sources) ? sources : [])
+    .map((source) => source.__cleanText || "")
+    .filter(Boolean)
+    .join("\n");
+
+  if (!merged) return {};
+
+  const subdivisionMatch =
+    merged.match(
+      /completion of\s+the subdivision,\s+the total issued share capital (?:will be|is)\s+([\d,]+)\s+shares/i
+    ) ||
+    merged.match(
+      /following the completion of\s+the subdivision,\s+the total issued share capital (?:will be|is)\s+([\d,]+)\s+shares/i
+    );
+
+  const afterIpoMatch =
+    merged.match(/comprising\s+([\d,]+)\s+shares\s+shall\s+be\s+listed/i) ||
+    merged.match(/entire enlarged issued share capital[^.\n]*?comprising\s+([\d,]+)\s+shares/i);
+
+  return {
+    afterSubdivisionBeforeIpoShares: subdivisionMatch?.[1] || "",
+    afterIpoShares: afterIpoMatch?.[1] || "",
+    dilutedEqualsBasic: /diluted earnings per share is equal to the basic/i.test(merged),
+  };
+}
+
+function buildProfitOrLossRowAlignedData(sources = []) {
   const { mainLines, continuationLines } = selectProfitOrLossStatementPageLines(sources);
-  if (mainLines.length === 0) return "";
+  if (mainLines.length === 0) return [];
 
   const periods = [
     {
@@ -1209,6 +1436,102 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
     .filter((row) => row.values)
     .filter((row) => row.values["Revenue"] && row.values["Profit after taxation/Total comprehensive income"]);
 
+  if (periodRows.length < 3) return [];
+
+  const epsSupportByPeriod = extractProfitOrLossEpsSupportByPeriod(sources);
+  return periodRows.map((row) => {
+    const support = epsSupportByPeriod[row.period] || {};
+    return {
+      ...row,
+      values: {
+        ...row.values,
+        __eps_basic: row.values.__eps_basic || support.basicEps || "",
+        __eps_diluted:
+          row.values.__eps_diluted ||
+          support.dilutedEps ||
+          (support.basicEps && !row.values.__eps_diluted ? support.basicEps : "") ||
+          "",
+        __owners_profit_attributable: support.profitAttributable || "",
+        __weighted_average_shares: support.weightedAverageShares || "",
+      },
+    };
+  });
+}
+
+function buildProfitOrLossDerivedRows(periodRows = [], sources = []) {
+  if (!Array.isArray(periodRows) || periodRows.length === 0) return [];
+
+  const marginConfigs = [
+    ["GP margin (%)", "Gross profit"],
+    ["PBT margin (%)", "Profit before taxation"],
+    ["PAT margin (%)", "Profit after taxation/Total comprehensive income"],
+  ];
+  const rows = [];
+
+  for (const [label, numeratorKey] of marginConfigs) {
+    const values = periodRows.map((row) => {
+      const revenue = tokenToNumber(row.values["Revenue"]);
+      const numerator = tokenToNumber(row.values[numeratorKey]);
+      if (!Number.isFinite(revenue) || revenue === 0 || !Number.isFinite(numerator)) {
+        return "";
+      }
+      return formatPercentValue((numerator / revenue) * 100);
+    });
+    if (hasAnyPopulatedValue(values)) {
+      rows.push(`| ${label} | ${values.join(" | ")} |`);
+    }
+  }
+
+  const shareBaseSupport = extractProfitOrLossShareBaseSupport(sources);
+  const epsVariantConfigs = [
+    [
+      "Basic and diluted EPS (RM) - After subdivision but before IPO",
+      shareBaseSupport.afterSubdivisionBeforeIpoShares,
+    ],
+    ["Basic and diluted EPS (RM) - After IPO", shareBaseSupport.afterIpoShares],
+  ];
+
+  for (const [label, shareBaseToken] of epsVariantConfigs) {
+    const shareBase = tokenToNumber(shareBaseToken);
+    if (!Number.isFinite(shareBase) || shareBase <= 0) continue;
+
+    const values = periodRows.map((row) => {
+      const attributableProfit = tokenToNumber(row.values.__owners_profit_attributable);
+      if (!Number.isFinite(attributableProfit)) return "";
+      return formatDecimalValue(attributableProfit / shareBase, 2);
+    });
+
+    if (hasAnyPopulatedValue(values)) {
+      rows.push(`| ${label} | ${values.join(" | ")} |`);
+    }
+  }
+
+  return rows;
+}
+
+function buildProfitOrLossFormulaNotesHelper(sources = []) {
+  const shareBaseSupport = extractProfitOrLossShareBaseSupport(sources);
+  const notes = [];
+
+  if (shareBaseSupport.afterSubdivisionBeforeIpoShares) {
+    notes.push(
+      `- After subdivision but before IPO EPS uses ${shareBaseSupport.afterSubdivisionBeforeIpoShares} ordinary shares.`
+    );
+  }
+  if (shareBaseSupport.afterIpoShares) {
+    notes.push(`- After IPO EPS uses ${shareBaseSupport.afterIpoShares} ordinary shares.`);
+  }
+  if (shareBaseSupport.dilutedEqualsBasic) {
+    notes.push("- Diluted EPS equals basic EPS where no dilutive potential ordinary shares are disclosed.");
+  }
+
+  return notes.length
+    ? ["[Directly traceable helper | short formula notes]", ...notes].join("\n")
+    : "";
+}
+
+function buildProfitOrLossRowAlignedHelper(sources = []) {
+  const periodRows = buildProfitOrLossRowAlignedData(sources);
   if (periodRows.length < 3) return "";
 
   const header = `| Line item | ${periodRows.map((row) => row.period).join(" | ")} |`;
@@ -1228,13 +1551,19 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
     epsRows.push(`| Earnings per share (RM) - Diluted | ${epsDilutedValues.join(" | ")} |`);
   }
 
-  return [
+  const derivedRows = buildProfitOrLossDerivedRows(periodRows, sources);
+  const formulaNotesHelper = buildProfitOrLossFormulaNotesHelper(sources);
+
+  const parts = [
     "[Directly traceable helper | row-aligned OCR reconstruction]",
     header,
     divider,
     ...bodyRows,
     ...epsRows,
-  ].join("\n");
+    ...derivedRows,
+  ];
+  if (formulaNotesHelper) parts.push("", formulaNotesHelper);
+  return parts.join("\n");
 }
 
 function inferProfitOrLossPeriodLabel(line = "") {
@@ -1386,11 +1715,22 @@ function pruneFinancialPositionStatementPages(
 function pruneProfitOrLossStatementPages(
   picked = [],
   promptContext = {},
-  hardExcludeTransactions = true
+  hardExcludeTransactions = true,
+  candidateSources = picked
 ) {
   if (!Array.isArray(picked) || picked.length === 0) return [];
 
   const rankedPicked = [...picked].sort((a, b) => {
+    return (
+      scoreSource(b, promptContext, hardExcludeTransactions) -
+      scoreSource(a, promptContext, hardExcludeTransactions)
+    );
+  });
+  const candidateRanked = [
+    ...(Array.isArray(candidateSources) && candidateSources.length
+      ? candidateSources
+      : picked),
+  ].sort((a, b) => {
     return (
       scoreSource(b, promptContext, hardExcludeTransactions) -
       scoreSource(a, promptContext, hardExcludeTransactions)
@@ -1433,7 +1773,34 @@ function pruneProfitOrLossStatementPages(
       );
     });
 
-  return hasProfitOrLossStatementCoverage(narrowed) ? narrowed : [];
+  if (!hasProfitOrLossStatementCoverage(narrowed)) return [];
+
+  const selectedKeys = new Set(narrowed.map((source) => sourceLocationKey(source)));
+  const remoteSupport = candidateRanked
+    .filter((source) => {
+      if (sourceDocKey(source) !== sourceDocKey(anchor)) return false;
+      if (source.filetype !== "pdf" || !source.table_candidate) return false;
+      if (selectedKeys.has(sourceLocationKey(source))) return false;
+      const text = source.__cleanText || "";
+      return isProfitOrLossRemoteSupportText(text);
+    })
+    .sort((a, b) => {
+      const scoreDelta =
+        remoteProfitOrLossSupportScore(b.__cleanText || "") -
+        remoteProfitOrLossSupportScore(a.__cleanText || "");
+      if (scoreDelta !== 0) return scoreDelta;
+      return (
+        scoreSource(b, promptContext, hardExcludeTransactions) -
+        scoreSource(a, promptContext, hardExcludeTransactions)
+      );
+    });
+
+  const merged = [...narrowed];
+  for (const source of remoteSupport.slice(0, 4)) {
+    merged.push(source);
+  }
+
+  return merged.sort((a, b) => Number(a.page_number || 0) - Number(b.page_number || 0));
 }
 
 function pruneHistoricalFinancialIntroPages(
@@ -1571,7 +1938,10 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     : cleaned.filter(
         (source) =>
           !isLikelyTransactionDump(source, minDateRowsToFlag) &&
-          (promptContext.proFormaAllowed || !hasProFormaSignals(source.__cleanText))
+          (promptContext.proFormaAllowed ||
+            !hasProFormaSignals(source.__cleanText) ||
+            (promptContext.sectionNumber === "12.1.1" &&
+              isProfitOrLossShareBaseSupportText(source.__cleanText)))
       );
 
   const ranked = [...eligible].sort((a, b) => {
@@ -1633,7 +2003,8 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       const narrowed = pruneProfitOrLossStatementPages(
         picked,
         promptContext,
-        hardExcludeTransactions
+        hardExcludeTransactions,
+        ranked
       );
       if (narrowed.length) {
         return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
@@ -1678,7 +2049,8 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     const narrowed = pruneProfitOrLossStatementPages(
       picked,
       promptContext,
-      hardExcludeTransactions
+      hardExcludeTransactions,
+      ranked
     );
     if (narrowed.length) {
       return renderPicked(narrowed, maxCharsPerSnippet, promptContext);

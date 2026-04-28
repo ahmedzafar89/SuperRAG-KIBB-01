@@ -97,6 +97,9 @@ describe("financial info prompt guards", () => {
     expect(userPrompt).toContain(
       "Do not output a single-column line-item list, a label-only table, or blank value columns"
     );
+    expect(userPrompt).toContain(
+      "basic and diluted EPS after subdivision but before IPO"
+    );
   });
 
   test("updated section templates cover finance costs and MD&A commentary rules", () => {
@@ -165,7 +168,7 @@ describe("IPO prompt source expansion", () => {
     expect(query).toContain("diluted");
   });
 
-  test("builds companion retrieval queries for profit or loss continuation and EBITDA support", () => {
+  test("builds companion retrieval queries for profit or loss continuation, EBITDA, and EPS share-base support", () => {
     const queries = buildIpoRetrievalQueries(
       "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME"
     );
@@ -181,6 +184,14 @@ describe("IPO prompt source expansion", () => {
     ).toBe(true);
     expect(
       queries.some((query) => query.includes("ebitda is computed as follows"))
+    ).toBe(true);
+    expect(
+      queries.some((query) =>
+        query.includes("weighted average number of ordinary shares in issue")
+      )
+    ).toBe(true);
+    expect(
+      queries.some((query) => query.includes("subdivision of shares"))
     ).toBe(true);
   });
 
@@ -805,14 +816,14 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("page:22");
     expect(block).toContain("page:23");
     expect(block).not.toContain("page:24");
-    expect(block).not.toContain("page:71");
+    expect(block).toContain("page:71");
   });
 
   test("keeps nearby EBITDA computation support for profit or loss summaries", () => {
     const block = formatEvidenceSnippets(
       [
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 22,
           table_candidate: true,
@@ -820,7 +831,7 @@ describe("financial info evidence formatting", () => {
           score: 0.9,
         },
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 23,
           table_candidate: true,
@@ -828,7 +839,7 @@ describe("financial info evidence formatting", () => {
           score: 0.8,
         },
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 24,
           table_candidate: true,
@@ -836,7 +847,7 @@ describe("financial info evidence formatting", () => {
           score: 0.1,
         },
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 71,
           table_candidate: true,
@@ -855,7 +866,7 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("page:23");
     expect(block).toContain("page:24");
     expect(block).toContain("EBITDA is computed as follows");
-    expect(block).not.toContain("page:71");
+    expect(block).toContain("page:71");
   });
 
   test("excludes adjacent financial position pages from profit or loss evidence blocks", () => {
@@ -979,6 +990,73 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("919,050");
     expect(block).toContain("page:22");
     expect(block).toContain("page:23");
+  });
+
+  test("adds derived margin and EPS share-base helpers when remote support pages are available", () => {
+    const page22 = normalizeSource({
+      title: "accountant-report-JRK.pdf",
+      filetype: "pdf",
+      page_number: 22,
+      table_candidate: true,
+      text: "ACCOUNTANTS’\nRegistration Registration 14. IMPAIRMENT LOSSES ON FINANCIAL ASSETS INCOME FOR THE FINANCIAL YEAR/PERIOD\nJRK HOLDINGS BERHAD CONSOLIDATED REVENUE COST OF SALES GROSS PROFIT OTHER INCOME ADMINISTRATIVE EXPENSES SELLING AND DISTRIBUTION EXPENSES OTHER EXPENSES FINANCE COSTS NET (IMPAIRMENT LOSSES)/REVERSAL OF PROFIT BEFORE TAXATION INCOME TAX EXPENSE PROFIT AFTER TAXATION/TOTAL COMPREHENSIVE",
+    });
+    const page23 = normalizeSource({
+      title: "accountant-report-JRK.pdf",
+      filetype: "pdf",
+      page_number: 23,
+      table_candidate: true,
+      text: "OF\nREPORT\nSTATEMENTS\ncontrolling interests\nCOMPREHENSIVE INCOME ATTRIBUTABLE TO: Owners of the Company Non Basic Diluted\nJRK HOLDINGS BERHAD CONSOLIDATED PROFIT AFTER TAXATION/TOTAL EARNINGS PER SHARE (RM) - -",
+    });
+    const page71 = normalizeSource({
+      title: "accountant-report-JRK.pdf",
+      filetype: "pdf",
+      page_number: 71,
+      table_candidate: true,
+      text: "EARNINGS PER SHARE\nWeighted average number of ordinary shares in issue\nBasic earnings per share (RM)",
+    });
+    const page11 = normalizeSource({
+      title: "accountant-report-JRK.pdf",
+      filetype: "pdf",
+      page_number: 11,
+      table_candidate: true,
+      text: "Subdivision of shares",
+    });
+    const page12 = normalizeSource({
+      title: "accountant-report-JRK.pdf",
+      filetype: "pdf",
+      page_number: 12,
+      table_candidate: true,
+      text: "Upon completion of the IPO",
+    });
+
+    const block = formatEvidenceSnippets([page22, page23, page71, page11, page12], {
+      maxSnippets: 8,
+      promptText:
+        "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+    });
+
+    expect(block).toContain("page:71");
+    expect(block).toContain("page:11");
+    expect(block).toContain("page:12");
+    expect(block).toContain(
+      "| GP margin (%) | 35.21% | 41.29% | 31.45% | 27.97% | 41.58% |"
+    );
+    expect(block).toContain(
+      "| PBT margin (%) | 16.91% | 17.63% | 17.32% | 17.25% | 21.96% |"
+    );
+    expect(block).toContain(
+      "| PAT margin (%) | 12.30% | 12.12% | 11.78% | 12.31% | 14.58% |"
+    );
+    expect(block).toContain(
+      "| Basic and diluted EPS (RM) - After subdivision but before IPO | 0.01 | 0.01 | 0.02 | 0.01 | 0.01 |"
+    );
+    expect(block).toContain(
+      "| Basic and diluted EPS (RM) - After IPO | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 |"
+    );
+    expect(block).toContain(
+      "After subdivision but before IPO EPS uses 703,062,738 ordinary shares."
+    );
+    expect(block).toContain("After IPO EPS uses 963,062,738 ordinary shares.");
   });
 
   test("allows pro forma pages for capitalisation and indebtedness", () => {

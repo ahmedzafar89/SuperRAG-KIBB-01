@@ -50,6 +50,31 @@ function buildIpoRetrievalQueries(prompt = "") {
           "ebitda",
         ].join(" ")
       );
+      queries.push(
+        [
+          promptContext.heading,
+          "earnings per share",
+          "weighted average number of ordinary shares in issue",
+          "basic earnings per share",
+          "diluted earnings per share",
+          "subdivision of shares",
+          "subdivided shares",
+          "public issue",
+          "enlarged issued share capital",
+          "after ipo",
+        ].join(" ")
+      );
+      queries.push(
+        [
+          promptContext.heading,
+          "profit before taxation is arrived at after",
+          "depreciation",
+          "interest expense",
+          "finance cost",
+          "finance income",
+          "taxation",
+        ].join(" ")
+      );
       break;
     default:
       break;
