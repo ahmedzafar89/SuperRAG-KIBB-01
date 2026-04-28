@@ -636,6 +636,7 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
     if (Number.isFinite(pageNumber) && pageNumber <= 40) score += 0.1;
     if (Number.isFinite(pageNumber) && pageNumber > 60) score -= 0.75;
     if (hasMdnaOrBusinessNarrativeSignals(text)) score -= 0.8;
+    if (hasProfitOrLossPeriodValueSignals(text)) score += 0.65;
   }
   if (promptContext.sectionNumber === "12.2") {
     const pageNumber = Number(source.page_number);
@@ -691,7 +692,9 @@ function isHelpfulCompanion(anchor, candidate, promptContext) {
   const text = candidate.__cleanText;
   return (
     (promptContext.includeComparativeFpe && hasComparativePeriodSignals(text)) ||
-    (promptContext.includeNotes && hasNoteSignals(text))
+    (promptContext.includeNotes && hasNoteSignals(text)) ||
+    (promptContext.sectionNumber === "12.1.1" &&
+      hasProfitOrLossPeriodValueSignals(text))
   );
 }
 
@@ -796,6 +799,16 @@ function hasProfitOrLossMetricSupportSignals(text = "") {
   return /ebitda|gp margin|pbt margin|pat margin|basic and diluted eps|finance income|taxation|depreciation|finance cost|ebitda is computed/i.test(
     text
   );
+}
+
+function hasProfitOrLossPeriodValueSignals(text = "") {
+  const normalized = String(text || "");
+  const periodSignals =
+    /unaudited\s+1\.1\.\d{4}\s+to\s+31\.7\.\d{4}|audited\s+fye\s+31\s+december\s+\d{4}|financial year ended\s*\(?["']?fye["']?\)?\s*31\s+december\s+\d{4}/i.test(
+      normalized
+    );
+  const numericMatches = normalized.match(/\(?\d[\d,]*(?:\.\d+)?\)?/g) || [];
+  return periodSignals && numericMatches.length >= 4;
 }
 
 const PROFIT_OR_LOSS_LEADING_LABELS = [
@@ -979,12 +992,14 @@ function pruneProfitOrLossStatementPages(
       if (distance <= 1) {
         return (
           hasProfitOrLossStatementSignals(text) ||
-          hasProfitOrLossMetricSupportSignals(text)
+          hasProfitOrLossMetricSupportSignals(text) ||
+          hasProfitOrLossPeriodValueSignals(text)
         );
       }
       return (
         distance <= promptContext.adjacentPageWindow &&
-        hasProfitOrLossMetricSupportSignals(text)
+        (hasProfitOrLossMetricSupportSignals(text) ||
+          hasProfitOrLossPeriodValueSignals(text))
       );
     })
     .sort((a, b) => {
@@ -1295,7 +1310,8 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
 
           return (
             isProfitOrLossStatementLike(source) ||
-            hasProfitOrLossMetricSupportSignals(source.__cleanText || "")
+            hasProfitOrLossMetricSupportSignals(source.__cleanText || "") ||
+            hasProfitOrLossPeriodValueSignals(source.__cleanText || "")
           );
         })
         .sort((a, b) => Number(a.page_number || 0) - Number(b.page_number || 0));
