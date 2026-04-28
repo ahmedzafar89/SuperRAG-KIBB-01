@@ -1,9 +1,20 @@
 function extractIpoPromptContext(promptText = "") {
   const normalizedPrompt = String(promptText || "");
-  const headingMatch = normalizedPrompt.match(
-    /TARGET SECTION HEADING\s*[\r\n]+([^\r\n]+)/i
+  const promptForHeadingMatch = normalizedPrompt
+    .replace(/target\s+se\s+ction\s+heading/gi, "TARGET SECTION HEADING")
+    .replace(/target\s+section\s+heading/gi, "TARGET SECTION HEADING");
+  const headingMatch = promptForHeadingMatch.match(
+    /TARGET SECTION HEADING\b\s*:?\s*(?:[\r\n]+)?([^\r\n]+)/i
   );
-  const heading = (headingMatch?.[1] || "").trim();
+  const fallbackHeadingMatch = normalizedPrompt.match(
+    /\b(12(?:\.\d+){0,2})\s+([A-Z][^\r\n]{5,})/i
+  );
+  const heading = (
+    headingMatch?.[1] ||
+    (fallbackHeadingMatch
+      ? `${fallbackHeadingMatch[1]} ${fallbackHeadingMatch[2]}`
+      : "")
+  ).trim();
   const sectionNumber = (heading.match(/^12(?:\.\d+){0,2}/) || [])[0] || "";
   const tableHeavySections = new Set([
     "12.1.1",
@@ -40,8 +51,19 @@ function extractIpoPromptContext(promptText = "") {
       "revenue",
       "cost of sales",
       "gross profit",
+      "other income",
+      "administrative expenses",
+      "selling and distribution expenses",
+      "other expenses",
+      "income tax expense",
       "profit before tax",
       "profit after tax",
+      "total comprehensive income",
+      "attributable to",
+      "owners of the company",
+      "non-controlling interests",
+      "basic",
+      "diluted",
       "ebitda",
       "gp margin",
       "pbt margin",
@@ -52,6 +74,8 @@ function extractIpoPromptContext(promptText = "") {
       "taxation",
       "depreciation",
       "finance cost",
+      "net impairment losses",
+      "reversal of impairment losses on financial assets",
     ],
     "12.1.2": [
       "financial position",

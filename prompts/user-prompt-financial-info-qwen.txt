@@ -1,4 +1,4 @@
-FINANCIAL INFORMATION USER TEMPLATES FOR QWEN
+FINANCIAL INFORMATION USER PROMPTS
 
 Use one section block at a time.
 Copy only the block for the target section.
@@ -10,6 +10,10 @@ GLOBAL RULES FOR ALL BLOCKS
 - Use the style reference only for structure and tone.
 - Ignore figures, percentages, dates, line items, note numbers, and cross-references in the style reference.
 - If the section is wholly unsupported, output exactly: Not disclosed in the provided documents.
+- Treat the section as wholly unsupported only when the evidence contains no usable content for the target section after reviewing all supplied snippets.
+- If the evidence supports only part of the requested section, draft only the supported part and omit the unsupported rows or statements.
+- Do not use the fallback wording when the evidence supports a partial table, partial narrative, or only some rows or periods.
+- Do not treat orphan line-item labels without aligned figures, period headers, or directly usable note content as enough support for a statement table.
 
 --- 12.1
 
@@ -48,11 +52,15 @@ SECTION TASK
 - Include all supported line items in evidence order.
 - Include both current and comparative FPE if both are disclosed.
 - Include EBITDA, GP margin, PBT margin, PAT margin, EPS, EBITDA computation, and short formula notes only where expressly disclosed or directly traceable under the approved prospectus summary display requested for this section.
+- Review all snippets for the same statement together before deciding that this section is unsupported.
+- If period headers, figures, and line items are split across nearby snippets or continuation pages, assemble only the rows that align cleanly from the evidence.
 
 DO NOT
 - Do not stop after the first few rows if more supported rows exist.
 - Do not output unlabeled subtotal-only rows.
+- Do not output a single-column line-item list, a label-only table, or blank value columns when aligned period headers and figures are not disclosed for those rows.
 - Do not shift figures across rows or periods.
+- Do not treat disclosed line items, period labels, or value fragments for this statement as wholly unsupported evidence merely because some rows are incomplete.
 - Do not explain movements or drivers.
 - Do not continue into section 12.1.2.
 

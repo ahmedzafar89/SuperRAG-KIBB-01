@@ -53,6 +53,50 @@ describe("financial info prompt guards", () => {
     );
   });
 
+  test("qwen prompt set includes partial-support fallback discipline", () => {
+    const systemPrompt = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "prompts",
+        "system-prompt-financial-info-qwen.prompty"
+      ),
+      "utf8"
+    );
+    const userPrompt = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "prompts",
+        "user-prompt-financial-info-qwen.txt"
+      ),
+      "utf8"
+    );
+
+    expect(systemPrompt).toContain(
+      "Treat the section as wholly unsupported only when the evidence contains no usable content"
+    );
+    expect(systemPrompt).toContain(
+      "Do not use the fallback wording when the evidence supports a partial table"
+    );
+    expect(systemPrompt).toContain(
+      "For split or continued statement extracts, read adjacent snippets for the same statement together"
+    );
+    expect(systemPrompt).toContain(
+      "Do not output a label-only table, a single-column line-item list, or blank value columns"
+    );
+    expect(userPrompt).toContain(
+      "If the evidence supports only part of the requested section, draft only the supported part"
+    );
+    expect(userPrompt).toContain(
+      "Review all snippets for the same statement together before deciding that this section is unsupported."
+    );
+    expect(userPrompt).toContain(
+      "Do not treat disclosed line items, period labels, or value fragments for this statement as wholly unsupported evidence"
+    );
+    expect(userPrompt).toContain(
+      "Do not output a single-column line-item list, a label-only table, or blank value columns"
+    );
+  });
+
   test("updated section templates cover finance costs and MD&A commentary rules", () => {
     const userPrompt = fs.readFileSync(
       path.join(
@@ -100,6 +144,23 @@ describe("IPO prompt source expansion", () => {
     expect(query).toContain("consolidated statements of financial position");
     expect(query).toContain("non-current assets");
     expect(query).toContain("equity and liabilities");
+  });
+
+  test("builds a focused retrieval query when the target heading is on the same line or split oddly", () => {
+    const query = buildIpoRetrievalQuery(
+      "GLOBAL RULES\nTARGET SE CTION HEADING 12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME\nSECTION TASK\nDraft only section 12.1.1."
+    );
+
+    expect(query).toContain(
+      "12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME"
+    );
+    expect(query).toContain("12.1.1");
+    expect(query).toContain("profit or loss");
+    expect(query).toContain("revenue");
+    expect(query).toContain("earnings per share");
+    expect(query).toContain("income tax expense");
+    expect(query).toContain("basic");
+    expect(query).toContain("diluted");
   });
 
   test("merges expanded IPO sources without duplicating the same document chunk", () => {
@@ -220,6 +281,20 @@ describe("financial info evidence formatting", () => {
     expect(context.tableHeavy).toBe(true);
     expect(context.includeComparativeFpe).toBe(true);
     expect(context.keywords).toContain("cash flow");
+  });
+
+  test("extracts prompt context from malformed same-line target heading text", () => {
+    const context = extractIpoPromptContext(
+      "GLOBAL RULES\nTARGET SE CTION HEADING 12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME\nSECTION TASK\nDraft only section 12.1.1."
+    );
+
+    expect(context.heading).toBe(
+      "12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME"
+    );
+    expect(context.sectionNumber).toBe("12.1.1");
+    expect(context.tableHeavy).toBe(true);
+    expect(context.keywords).toContain("profit or loss");
+    expect(context.keywords).toContain("earnings per share");
   });
 
   test("extracts intro and borrowings prompt context from the target heading", () => {

@@ -19,6 +19,10 @@ Evidence rules
 - Do not use facts, figures, dates, periods, note numbers, percentages, line items, or cross-references from the style reference.
 - If the evidence supports only part of the section, draft only the supported part.
 - If the section is wholly unsupported, output exactly: Not disclosed in the provided documents.
+- Treat the section as wholly unsupported only when the evidence contains no usable content for that target section after reviewing all supplied snippets.
+- Relevant content includes the target statement heading, period headers, audit-status labels, line items, figures, continuation-page rows, note fragments, and computation-note fragments.
+- Orphan line-item labels without aligned figures, period headers, or directly usable note content are not enough to justify a statement table.
+- Do not use the fallback wording when the evidence supports a partial table, partial narrative, or only some rows or periods of the requested section.
 - Never place the fallback wording inside a supported table, row, or note.
 
 Figure rules
@@ -31,7 +35,7 @@ Figure rules
 - Do not move a figure from one row label to another.
 
 Style rules
-- Formal IPO prospectus tone.
+- Formal Malaysian IPO prospectus tone.
 - Neutral accountant-style wording.
 - Brief framing paragraph only when the section needs one.
 - No promotional language.
@@ -48,7 +52,10 @@ Table rules
 - Use clean markdown tables with pipe characters when the section is table-based.
 - Include a header row and separator row.
 - Use all supported rows from the selected evidence block.
+- For split or continued statement extracts, read adjacent snippets for the same statement together before deciding whether the section is unsupported.
+- If labels and values are split across nearby snippets or pages, assemble only the rows that align cleanly and omit unresolved rows rather than falling back for the whole section.
 - If a continuation page or missing parent heading is not in the selected evidence, omit the affected rows rather than guessing.
+- Do not output a label-only table, a single-column line-item list, or blank value columns for statement sections when the evidence does not disclose aligned period headers and values for those rows.
 
 Style-reference rules
 - Use style reference only for section order, table-introduction pattern, and cadence.
@@ -58,6 +65,7 @@ Style-reference rules
 Internal work order
 1. Identify the target section.
 2. Read the evidence first.
-3. Build the row set or narrative points only from evidence.
-4. Use style reference only to shape presentation.
-5. Omit anything not clearly supported.
+3. Review all supplied snippets for the same statement before deciding whether fallback is allowed.
+4. Build the row set or narrative points only from evidence.
+5. Use style reference only to shape presentation.
+6. Omit anything not clearly supported.
