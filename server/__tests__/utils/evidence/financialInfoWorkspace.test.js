@@ -5,6 +5,7 @@ const path = require("path");
 const {
   extractIpoPromptContext,
   formatEvidenceSnippets,
+  normalizeSource,
 } = require("../../../utils/evidence/formatEvidenceSnippets");
 const {
   buildIpoPromptBlocks,
@@ -861,7 +862,7 @@ describe("financial info evidence formatting", () => {
     const block = formatEvidenceSnippets(
       [
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 21,
           table_candidate: true,
@@ -869,7 +870,7 @@ describe("financial info evidence formatting", () => {
           score: 0.95,
         },
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 22,
           table_candidate: true,
@@ -877,7 +878,7 @@ describe("financial info evidence formatting", () => {
           score: 0.2,
         },
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 23,
           table_candidate: true,
@@ -904,14 +905,14 @@ describe("financial info evidence formatting", () => {
     const block = formatEvidenceSnippets(
       [
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 22,
           table_candidate: true,
           text: "PDF page: 22\nSource section: INCOME 2023\nUnaudited 1.1.2024 to 31.7.2024 83,479,155 23,346,710 23,699,076 (3,834,720)\nAudited FYE 31 December 2023 65,092,484 26,878,587 27,007,844 (7,512,980)\nFinancial Year Ended (\"FYE\") 31 December 2022 52,931,108 18,639,526 18,708,669 (4,751,086)\nCONSOLIDATED REVENUE COST OF SALES GROSS PROFIT OTHER INCOME ADMINISTRATIVE EXPENSES SELLING AND DISTRIBUTION EXPENSES OTHER EXPENSES FINANCE COSTS NET (IMPAIRMENT LOSSES)/REVERSAL OF IMPAIRMENT LOSSES ON FINANCIAL ASSETS PROFIT BEFORE TAXATION INCOME TAX EXPENSE PROFIT AFTER TAXATION/TOTAL COMPREHENSIVE INCOME FOR THE FINANCIAL YEAR/PERIOD",
         },
         {
-          title: "accountant-report-JRK.pdf",
+          title: "accountant-report-synthetic.pdf",
           filetype: "pdf",
           page_number: 23,
           table_candidate: true,
@@ -933,6 +934,41 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain(
       "| Other income | (4,751,086) | (7,512,980) | (3,834,720) |"
     );
+  });
+
+  test("enriches sparse JRK pdf hits from stored parsed page files", () => {
+    const page22 = normalizeSource({
+      title: "accountant-report-JRK.pdf",
+      filetype: "pdf",
+      page_number: 22,
+      table_candidate: true,
+      text: "ACCOUNTANTS’\nRegistration Registration 14. IMPAIRMENT LOSSES ON FINANCIAL ASSETS INCOME FOR THE FINANCIAL YEAR/PERIOD\nJRK HOLDINGS BERHAD CONSOLIDATED REVENUE COST OF SALES GROSS PROFIT OTHER INCOME ADMINISTRATIVE EXPENSES SELLING AND DISTRIBUTION EXPENSES OTHER EXPENSES FINANCE COSTS NET (IMPAIRMENT LOSSES)/REVERSAL OF PROFIT BEFORE TAXATION INCOME TAX EXPENSE PROFIT AFTER TAXATION/TOTAL COMPREHENSIVE",
+    });
+    const page23 = normalizeSource({
+      title: "accountant-report-JRK.pdf",
+      filetype: "pdf",
+      page_number: 23,
+      table_candidate: true,
+      text: "OF\nREPORT\nSTATEMENTS\ncontrolling interests\nCOMPREHENSIVE INCOME ATTRIBUTABLE TO: Owners of the Company Non Basic Diluted\nJRK HOLDINGS BERHAD CONSOLIDATED PROFIT AFTER TAXATION/TOTAL EARNINGS PER SHARE (RM) - -",
+    });
+
+    expect(page22.__cleanText).toContain("83,479,155");
+    expect(page22.__cleanText).toContain("65,092,484");
+    expect(page23.__cleanText).toContain("6,511,013");
+    expect(page23.__cleanText).toContain("919,050");
+
+    const block = formatEvidenceSnippets([page22, page23], {
+      maxSnippets: 4,
+      promptText:
+        "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+    });
+
+    expect(block).toContain("83,479,155");
+    expect(block).toContain("65,092,484");
+    expect(block).toContain("6,511,013");
+    expect(block).toContain("919,050");
+    expect(block).toContain("page:22");
+    expect(block).toContain("page:23");
   });
 
   test("allows pro forma pages for capitalisation and indebtedness", () => {

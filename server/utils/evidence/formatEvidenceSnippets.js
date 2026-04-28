@@ -1,3 +1,16 @@
+const fs = require("fs");
+const path = require("path");
+
+const CUSTOM_DOCUMENTS_DIR = path.join(
+  process.cwd(),
+  "server",
+  "storage",
+  "documents",
+  "custom-documents"
+);
+const customDocumentIndexCache = new Map();
+const customDocumentPageTextCache = new Map();
+
 function extractIpoPromptContext(promptText = "") {
   const normalizedPrompt = String(promptText || "");
   const promptForHeadingMatch = normalizedPrompt
@@ -221,6 +234,67 @@ function cleanText(txt = "") {
     .trim();
 }
 
+function getCustomDocumentFilenameCandidates(source = {}) {
+  return Array.from(
+    new Set(
+      [
+        source.sourceDocument,
+        source.docTitle,
+        source.title,
+        source.filename,
+        source.docSource,
+      ]
+        .map((value) => String(value || "").trim())
+        .filter(Boolean)
+        .map((value) => path.basename(value.replace(/^file:\/\//i, "")))
+    )
+  );
+}
+
+function getCustomDocumentPagePath(source = {}) {
+  const pageNumber = Number(source?.page_number);
+  if (!Number.isFinite(pageNumber) || pageNumber <= 0) return "";
+
+  for (const candidate of getCustomDocumentFilenameCandidates(source)) {
+    const cacheKey = `${candidate}|p${pageNumber}`;
+    if (!customDocumentIndexCache.has(cacheKey)) {
+      const matches = fs.existsSync(CUSTOM_DOCUMENTS_DIR)
+        ? fs
+            .readdirSync(CUSTOM_DOCUMENTS_DIR)
+            .filter((name) => name.startsWith(`${candidate}-p${pageNumber}-`))
+        : [];
+      customDocumentIndexCache.set(cacheKey, matches);
+    }
+
+    const matches = customDocumentIndexCache.get(cacheKey) || [];
+    if (matches.length > 0) {
+      return path.join(CUSTOM_DOCUMENTS_DIR, matches[0]);
+    }
+  }
+
+  return "";
+}
+
+function getStoredCustomDocumentPageText(source = {}) {
+  const pagePath = getCustomDocumentPagePath(source);
+  if (!pagePath) return "";
+  if (customDocumentPageTextCache.has(pagePath)) {
+    return customDocumentPageTextCache.get(pagePath);
+  }
+
+  let text = "";
+  try {
+    const raw = fs.readFileSync(pagePath, "utf8");
+    const parsed = JSON.parse(raw);
+    text = String(parsed?.pageContent || parsed?.text || "").trim();
+  } catch {
+    text = "";
+  }
+
+  customDocumentPageTextCache.set(pagePath, text);
+  return text;
+}
+
 function sanitizeFinanceEvidenceText(txt = "", source = {}) {
   const text = cleanText(txt);
   if (!text) return "";
@@ -261,6 +335,27 @@ function sanitizeFinanceEvidenceText(txt = "", source = {}) {
   return filtered.join("\n").trim();
 }
 
+function shouldPreferStoredPdfPageText(rawText = "", storedText = "", source = {}) {
+  if (!storedText) return false;
+  if (!rawText) return true;
+  if (storedText.length <= rawText.length) return false;
+
+  const rawHasProfitOrLossValues =
+    source?.page_number && hasProfitOrLossPeriodValueSignals(rawText);
+  const storedHasProfitOrLossValues =
+    source?.page_number && hasProfitOrLossPeriodValueSignals(storedText);
+
+  if (storedHasProfitOrLossValues && !rawHasProfitOrLossValues) return true;
+
+  const rawMarkerCount = profitOrLossMarkerCount(rawText);
+  const storedMarkerCount = profitOrLossMarkerCount(storedText);
+  if (storedMarkerCount > rawMarkerCount + 2) return true;
+
+  if (storedText.length > rawText.length * 1.5) return true;
+
+  return false;
+}
+
 function normalizeSource(source = {}) {
   const metadata =
     source && source.metadata && typeof source.metadata === "object"
@@ -268,8 +363,16 @@ function normalizeSource(source = {}) {
       : {};
   const merged = { ...metadata, ...source };
   delete merged.metadata;
-  const rawText =
+  const snippetText =
     source.text || source.pageContent || metadata.text || metadata.pageContent || "";
+  const storedPdfPageText = getStoredCustomDocumentPageText(merged);
+  const rawText = shouldPreferStoredPdfPageText(
+    snippetText,
+    storedPdfPageText,
+    merged
+  )
+    ? storedPdfPageText
+    : snippetText;
   const text = sanitizeFinanceEvidenceText(rawText, merged);
 
   return {
