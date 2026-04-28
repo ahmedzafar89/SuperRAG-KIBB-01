@@ -24,7 +24,7 @@ function buildIpoPromptBlocks(allSources = [], opts = {}) {
   const evidenceMaxCharsPerSnippet =
     opts.evidenceMaxCharsPerSnippet ??
     (promptContext.tableHeavy ? 2600 : 1800);
-  const styleMaxSnippets = opts.styleMaxSnippets ?? (promptContext.tableHeavy ? 3 : 2);
+  const styleMaxSnippets = opts.styleMaxSnippets ?? (promptContext.tableHeavy ? 1 : 2);
   const styleMaxCharsPerSnippet =
     opts.styleMaxCharsPerSnippet ?? (promptContext.tableHeavy ? 1200 : 900);
 

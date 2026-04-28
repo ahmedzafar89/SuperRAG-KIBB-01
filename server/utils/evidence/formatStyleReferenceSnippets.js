@@ -223,6 +223,49 @@ function scoreHeadingLine(line = "", promptContext = {}) {
   return overlap;
 }
 
+function scoreStyleSectionSignals(text = "", promptContext = {}) {
+  const normalized = cleanText(text).toLowerCase();
+
+  switch (promptContext.sectionNumber) {
+    case "12.1.1":
+      if (/profit or loss|other comprehensive income/i.test(normalized)) return 2;
+      return [
+        /revenue/,
+        /cost of sales/,
+        /gross profit/,
+        /other income/,
+        /administrative expenses/,
+        /selling and distribution expenses/,
+        /finance costs?/,
+        /profit before tax|profit before taxation/,
+        /earnings per share/,
+      ].filter((pattern) => pattern.test(normalized)).length >= 5
+        ? 1
+        : 0;
+    case "12.1.2":
+      return /financial position|non-current assets|current assets|equity and liabilities|total assets|total equity and liabilities/i.test(
+        normalized
+      )
+        ? 1
+        : 0;
+    case "12.1.3":
+    case "12.4.2":
+      return /cash flows|operating activities|investing activities|financing activities|cash and cash equivalents/i.test(
+        normalized
+      )
+        ? 1
+        : 0;
+    case "12.2":
+      return /capitalisation|indebtedness|total indebtedness|total capitalisation|after public issue|pro forma/i.test(
+        normalized
+      )
+        ? 1
+        : 0;
+    default:
+      return 0;
+  }
+}
+
 function extractRelevantStyleText(source = {}, promptContext = {}, maxChars = 1200) {
   const text = cleanText(source.text || "");
   if (!text || !promptContext?.heading) return text;
@@ -237,7 +280,9 @@ function extractRelevantStyleText(source = {}, promptContext = {}, maxChars = 12
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || a.index - b.index);
 
-  if (!scored.length) return text;
+  if (!scored.length) {
+    return scoreStyleSectionSignals(text, promptContext) > 0 ? text : "";
+  }
 
   const start = scored[0].index;
   const nextHeading = indexedLines.find(
@@ -267,16 +312,40 @@ function formatStyleReferenceSnippets(sources = [], opts = {}) {
       return {
         ...source,
         __relevantText: relevantText,
-        __score: promptContext
+        __headingScore: promptContext
           ? scoreHeadingLine(relevantText.split(/\r?\n/)[0] || "", promptContext)
+          : 0,
+        __sectionScore: promptContext
+          ? scoreStyleSectionSignals(relevantText, promptContext)
           : 0,
       };
     })
+    .map((source) => ({
+      ...source,
+      __score: Math.max(source.__headingScore || 0, source.__sectionScore || 0),
+    }))
+    .filter((source) => source.__relevantText)
     .sort((a, b) => b.__score - a.__score);
+
+  const strictSectionMatches =
+    promptContext?.sectionNumber === "12.1.1"
+      ? candidates.filter((source) =>
+          /profit or loss|other comprehensive income/i.test(source.__relevantText || "")
+        )
+      : [];
+
+  const rankedCandidates =
+    strictSectionMatches.length > 0
+      ? strictSectionMatches
+      : promptContext && candidates.some((source) => source.__headingScore > 0)
+      ? candidates.filter((source) => source.__headingScore > 0)
+      : promptContext && candidates.some((source) => source.__score > 0)
+      ? candidates.filter((source) => source.__score > 0)
+      : candidates;
 
   const picked = [];
   const seen = new Set();
-  for (const source of candidates) {
+  for (const source of rankedCandidates) {
     const locationKey = [
       styleReferenceKey(source).toLowerCase(),
       source.page_number || "",

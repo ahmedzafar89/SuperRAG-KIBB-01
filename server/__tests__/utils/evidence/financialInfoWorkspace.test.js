@@ -762,6 +762,49 @@ describe("financial info evidence formatting", () => {
     expect(block).not.toContain("page:71");
   });
 
+  test("excludes adjacent financial position pages from profit or loss evidence blocks", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 21,
+          table_candidate: true,
+          text: "PDF page: 21\nSource section: JRK HOLDINGS BERHAD\nRegistration No: 201801045336 (1307368 - P)\nACCOUNTANTS’ REPORT\nCONSOLIDATED STATEMENTS OF FINANCIAL POSITION (CONT'D)\nEQUITY AND LIABILITIES\nShare capital\nRetained profits\nTOTAL EQUITY AND LIABILITIES\nThe annexed notes form an integral part of these financial statements.",
+          score: 0.95,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 22,
+          table_candidate: true,
+          text: "PDF page: 22\nSource section: INCOME 2023\nUnaudited 1.1.2024 to 31.7.2024 83,479,155 23,346,710 23,699,076 (3,834,720)\nAudited FYE 31 December 2023 65,092,484 26,878,587 27,007,844 (7,512,980)\nFinancial Year Ended (\"FYE\") 31 December 2022 52,931,108 18,639,526 18,708,669 (4,751,086)\nCONSOLIDATED REVENUE COST OF SALES GROSS PROFIT OTHER INCOME ADMINISTRATIVE EXPENSES SELLING AND DISTRIBUTION EXPENSES OTHER EXPENSES FINANCE COSTS NET (IMPAIRMENT LOSSES)/REVERSAL OF IMPAIRMENT LOSSES ON FINANCIAL ASSETS PROFIT BEFORE TAXATION INCOME TAX EXPENSE PROFIT AFTER TAXATION/TOTAL COMPREHENSIVE INCOME FOR THE FINANCIAL YEAR/PERIOD",
+          score: 0.2,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 23,
+          table_candidate: true,
+          text: "PDF page: 23\nSource section: COMPREHENSIVE\nAudited FYE 31 December 2023 6,511,013 1,376,600 7,887,613\nAudited FYE 31 December 2022 5,593,471 919,050 6,512,521\nCOMPREHENSIVE INCOME ATTRIBUTABLE TO: Owners of the Company Non-controlling interests Basic Diluted CONSOLIDATED PROFIT AFTER TAXATION/TOTAL EARNINGS PER SHARE (RM)",
+          score: 0.2,
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+      }
+    );
+
+    expect(block).toContain("page:22");
+    expect(block).toContain("page:23");
+    expect(block).not.toContain("page:21");
+    expect(block).not.toContain("EQUITY AND LIABILITIES");
+    expect(block).not.toContain("Registration No:");
+    expect(block).not.toContain("ACCOUNTANTS’ REPORT");
+  });
+
   test("allows pro forma pages for capitalisation and indebtedness", () => {
     const block = formatEvidenceSnippets(
       [
@@ -892,6 +935,48 @@ describe("financial info evidence formatting", () => {
     expect(styleBlock).not.toContain("chapter introduction");
     expect(styleBlock).toContain("[CURRENCY_AMOUNT]");
     expect(styleBlock).toContain("FYE [YEAR]");
+  });
+
+  test("style formatter excludes unrelated sections when a matching profit or loss sample exists", () => {
+    const styleBlock = formatStyleReferenceSnippets(
+      [
+        {
+          docTitle: "style_ref_financial-info_sample",
+          text: [
+            "11.1.1 Combined statements of profit or loss and other comprehensive income",
+            "The following table sets out a summary of our Group's audited combined statements of profit or loss.",
+            "Revenue RM20.05 million for FYE 2025.",
+          ].join("\n"),
+        },
+        {
+          docTitle: "style_ref_financial-info_sample",
+          text: [
+            "11.5 IMPACT OF FOREIGN EXCHANGE RATES, INTEREST RATES AND/OR COMMODITY PRICES",
+            "Interest coverage ratio measures the number of times a company can make its interest payments with its EBIT.",
+          ].join("\n"),
+        },
+        {
+          docTitle: "style_ref_financial-info_sample",
+          text: [
+            "10.4 Analysis of revenue by sales channel",
+            "Online sales RM10.00 million.",
+          ].join("\n"),
+        },
+      ],
+      {
+        maxSnippets: 3,
+        maxCharsPerSnippet: 800,
+        promptContext: extractIpoPromptContext(
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME"
+        ),
+      }
+    );
+
+    expect(styleBlock).toContain("profit or loss");
+    expect(styleBlock).toContain("[CURRENCY_AMOUNT]");
+    expect(styleBlock).not.toContain("IMPACT OF FOREIGN EXCHANGE RATES");
+    expect(styleBlock).not.toContain("Interest coverage ratio");
+    expect(styleBlock).not.toContain("Analysis of revenue by sales channel");
   });
 });
 

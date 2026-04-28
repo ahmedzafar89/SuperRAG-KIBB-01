@@ -197,6 +197,46 @@ function cleanText(txt = "") {
     .trim();
 }
 
+function sanitizeFinanceEvidenceText(txt = "", source = {}) {
+  const text = cleanText(txt);
+  if (!text) return "";
+
+  const isFinancePdf =
+    source?.filetype === "pdf" && (source?.table_candidate || source?.page_number);
+  if (!isFinancePdf) return text;
+
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) =>
+      line
+        .replace(/The annexed notes form an integral part of these financial statements\./gi, " ")
+        .replace(/Registration(?:\s+Registration)?\s+No\.?:?/gi, " ")
+        .replace(/\bACCOUNTANTS[’']\s+REPORT(?:\s+\(CONT[’']D\))?/gi, " ")
+        .replace(/\bREPORT\s+\(CONT[’']D\)\b/gi, " ")
+        .replace(/\bRegistration\s+14\.\b/gi, " ")
+        .replace(/\bPage\b/gi, " ")
+        .replace(/\(CONT[’']D\)/gi, " ")
+        .replace(/\b\d{9,}\s*\([^)]*\)/g, " ")
+        .replace(/[ \t]+/g, " ")
+        .trim()
+    )
+    .filter(Boolean);
+
+  const filtered = lines.filter((line) => {
+    if (/^PDF page:\s*\d+$/i.test(line)) return false;
+    if (/^Source section:\s*/i.test(line)) return false;
+    if (/^Note$/i.test(line)) return false;
+    if (/^\(CONT[’']D\)$/i.test(line)) return false;
+    if (/^[<>\-\.\(\)\s:]+$/.test(line)) return false;
+    if (/^[<>]\s*[<>]$/.test(line)) return false;
+    if (/^[A-Za-z]\)?$/.test(line) && line !== "RM") return false;
+    if (/^[A-Za-z]\.$/.test(line)) return false;
+    return true;
+  });
+
+  return filtered.join("\n").trim();
+}
+
 function normalizeSource(source = {}) {
   const metadata =
     source && source.metadata && typeof source.metadata === "object"
@@ -204,13 +244,9 @@ function normalizeSource(source = {}) {
       : {};
   const merged = { ...metadata, ...source };
   delete merged.metadata;
-  const text = cleanText(
-    source.text ||
-      source.pageContent ||
-      metadata.text ||
-      metadata.pageContent ||
-      ""
-  );
+  const rawText =
+    source.text || source.pageContent || metadata.text || metadata.pageContent || "";
+  const text = sanitizeFinanceEvidenceText(rawText, merged);
 
   return {
     ...merged,
@@ -302,6 +338,12 @@ function hasAccountantsReportBoilerplateSignals(text = "") {
   );
 }
 
+function hasConsolidatedNotesSignals(text = "") {
+  return /notes to the consolidated financial statements|note\s+\d+(?:\.\d+)?/i.test(
+    text
+  );
+}
+
 function sectionSpecificSignalScore(text = "", promptContext = {}) {
   const normalized = cleanText(text).toLowerCase();
   let score = 0;
@@ -334,10 +376,27 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
         score -= 1.15;
       break;
     case "12.1.1":
+      const profitOrLossMarkers = [
+        /revenue/,
+        /cost of sales/,
+        /gross profit/,
+        /other income/,
+        /administrative expenses/,
+        /selling and distribution expenses/,
+        /other expenses/,
+        /finance costs?/,
+        /profit before taxation/,
+        /income tax expense/,
+        /profit after taxation/,
+        /earnings per share/,
+      ].filter((pattern) => pattern.test(normalized)).length;
       if (/consolidated statements? of profit or loss/.test(normalized)) score += 0.55;
       if (/other comprehensive income/.test(normalized)) score += 0.3;
       if (/revenue|cost of sales|gross profit|profit before taxation|profit after taxation|earnings per share/.test(normalized))
         score += 0.28;
+      if (profitOrLossMarkers >= 8) score += 1.1;
+      else if (profitOrLossMarkers >= 5) score += 0.55;
+      else if (profitOrLossMarkers >= 3) score += 0.22;
       if (/ebitda|gp margin|pbt margin|pat margin|basic and diluted eps/.test(normalized))
         score += 0.32;
       if (/finance income|taxation|depreciation|finance cost|ebitda is computed/.test(normalized))
@@ -346,6 +405,9 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
         score += 0.2;
       if (/income tax expense|basic|diluted|attributable to:|owners of the company|non-controlling interests/.test(normalized))
         score += 0.22;
+      if (hasConsolidatedNotesSignals(normalized)) score -= 1.5;
+      if (/statement[s]? of financial position|equity and liabilities|total equity and liabilities|current liabilities|non-current liabilities|share capital|retained profits|total assets/.test(normalized))
+        score -= 1.25;
       if (/dividends|balance at 1\.1|balance at 31\.12|distribution to owners|statement of changes in equity|acquisition of non/.test(normalized))
         score -= 1.35;
       break;
@@ -674,9 +736,52 @@ function hasProfitOrLossExcludedSignals(text = "") {
   );
 }
 
+function profitOrLossMarkerCount(text = "") {
+  return [
+    /revenue/i,
+    /cost of sales/i,
+    /gross profit/i,
+    /other income/i,
+    /administrative expenses/i,
+    /selling and distribution expenses/i,
+    /other expenses/i,
+    /finance costs?/i,
+    /profit before taxation/i,
+    /income tax expense/i,
+    /profit after taxation/i,
+    /earnings per share/i,
+  ].filter((pattern) => pattern.test(text)).length;
+}
+
 function hasProfitOrLossMetricSupportSignals(text = "") {
   return /ebitda|gp margin|pbt margin|pat margin|basic and diluted eps|finance income|taxation|depreciation|finance cost|ebitda is computed/i.test(
     text
+  );
+}
+
+function hasProfitOrLossStatementSignals(text = "") {
+  if (
+    /consolidated statements? of profit or loss|other comprehensive income/i.test(text)
+  ) {
+    return true;
+  }
+
+  if (profitOrLossMarkerCount(text) >= 4) return true;
+
+  return /profit after taxation|total comprehensive|earnings per share|basic|diluted|attributable to:/i.test(
+    text
+  );
+}
+
+function isProfitOrLossStatementLike(source = {}) {
+  const text = source.__cleanText || "";
+  return (
+    hasProfitOrLossStatementSignals(text) &&
+    !hasProfitOrLossExcludedSignals(text) &&
+    !hasConsolidatedNotesSignals(text) &&
+    !/statement[s]? of financial position|equity and liabilities|current liabilities|non-current liabilities|total equity and liabilities/i.test(
+      text
+    )
   );
 }
 
@@ -742,7 +847,12 @@ function pruneProfitOrLossStatementPages(
         return false;
       }
       const distance = pageDistance(anchor, source);
-      if (distance <= 1) return true;
+      if (distance <= 1) {
+        return (
+          hasProfitOrLossStatementSignals(text) ||
+          hasProfitOrLossMetricSupportSignals(text)
+        );
+      }
       return (
         distance <= promptContext.adjacentPageWindow &&
         hasProfitOrLossMetricSupportSignals(text)
@@ -1034,6 +1144,29 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     );
     if (narrowed.length) {
       return renderPicked(narrowed, maxCharsPerSnippet);
+    }
+  }
+
+  if (promptContext.sectionNumber === "12.1.1") {
+    const statementPages = ranked.filter((source) => isProfitOrLossStatementLike(source));
+    if (statementPages.length) {
+      const anchor = statementPages[0];
+      const statementLike = ranked
+        .filter((source) => {
+          if (sourceDocKey(source) !== sourceDocKey(anchor)) return false;
+          const distance = pageDistance(anchor, source);
+          if (!Number.isFinite(distance) || distance > promptContext.adjacentPageWindow) {
+            return false;
+          }
+
+          return (
+            isProfitOrLossStatementLike(source) ||
+            hasProfitOrLossMetricSupportSignals(source.__cleanText || "")
+          );
+        })
+        .sort((a, b) => Number(a.page_number || 0) - Number(b.page_number || 0));
+
+      return renderPicked(statementLike.slice(0, maxSnippets), maxCharsPerSnippet);
     }
   }
 
