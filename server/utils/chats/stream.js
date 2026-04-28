@@ -17,6 +17,10 @@ const {
   buildIpoPromptBlocks,
   injectIpoPromptBlocks,
 } = require("../evidence/buildIpoPromptBlocks");
+const {
+  getIpoPromptSources,
+  mergeIpoPromptSources,
+} = require("../evidence/ipoPromptSearch");
 
 const VALID_CHAT_MODE = ["chat", "query"];
 
@@ -233,12 +237,23 @@ async function streamChatWithWorkspace(
 
   // === IPO Evidence Injection (only for a workspace/chat mode you decide) ===
   if (shouldUseIpoPromptInjection(workspace, updatedMessage)) {
-    console.log("[IPO EVIDENCE INJECTION] Detected workspace and prompt for IPO evidence injection.");
+    console.log(
+      "[IPO EVIDENCE INJECTION] Detected workspace and prompt for IPO evidence injection."
+    );
 
-    const promptSources = [
-      ...vectorSearchResults.sources,
-      ...sources,
-    ];
+    const promptSources = await getIpoPromptSources({
+      workspace,
+      prompt: updatedMessage,
+      VectorDb,
+      LLMConnector,
+      embeddingsCount,
+      pinnedDocIdentifiers,
+      existingSources: mergeIpoPromptSources(
+        sources,
+        vectorSearchResults.sources
+      ),
+    });
+    sources = promptSources;
     const promptBlocks = buildIpoPromptBlocks(promptSources, {
       userTemplate: updatedMessage,
     });

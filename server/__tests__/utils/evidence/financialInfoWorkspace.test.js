@@ -13,6 +13,10 @@ const {
   formatStyleReferenceSnippets,
   sanitizeStyleReferenceText,
 } = require("../../../utils/evidence/formatStyleReferenceSnippets");
+const {
+  expandedIpoTopN,
+  mergeIpoPromptSources,
+} = require("../../../utils/evidence/ipoPromptSearch");
 
 describe("financial info prompt guards", () => {
   test("system prompt includes anti-leakage and table-fidelity rules", () => {
@@ -59,6 +63,38 @@ describe("financial info prompt guards", () => {
     expect(userPrompt).toContain(
       "Use a short introductory paragraph only if it is needed to orient the reader; otherwise start directly with one complete summary table."
     );
+  });
+});
+
+describe("IPO prompt source expansion", () => {
+  test("uses a larger candidate set than the workspace topN for financial-info prompts", () => {
+    expect(expandedIpoTopN({ topN: 12 })).toBe(50);
+    expect(expandedIpoTopN({ topN: 80 })).toBe(80);
+  });
+
+  test("merges expanded IPO sources without duplicating the same document chunk", () => {
+    const source = {
+      title: "accountant-report.pdf",
+      page_number: 28,
+      source_section: "CONSOLIDATED STATEMENTS OF CASH FLOWS",
+      text: "Net cash generated from operating activities 100",
+    };
+
+    const merged = mergeIpoPromptSources(
+      [source],
+      [
+        { ...source },
+        {
+          title: "style_ref_financial-info_sample.pdf",
+          page_number: 5,
+          text: "Combined statements of cash flows style section",
+        },
+      ]
+    );
+
+    expect(merged).toHaveLength(2);
+    expect(merged[0].title).toBe("accountant-report.pdf");
+    expect(merged[1].title).toContain("style_ref");
   });
 });
 
