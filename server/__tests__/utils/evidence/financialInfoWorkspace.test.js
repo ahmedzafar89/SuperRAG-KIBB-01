@@ -15,6 +15,7 @@ const {
 } = require("../../../utils/evidence/formatStyleReferenceSnippets");
 const {
   buildIpoRetrievalQuery,
+  buildIpoRetrievalQueries,
   expandedIpoTopN,
   mergeIpoPromptSources,
 } = require("../../../utils/evidence/ipoPromptSearch");
@@ -161,6 +162,25 @@ describe("IPO prompt source expansion", () => {
     expect(query).toContain("income tax expense");
     expect(query).toContain("basic");
     expect(query).toContain("diluted");
+  });
+
+  test("builds companion retrieval queries for profit or loss continuation and EBITDA support", () => {
+    const queries = buildIpoRetrievalQueries(
+      "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME"
+    );
+
+    expect(queries.length).toBeGreaterThan(1);
+    expect(
+      queries.some((query) =>
+        query.includes("total comprehensive income attributable to")
+      )
+    ).toBe(true);
+    expect(
+      queries.some((query) => query.includes("basic diluted earnings per share"))
+    ).toBe(true);
+    expect(
+      queries.some((query) => query.includes("ebitda is computed as follows"))
+    ).toBe(true);
   });
 
   test("merges expanded IPO sources without duplicating the same document chunk", () => {

@@ -362,6 +362,12 @@ function hasAccountantsReportBoilerplateSignals(text = "") {
   );
 }
 
+function hasMdnaOrBusinessNarrativeSignals(text = "") {
+  return /geographical|geographic|segment|property development|principal activities|results of its business|overview of our results of operations|management discussion and analysis/i.test(
+    text
+  );
+}
+
 function hasConsolidatedNotesSignals(text = "") {
   return /notes to the consolidated financial statements|note\s+\d+(?:\.\d+)?/i.test(
     text
@@ -621,6 +627,15 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
     const pageNumber = Number(source.page_number);
     if (Number.isFinite(pageNumber) && pageNumber <= 40) score += 0.15;
     if (Number.isFinite(pageNumber) && pageNumber > 60) score -= 0.45;
+  }
+  if (promptContext.sectionNumber === "12.1.1") {
+    const pageNumber = Number(source.page_number);
+    if (Number.isFinite(pageNumber) && pageNumber >= 20 && pageNumber <= 24) {
+      score += 0.45;
+    }
+    if (Number.isFinite(pageNumber) && pageNumber <= 40) score += 0.1;
+    if (Number.isFinite(pageNumber) && pageNumber > 60) score -= 0.75;
+    if (hasMdnaOrBusinessNarrativeSignals(text)) score -= 0.8;
   }
   if (promptContext.sectionNumber === "12.2") {
     const pageNumber = Number(source.page_number);

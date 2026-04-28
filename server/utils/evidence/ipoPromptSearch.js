@@ -22,6 +22,48 @@ function buildIpoRetrievalQuery(prompt = "") {
   return Array.from(new Set(parts)).join(" ");
 }
 
+function buildIpoRetrievalQueries(prompt = "") {
+  const promptContext = extractIpoPromptContext(prompt);
+  const queries = [buildIpoRetrievalQuery(prompt)];
+
+  switch (promptContext.sectionNumber) {
+    case "12.1.1":
+      queries.push(
+        [
+          promptContext.heading,
+          "profit after taxation",
+          "total comprehensive income attributable to",
+          "owners of the company",
+          "non-controlling interests",
+          "basic diluted earnings per share",
+        ].join(" ")
+      );
+      queries.push(
+        [
+          promptContext.heading,
+          "ebitda is computed as follows",
+          "pat",
+          "finance income",
+          "taxation",
+          "depreciation",
+          "finance cost",
+          "ebitda",
+        ].join(" ")
+      );
+      break;
+    default:
+      break;
+  }
+
+  return Array.from(
+    new Set(
+      queries
+        .map((query) => String(query || "").trim())
+        .filter(Boolean)
+    )
+  );
+}
+
 function sourceValue(source = {}, key) {
   return source?.[key] ?? source?.metadata?.[key] ?? "";
 }
@@ -129,25 +171,33 @@ async function getIpoPromptSources({
   }
 
   try {
-    const expandedResults = await VectorDb.performSimilaritySearch({
-      namespace: workspace.slug,
-      input: buildIpoRetrievalQuery(prompt),
-      LLMConnector,
-      similarityThreshold: workspace?.similarityThreshold,
-      topN: expandedIpoTopN(workspace),
-      filterIdentifiers: pinnedDocIdentifiers,
-      rerank: workspace?.vectorSearchMode === "rerank",
-    });
+    let mergedExpandedSources = [];
+    for (const query of buildIpoRetrievalQueries(prompt)) {
+      const expandedResults = await VectorDb.performSimilaritySearch({
+        namespace: workspace.slug,
+        input: query,
+        LLMConnector,
+        similarityThreshold: workspace?.similarityThreshold,
+        topN: expandedIpoTopN(workspace),
+        filterIdentifiers: pinnedDocIdentifiers,
+        rerank: workspace?.vectorSearchMode === "rerank",
+      });
 
-    if (expandedResults?.message) {
-      console.warn(
-        "[IPO EVIDENCE INJECTION] Expanded source search failed:",
-        expandedResults.message
+      if (expandedResults?.message) {
+        console.warn(
+          "[IPO EVIDENCE INJECTION] Expanded source search failed:",
+          expandedResults.message
+        );
+        continue;
+      }
+
+      mergedExpandedSources = mergeIpoPromptSources(
+        mergedExpandedSources,
+        expandedResults.sources
       );
-      return mergeIpoPromptSources(existingSources);
     }
 
-    return mergeIpoPromptSources(existingSources, expandedResults.sources);
+    return mergeIpoPromptSources(existingSources, mergedExpandedSources);
   } catch (error) {
     console.warn(
       "[IPO EVIDENCE INJECTION] Expanded source search failed:",
@@ -244,6 +294,7 @@ async function prepareIpoPromptInjection({
 module.exports = {
   IPO_PROMPT_EXPANDED_TOP_N,
   buildIpoRetrievalQuery,
+  buildIpoRetrievalQueries,
   expandedIpoTopN,
   filterStyleReferenceSearchResults,
   filterStyleReferenceSources,
