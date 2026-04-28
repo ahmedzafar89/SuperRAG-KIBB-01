@@ -419,6 +419,7 @@ async function chatSync({
     });
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
+    contextTexts = [];
   }
 
   // Compress & Assemble message to ensure prompt passes token limit with room for response
@@ -807,6 +808,7 @@ async function streamChat({
     });
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
+    contextTexts = [];
   }
 
   // Compress & Assemble message to ensure prompt passes token limit with room for response

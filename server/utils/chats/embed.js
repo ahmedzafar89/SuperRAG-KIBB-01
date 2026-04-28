@@ -187,6 +187,7 @@ async function streamChatWithForEmbed(
     });
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
+    contextTexts = [];
   }
 
   // Compress message to ensure prompt passes token limit with room for response

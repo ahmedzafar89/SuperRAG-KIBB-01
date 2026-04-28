@@ -278,6 +278,7 @@ async function streamChatWithWorkspace(
     });
     sources = factualSources;
     updatedMessage = injectIpoPromptBlocks(updatedMessage, promptBlocks);
+    contextTexts = [];
   }
 
   const systemPrompt = await chatPrompt(workspace, user);
