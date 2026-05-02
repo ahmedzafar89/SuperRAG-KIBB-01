@@ -25,11 +25,15 @@ SECTION TASK
 - State the actual disclosed periods covered.
 - State the actual disclosed accounting framework.
 - State that the historical financial information should be read together with the Accountants' Report only where disclosed.
+- Use two short paragraphs when supported: the first for periods/framework/read-together context, the second for accounting policy information.
+- If the evidence expressly states that there are no accounting policies peculiar to the Group, business, or industry, state that in the second paragraph.
+- If the evidence identifies Note 3 or another specific note for accounting policies, refer to that note and the Accountants' Report in the second paragraph.
 
 DO NOT
 - Do not analyse performance, liquidity, cash flow, ratios, or trends.
 - Do not reproduce statement tables.
 - Do not use generic wording such as latest two financial years, latest three financial years, shorter period, or latest practicable date unless disclosed.
+- Do not infer a statement that there are no peculiar accounting policies unless the evidence expressly supports it.
 - Do not continue into section 12.1.1.
 
 STYLE REFERENCE
@@ -48,10 +52,12 @@ SECTION TASK
 - Start with one complete summary table unless the evidence requires a brief qualifier.
 - Prefer prospectus-style headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, FPE 2025 when the mapping is exact.
 - If prospectus-style headers are used, place RM'000 in a separate unit row.
+- If the table is presented in RM'000, mechanically convert the statement line-item figures into RM'000 and do not leave those line items in full RM.
 - If audit status is disclosed across periods, prefer a separate audit-status row.
 - Include all supported line items in evidence order.
 - Include both current and comparative FPE if both are disclosed.
 - Include EBITDA, GP margin, PBT margin, PAT margin, EPS, basic and diluted EPS after subdivision but before IPO, basic and diluted EPS after IPO, the EBITDA computation, and short formula notes only where expressly disclosed or directly traceable under the approved prospectus summary display requested for this section.
+- Where supported, preserve numbered short notes for the EBITDA computation, GP/PBT/PAT margin bases, basic EPS equals diluted EPS, and the disclosed pre-IPO and post-IPO EPS share bases.
 - Review all snippets for the same statement together before deciding that this section is unsupported.
 - If period headers, figures, and line items are split across nearby snippets or continuation pages, assemble only the rows that align cleanly from the evidence.
 
@@ -59,6 +65,7 @@ DO NOT
 - Do not stop after the first few rows if more supported rows exist.
 - Do not output unlabeled subtotal-only rows.
 - Do not output a single-column line-item list, a label-only table, or blank value columns when aligned period headers and figures are not disclosed for those rows.
+- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
 - Do not shift figures across rows or periods.
 - Do not treat disclosed line items, period labels, or value fragments for this statement as wholly unsupported evidence merely because some rows are incomplete.
 - Do not explain movements or drivers.
@@ -84,12 +91,14 @@ SECTION TASK
 - Start with one complete summary table unless the evidence requires a brief qualifier.
 - Prefer prospectus-style headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025 when the mapping is exact.
 - If prospectus-style headers are used, place RM'000 in a separate unit row.
+- If the table is presented in RM'000, mechanically convert the statement line-item figures into RM'000 and do not leave those line items in full RM.
 - Include all supported line items in evidence order.
 - Keep current and non-current classifications exactly as disclosed.
 - Preserve assets, equity, and liabilities structure exactly as supported.
 
 DO NOT
 - Do not output unlabeled subtotal-only rows.
+- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
 - Do not keep a row cluster if the parent heading is missing from selected evidence.
 - Do not relabel the section.
 - Do not interpret solvency, capital strength, or movements.
@@ -112,12 +121,14 @@ TARGET SECTION HEADING
 SECTION TASK
 - Draft only section 12.1.3.
 - Start with one complete summary table unless the evidence requires a brief qualifier.
+- If the table is presented in RM'000, mechanically convert the statement line-item figures into RM'000 and do not leave those line items in full RM.
 - Include all supported operating, investing, and financing cash flow rows.
 - Include current and comparative FPE if both are disclosed.
 - Include opening and closing cash balance rows only if disclosed.
 
 DO NOT
 - Do not explain movements or causes.
+- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
 - Do not continue into section 12.2.
 
 OUTPUT SHAPE
