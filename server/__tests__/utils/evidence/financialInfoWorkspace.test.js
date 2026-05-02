@@ -126,6 +126,12 @@ describe("financial info prompt guards", () => {
       "Do not use generic regulatory wording such as \"latest two financial years\""
     );
     expect(userPrompt).toContain(
+      "Where the evidence supports it, use two short paragraphs:"
+    );
+    expect(userPrompt).toContain(
+      "Do not infer a statement that there are no peculiar accounting policies unless the evidence expressly supports it."
+    );
+    expect(userPrompt).toContain(
       "Include disclosed indicator notes, formula notes, annualisation notes, and explanatory commentary"
     );
     expect(userPrompt).toContain(
@@ -133,6 +139,12 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       "Where EBITDA is presented, include the disclosed EBITDA computation immediately beneath the main table"
+    );
+    expect(userPrompt).toContain(
+      "mechanically convert the statement line-item figures into RM'000 before drafting"
+    );
+    expect(userPrompt).toContain(
+      "Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records."
     );
     expect(userPrompt).toContain(
       "Do not infer any 12-month sufficiency statement, LPD statement, or post-listing funding statement from style convention."
@@ -198,6 +210,23 @@ describe("IPO prompt source expansion", () => {
     ).toBe(true);
     expect(
       queries.some((query) => query.includes("subdivision of shares"))
+    ).toBe(true);
+  });
+
+  test("builds companion retrieval queries for historical financial intro accounting-policy support", () => {
+    const queries = buildIpoRetrievalQueries(
+      "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION"
+    );
+
+    expect(queries.length).toBeGreaterThan(1);
+    expect(
+      queries.some((query) => query.includes("material accounting policy information"))
+    ).toBe(true);
+    expect(queries.some((query) => query.includes("note 3"))).toBe(true);
+    expect(
+      queries.some((query) =>
+        query.includes("there are no accounting policies which are peculiar")
+      )
     ).toBe(true);
   });
 
@@ -346,6 +375,8 @@ describe("financial info evidence formatting", () => {
     expect(introContext.sectionNumber).toBe("12.1");
     expect(introContext.keywords).toContain("historical financial information");
     expect(introContext.keywords).toContain("accountants report");
+    expect(introContext.keywords).toContain("accounting policies");
+    expect(introContext.keywords).toContain("note 3");
     expect(borrowingContext.sectionNumber).toBe("12.4.3");
     expect(borrowingContext.keywords).toContain("bank borrowings");
     expect(borrowingContext.keywords).toContain("banking facilities");
@@ -467,6 +498,98 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("TOTAL ASSETS");
     expect(block).toContain("TOTAL EQUITY AND LIABILITIES");
     expect(block).not.toContain("REPORTING ACCOUNTANTS’ OPINION");
+  });
+
+  test("adds normalized RM'000 helper rows for financial position statements", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 20,
+          table_candidate: true,
+          text: [
+            "CONSOLIDATED STATEMENTS OF FINANCIAL POSITION",
+            "Property, plant and",
+            "equipment 4 267,251 2,160,315 2,912,285 2,498,000 5,825,165",
+            "Inventories 7 13,356,941 27,400,321 47,803,278 49,112,000 57,638,945",
+            "TOTAL ASSETS 45,900,000 78,100,000 120,500,000 117,200,000 156,800,000",
+          ].join("\n"),
+        },
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 21,
+          table_candidate: true,
+          text: [
+            "CONSOLIDATED STATEMENTS OF FINANCIAL POSITION (CONT'D)",
+            "Share capital 15 27,099,862 27,099,862 27,099,862 27,099,862 96,306,274",
+            "Retained profits 5,800,000 12,900,000 24,600,000 22,400,000 29,100,000",
+            "TOTAL EQUITY AND LIABILITIES 45,900,000 78,100,000 120,500,000 117,200,000 156,800,000",
+          ].join("\n"),
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION",
+      }
+    );
+
+    expect(block).toContain("[Directly traceable helper | period and unit formatting]");
+    expect(block).toContain("| Audit status | Audited | Audited | Audited | Unaudited | Audited |");
+    expect(block).toContain("| Unit | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |");
+    expect(block).toContain(
+      "| Property, plant and equipment | 267 | 2,160 | 2,912 | 2,498 | 5,825 |"
+    );
+    expect(block).toContain(
+      "| Share capital | 27,099 | 27,099 | 27,099 | 27,099 | 96,306 |"
+    );
+  });
+
+  test("adds period and normalized cash flow helper formatting for section 12.1.3", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 26,
+          table_candidate: true,
+          text: [
+            "CONSOLIDATED STATEMENTS OF CASH FLOWS",
+            "Profit before tax 8,950,000 11,220,000 20,370,000 12,440,000 10,980,000",
+            "Depreciation 481,000 1,064,000 1,201,000 692,000 549,000",
+            "Net cash generated from operating activities 12,345,000 23,456,000 34,567,000 11,111,000 22,222,000",
+          ].join("\n"),
+        },
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 27,
+          table_candidate: true,
+          text: [
+            "Net cash used in investing activities (4,321,000) (5,432,000) (6,543,000) (2,100,000) (1,200,000)",
+            "Net increase in cash and cash equivalents 3,210,000 4,320,000 5,430,000 1,980,000 2,220,000",
+            "Cash and cash equivalents at end 7,890,000 12,210,000 17,640,000 14,190,000 19,860,000",
+          ].join("\n"),
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.3 CONSOLIDATED STATEMENTS OF CASH FLOWS",
+      }
+    );
+
+    expect(block).toContain("[Directly traceable helper | period and unit formatting]");
+    expect(block).toContain("| Audit status | Audited | Audited | Audited | Unaudited | Audited |");
+    expect(block).toContain("| Unit | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |");
+    expect(block).toContain(
+      "| Net cash generated from operating activities | 12,345 | 23,456 | 34,567 | 11,111 | 22,222 |"
+    );
+    expect(block).toContain(
+      "| Net cash used in investing activities | (4,321) | (5,432) | (6,543) | (2,100) | (1,200) |"
+    );
   });
 
   test("prefers actual profit or loss statement pages over changes in equity pages", () => {
@@ -614,6 +737,14 @@ describe("financial info evidence formatting", () => {
         {
           title: "accountant-report-JRK.pdf",
           filetype: "pdf",
+          page_number: 31,
+          table_candidate: true,
+          text: "3. MATERIAL ACCOUNTING POLICY INFORMATION. The notes to the consolidated financial statements, including material accounting policy information, are set out on pages 4 to 92. For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report.",
+          score: 0.82,
+        },
+        {
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
           page_number: 109,
           table_candidate: true,
           text: "Duplicate late report page repeating the same periods and framework.",
@@ -637,6 +768,7 @@ describe("financial info evidence formatting", () => {
 
     expect(block).toContain("page:17");
     expect(block).toContain("page:30");
+    expect(block).toContain("page:31");
     expect(block).not.toContain("page:18");
     expect(block).not.toContain("page:109");
   });
@@ -982,13 +1114,13 @@ describe("financial info evidence formatting", () => {
 
     expect(block).toContain("[Directly traceable helper | row-aligned OCR reconstruction]");
     expect(block).toContain(
-      "| Revenue | 52,931,108 | 65,092,484 | 117,648,930 | 83,479,155 | 49,593,481 |"
+      "| Revenue | 52,931 | 65,092 | 117,648 | 83,479 | 49,593 |"
     );
     expect(block).toContain(
-      "| Cost of sales | (34,291,582) | (38,213,897) | (80,645,701) | (60,132,445) | (28,970,540) |"
+      "| Cost of sales | (34,291) | (38,213) | (80,645) | (60,132) | (28,970) |"
     );
     expect(block).toContain(
-      "| Profit after taxation/Total comprehensive income | 6,512,521 | 7,887,613 | 13,862,810 | 10,279,116 | 7,232,603 |"
+      "| Profit after taxation/Total comprehensive income | 6,512 | 7,887 | 13,862 | 10,279 | 7,232 |"
     );
     expect(block).toContain("83,479,155");
     expect(block).toContain("65,092,484");
@@ -1060,9 +1192,18 @@ describe("financial info evidence formatting", () => {
       "| Basic and diluted EPS (RM) - After IPO | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 |"
     );
     expect(block).toContain(
-      "After subdivision but before IPO EPS uses 703,062,738 ordinary shares."
+      "[Directly traceable helper | numbered formula notes]"
     );
-    expect(block).toContain("After IPO EPS uses 963,062,738 ordinary shares.");
+    expect(block).toContain("Notes:");
+    expect(block).toContain("(2) Computed based on GP over revenue.");
+    expect(block).toContain("(3) Computed based on PBT over revenue.");
+    expect(block).toContain("(4) Computed based on PAT over revenue.");
+    expect(block).toContain(
+      "(6) Computed based on PAT attributable to owners of our Company over 703,062,738 Shares after the Subdivision but before our IPO."
+    );
+    expect(block).toContain(
+      "(7) Computed based on PAT attributable to owners of our Company over 963,062,738 Shares after our IPO."
+    );
   });
 
   test("allows pro forma pages for capitalisation and indebtedness", () => {

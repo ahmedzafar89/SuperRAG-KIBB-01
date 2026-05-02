@@ -27,6 +27,25 @@ function buildIpoRetrievalQueries(prompt = "") {
   const queries = [buildIpoRetrievalQuery(prompt)];
 
   switch (promptContext.sectionNumber) {
+    case "12.1":
+      queries.push(
+        [
+          promptContext.heading,
+          "material accounting policy information",
+          "accounting policies",
+          "note 3",
+          "accountants report",
+        ].join(" ")
+      );
+      queries.push(
+        [
+          promptContext.heading,
+          "there are no accounting policies which are peculiar",
+          "nature of the business or industry",
+          "note 3",
+        ].join(" ")
+      );
+      break;
     case "12.1.1":
       queries.push(
         [
