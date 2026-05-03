@@ -891,7 +891,11 @@ function extractHistoricalIntroHelperData(sources = []) {
       : "";
 
   const statements = [];
-  if (/statements? of profit or loss and other comprehensive income/i.test(normalized)) {
+  if (
+    /statements? of profit or loss and other comprehensive income|statements? of comprehensive income/i.test(
+      normalized
+    )
+  ) {
     statements.push(`${basisTerm || "consolidated"} statements of profit or loss and other comprehensive income`);
   }
   if (/statements? of financial position/i.test(normalized)) {
@@ -942,6 +946,22 @@ function extractHistoricalIntroHelperData(sources = []) {
       normalized
     );
   const hasAccountantsReportReference = /Accountants[’'] Report/i.test(normalized);
+  const hasManagementDiscussionReference =
+    /management[’'`s\s]+discussion and analysis|results of operations|financial condition/i.test(
+      normalized
+    );
+  const noAuditQualificationStatus =
+    /without audit qualifications?|without qualification|not subject to any audit qualification|not subject to any qualification|no audit qualification/i.test(
+      normalized
+    )
+      ? "expressly disclosed"
+      : "";
+  const hasFinancialYearsUnderReviewPhrase =
+    /financial years\/period under review|financial years under review|financial period under review/i.test(
+      normalized
+    );
+  const hasFinancialYearsEndedPhrase =
+    /financial years ended|financial period ended/i.test(normalized);
 
   return {
     basisTerm,
@@ -951,7 +971,50 @@ function extractHistoricalIntroHelperData(sources = []) {
     noteReference,
     hasPeculiarAccountingPoliciesStatement,
     hasAccountantsReportReference,
+    hasManagementDiscussionReference,
+    noAuditQualificationStatus,
+    hasFinancialYearsUnderReviewPhrase,
+    hasFinancialYearsEndedPhrase,
   };
+}
+
+function joinWithAnd(items = []) {
+  const values = items.filter(Boolean);
+  if (values.length <= 1) return values[0] || "";
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(", ")} and ${values[values.length - 1]}`;
+}
+
+function buildHistoricalIntroParagraphOneScaffold(data = {}) {
+  const statementsPart = data.statements.length
+    ? `The following table sets out a summary of the ${joinWithAnd(data.statements)}`
+    : "The following table sets out a summary of the historical financial information";
+
+  let periodPart = "";
+  if (data.hasFinancialYearsUnderReviewPhrase) {
+    periodPart = " for the Financial Years/Period Under Review";
+  } else if (data.hasFinancialYearsEndedPhrase && data.periods.length) {
+    periodPart = ` for ${joinWithAnd(data.periods)}`;
+  } else if (data.periods.length) {
+    periodPart = ` for ${joinWithAnd(data.periods)}`;
+  }
+
+  let remainder = "";
+  if (data.frameworks.length) {
+    remainder += ` The historical financial information has been prepared in accordance with ${joinWithAnd(
+      data.frameworks
+    )}`;
+  }
+  if (data.noAuditQualificationStatus === "expressly disclosed") {
+    remainder += " and were not subject to any audit qualification";
+  }
+  if (data.hasAccountantsReportReference) {
+    remainder += " and should be read together with the Accountants' Report";
+  }
+
+  return `${statementsPart}${periodPart}.${remainder}.`
+    .replace(/\s+\./g, ".")
+    .replace(/\.\./g, ".");
 }
 
 function buildHistoricalFinancialIntroHelper(sources = []) {
@@ -969,8 +1032,14 @@ function buildHistoricalFinancialIntroHelper(sources = []) {
   if (data.frameworks.length) {
     lines.push(`- Accounting framework: ${data.frameworks.join("; ")}`);
   }
+  if (data.noAuditQualificationStatus) {
+    lines.push(`- Audit qualification status: ${data.noAuditQualificationStatus}`);
+  }
   if (data.hasAccountantsReportReference) {
     lines.push("- Accountants' Report reference: disclosed");
+  }
+  if (data.hasManagementDiscussionReference) {
+    lines.push("- Management's Discussion and Analysis reference: disclosed");
   }
   if (data.noteReference) {
     lines.push(`- Accounting policy reference: ${data.noteReference}`);
@@ -982,6 +1051,12 @@ function buildHistoricalFinancialIntroHelper(sources = []) {
     `- Peculiar accounting policies statement: ${
       data.hasPeculiarAccountingPoliciesStatement ? "expressly disclosed" : "not expressly disclosed in selected evidence"
     }`
+  );
+  lines.push(
+    `- Supported first-paragraph scaffold: ${buildHistoricalIntroParagraphOneScaffold(data)}`
+  );
+  lines.push(
+    "- Preferred 12.1 assembly order: statement basis; statements covered; periods; accounting framework; audit-qualification status if disclosed; read-together references if disclosed; accounting-policy sentence."
   );
 
   return lines.join("\n");

@@ -738,6 +738,9 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain(
       "- Short accounting-policy referral sentence supported: For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report."
     );
+    expect(block).toContain(
+      "- Supported first-paragraph scaffold: The following table sets out a summary of the consolidated statements of profit or loss and other comprehensive income, consolidated statements of financial position and consolidated statements of cash flows for 31 December 2022, 31 December 2023, 31 December 2024, 31 July 2025, FYE 31 December 2022 and FPE 31 July 2025. The historical financial information has been prepared in accordance with MFRS and IFRS Accounting Standards and should be read together with the Accountants' Report."
+    );
   });
 
   test("normalizes accounting-policy sub-note references back to the top-level note for section 12.1", () => {
@@ -769,6 +772,37 @@ describe("financial info evidence formatting", () => {
     expect(block).not.toContain("- Accounting policy reference: Note 3.4");
     expect(block).toContain(
       "- Short accounting-policy referral sentence supported: For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report."
+    );
+  });
+
+  test("captures no-audit-qualification support in the 12.1 intro helper when disclosed", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-intro-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 17,
+          table_candidate: true,
+          text: "Our Group's historical audited financial information comprises the combined statements of financial position, combined statements of comprehensive income and combined statements of cash flows for the Financial Period Under Review. The historical financial information has been prepared in accordance with MFRS and IFRS and were not subject to any audit qualification.",
+        },
+        {
+          title: "accountant-report-intro-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 18,
+          table_candidate: true,
+          text: "The following financial information should be read in conjunction with the Accountants' Report.",
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION",
+      }
+    );
+
+    expect(block).toContain("- Audit qualification status: expressly disclosed");
+    expect(block).toContain(
+      "- Supported first-paragraph scaffold: The following table sets out a summary of the combined statements of profit or loss and other comprehensive income, combined statements of financial position and combined statements of cash flows for the Financial Years/Period Under Review. The historical financial information has been prepared in accordance with MFRS and IFRS and were not subject to any audit qualification and should be read together with the Accountants' Report."
     );
   });
 
