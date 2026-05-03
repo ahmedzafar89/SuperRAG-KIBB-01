@@ -263,6 +263,8 @@ Do not stop after the first few rows if additional disclosed line items for the 
 Preserve categories such as current, non-current, secured, unsecured, guaranteed, unguaranteed, total indebtedness, total capitalisation, and equivalent issuer-specific classifications exactly as disclosed.
 Preserve any expressly disclosed pro forma columns, adjustment labels, transaction labels, notes references, placeholders, or post-listing captions exactly as supported by the factual evidence.
 Include gearing, net debt, or similar presentation rows only if they are expressly disclosed in the factual evidence for the issuer.
+If the evidence block explicitly begins with a `[Template fallback | 12.2 ...]` marker, output a non-factual skeleton/template for later completion instead of `Not disclosed in the provided documents.`
+When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
 Condense disclosed notes to the minimum necessary summary form.
 Do not recompute totals or add presentation rows to make figures tie.
 Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
@@ -288,6 +290,7 @@ OUTPUT CONTRACT
 - Do not output HTML tags such as <br>.
 - Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not invent figures, classifications, subtotals, totals, adjustment columns, notes, gearing, net debt, or any derived presentation row that is not expressly disclosed in the factual evidence.
+- If the evidence block is the authorised `12.2` template fallback scaffold, keep the placeholder wording and placeholder table cells exactly as placeholders and do not turn them into facts.
 - Use the accountant report and retrieved evidence as the only factual source.
 - Use the style reference only for section ordering, table-introduction pattern, and writing cadence.
 - If the requested section is wholly unsupported, say: Not disclosed in the provided documents.

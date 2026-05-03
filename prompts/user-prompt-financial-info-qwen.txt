@@ -15,6 +15,7 @@ TARGET SECTION HEADING
 
 SECTION TASK
 - Draft only section 12.1 as the chapter introduction.
+- Use short prospectus-style narrative only.
 - Use two short paragraphs when supported:
   first paragraph for scope, accounting framework, and read-together wording;
   second paragraph for accounting-policy wording.
@@ -22,15 +23,13 @@ SECTION TASK
   1. approved issuer-specific chapter-introduction framing from the selected style reference;
   2. supported accountants'-report evidence;
   3. generic fallback wording in this prompt.
-- Prefer the approved prospectus-style summary sentence when supported:
+- Prefer the approved prospectus-style opening sentence when supported:
   "The following table sets out a summary of the [consolidated/combined] statements of profit or loss and other comprehensive income and [consolidated/combined] statements of financial position ..."
 - Treat that sentence as a pattern, not mandatory wording.
 - Use "consolidated" or "combined" exactly as disclosed.
-- If the selected style reference supports "Financial Years/Period Under Review", use that framing in the first paragraph and do not state explicit years, dates, "as at" dates, or "financial years ended" wording there.
+- If the selected style reference supports "Financial Years/Period Under Review", use that framing in the first paragraph and do not force exact date wording there.
 - If the selected style reference frames the intro around profit or loss and financial position only, do not add cash flows unless the approved display for this issuer clearly includes it.
 - Prefer "our Group" over "the Group" where the evidence and style reference support that intro phrasing.
-- Prefer a first paragraph in this shape when supported:
-  "The following table sets out a summary of the [consolidated/combined] statements of profit or loss and other comprehensive income and [consolidated/combined] statements of financial position of our Group for the Financial Years/Period Under Review. The [consolidated/combined] financial statements have been prepared in accordance with [framework] and should be read in conjunction with the Accountants' Report."
 - If the evidence expressly states that there are no accounting policies peculiar to the Group, business, or industry, include that in the second paragraph.
 - If Note 3 or another accounting-policy note is expressly identified, refer to it in the second paragraph.
 - If both the "no peculiar accounting policies" sentence and the Note 3 reference are supported, combine them into one short second paragraph.
@@ -47,7 +46,6 @@ DO NOT
 - Do not use bland fallback openings such as "The Group's historical financial information comprises ..." or "Our Group's historical financial information comprises ..." when the approved prospectus-style intro is supported.
 - Do not rewrite the first paragraph into accountant-report syntax such as "as at [date]" or "for the financial years ended [date]" when the approved style reference supports the shorter chapter-introduction framing.
 - Do not force cash flows, statements of changes in equity, audit-qualification wording, or generic Note 3 referral wording when not supported.
-- Do not omit the peculiar-accounting-policies sentence when the selected evidence expressly supports it.
 - Do not continue into section 12.1.1.
 
 STYLE REFERENCE
@@ -55,3 +53,206 @@ STYLE REFERENCE
 
 EVIDENCE
 <<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.1.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use short prospectus-style narrative only.
+- Use two short paragraphs where the evidence supports both paragraphs.
+
+--- 12.1.1
+
+TARGET SECTION HEADING
+12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME
+
+SECTION TASK
+- Draft only section 12.1.1.
+- Match the approved prospectus display pattern closely.
+- Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier.
+- Present the disclosed periods exactly as supported by the evidence.
+- Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
+- When the summary table is presented in RM'000, mechanically convert the disclosed statement line-item figures into RM'000 before drafting.
+- When the mapping is exact from the evidence, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025.
+- Where concise period headers are used, place RM'000 as a separate unit row beneath the period headers.
+- Where audit status is disclosed across periods, prefer a separate audit-status row above the FYE/FPE row.
+- Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
+- Include all supported line items for the statement, in the same order as presented in the factual evidence.
+- If both a current FPE and comparative FPE are disclosed, include both.
+- Preserve disclosed audited or unaudited labels, comparative FPE columns or rows, subtotals, totals, and note labels exactly as shown.
+- For the approved 12.1.1 prospectus summary display, include EBITDA, GP margin, PBT margin, PAT margin, and basic and diluted EPS whenever the row labels and period values are expressly disclosed or are directly traceable from the selected Accountants' Report figures.
+- Where EBITDA is part of the approved display, include the EBITDA computation immediately beneath the main table and calculate it from the directly traceable supporting line items only when every component value is available for the relevant periods.
+- Include all supported numbered footnotes and formula notes for EBITDA, margins, EPS, diluted-equals-basic wording, and share-base assumptions where those notes or their computation basis are expressly disclosed or directly traceable from the selected Accountants' Report figures.
+- When a numbered footnote is directly traceable but the full wording is longer than needed, preserve the note number and condense the note to the minimum necessary prospectus-style computation basis.
+
+DO NOT
+- Do not stop after the first few rows if additional supported rows for the same statement are available.
+- Do not recompute totals or add presentation rows to make figures tie.
+- Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
+- If a row label and its period values cannot be aligned cleanly from the selected factual evidence, omit that row rather than shifting a value into the wrong row or period.
+- Do not output unlabeled subtotal-only rows.
+- Do not move a figure from one row label to another merely to complete the table.
+- Do not explain movements or performance drivers.
+- Do not continue into section 12.1.2.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.1.1.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
+- Present one complete main table for this section, followed by the EBITDA computation table and all supported numbered formula notes.
+- For 12.1.1, when directly traceable support exists for EBITDA or numbered computation notes, treat those items as expected output for the section rather than optional extras.
+- Tables must be in clean markdown using pipe characters.
+- Include a header row and separator row.
+- Do not output tab-separated text.
+- Do not output HTML tags such as <br>.
+- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
+
+--- 12.1.2
+
+TARGET SECTION HEADING
+12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION
+
+SECTION TASK
+- Draft only section 12.1.2.
+- Match the approved prospectus display pattern closely.
+- Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier.
+- Present the disclosed periods exactly as supported by the evidence.
+- Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
+- When the summary table is presented in RM'000, mechanically convert the disclosed statement line-item figures into RM'000 before drafting.
+- When the mapping is exact from the evidence, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025.
+- Where concise period headers are used, place RM'000 as a separate unit row beneath the period headers.
+- Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
+- Include all supported line items for the statement of financial position, in the same order as presented in the factual evidence.
+- Keep classifications such as current and non-current exactly as disclosed.
+- Preserve the distinction between assets, equity, and liabilities exactly as supported by the evidence.
+- Preserve disclosed audited or unaudited labels, comparative FPE columns or rows, subtotals, totals, and note labels exactly as shown.
+- If both a current FPE and comparative FPE are disclosed, include both.
+- Condense disclosed notes to the minimum necessary summary form.
+
+DO NOT
+- Do not stop after the first few rows if additional supported rows for the same statement are available.
+- Do not recompute totals or add presentation rows to make figures tie.
+- Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
+- Do not output unlabeled subtotal-only rows.
+- If a line-item cluster appears without its parent classification heading in the selected factual evidence, omit that cluster rather than inferring the missing classification.
+- Do not relabel this section as "historical financial position" or any other alternative heading.
+- Do not interpret balance sheet strength, capital position, solvency, or movements.
+- Do not continue into section 12.1.3.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.1.2.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
+- Present one complete table for this section.
+- The table must be in clean markdown using pipe characters.
+- Include a header row and separator row.
+- Do not output tab-separated text.
+- Do not output HTML tags such as <br>.
+- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
+
+--- 12.1.3
+
+TARGET SECTION HEADING
+12.1.3 CONSOLIDATED STATEMENTS OF CASH FLOWS
+
+SECTION TASK
+- Draft only section 12.1.3.
+- Match the approved prospectus display pattern closely.
+- Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or audit-status qualifier.
+- Present the disclosed periods exactly as supported by the evidence.
+- Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
+- When the summary table is presented in RM'000, mechanically convert the disclosed statement line-item figures into RM'000 before drafting.
+- When the mapping is exact from the evidence, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025.
+- Where concise period headers are used, place RM'000 as a separate unit row beneath the period headers.
+- Where audit status is disclosed across periods, prefer a separate audit-status row above the FYE/FPE row.
+- Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
+- Include all supported line items for the statement of cash flows, in the same order as presented in the factual evidence.
+- Preserve the distinction between operating, investing, and financing cash flow line items exactly as supported by the evidence.
+- If the evidence discloses both a comparative interim period and a current interim period, include both.
+- Preserve disclosed audited or unaudited labels, comparative FPE columns or rows, subtotals, totals, and note labels exactly as shown.
+- Include opening cash balances, closing cash balances, or directly related summary rows only if they are expressly disclosed in the factual evidence.
+- Condense disclosed notes to the minimum necessary summary form.
+
+DO NOT
+- Do not stop after the first few rows if additional supported rows for the same statement are available.
+- Do not recompute totals or add presentation rows to make figures tie.
+- Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
+- Do not explain movements, causes, liquidity implications, or performance drivers in this section.
+- Do not continue into section 12.2.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.1.3.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
+- Present one complete table for this section.
+- The table must be in clean markdown using pipe characters.
+- Include a header row and separator row.
+- Do not output tab-separated text.
+- Do not output HTML tags such as <br>.
+- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
+
+--- 12.2
+
+TARGET SECTION HEADING
+12.2 CAPITALISATION AND INDEBTEDNESS
+
+SECTION TASK
+- Draft only section 12.2.
+- Match the approved prospectus display pattern closely.
+- Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or status qualifier.
+- State the basis date and whether the information is audited, unaudited, pro forma, adjusted, or after a specific transaction only where expressly disclosed in the evidence.
+- Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
+- Include all supported line items, classifications, subtotals, totals, adjustment columns, and directly related summary disclosure for capitalisation and indebtedness, in the same order as presented in the factual evidence.
+- Preserve categories such as current, non-current, secured, unsecured, guaranteed, unguaranteed, total indebtedness, total capitalisation, and equivalent issuer-specific classifications exactly as disclosed.
+- Preserve any expressly disclosed pro forma columns, adjustment labels, transaction labels, notes references, placeholders, or post-listing captions exactly as supported by the factual evidence.
+- Include gearing, net debt, or similar presentation rows only if they are expressly disclosed in the factual evidence for the issuer.
+- If the evidence block explicitly begins with a `[Template fallback | 12.2 ...]` marker, output a non-factual skeleton/template for later completion instead of `Not disclosed in the provided documents.`
+- When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
+- Condense disclosed notes to the minimum necessary summary form.
+
+DO NOT
+- Do not stop after the first few rows if additional supported rows for the same section are available.
+- Do not recompute totals or add presentation rows to make figures tie.
+- Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
+- Do not calculate totals, gearing, net debt, post-issue values, or any other derived row unless that exact value is expressly disclosed in the factual evidence.
+- Do not explain capital structure implications, funding adequacy, or borrowing strategy in this section.
+- Do not continue into section 12.3.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.2.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use a short framing paragraph only if the factual evidence requires it before the table.
+- Present one complete table for this section.
+- The table must be in clean markdown using pipe characters.
+- Include a header row and separator row.
+- Do not output tab-separated text.
+- Do not output HTML tags such as <br>.
+- If the evidence block is the authorised `12.2` template fallback scaffold, keep the placeholder wording and placeholder table cells exactly as placeholders and do not turn them into facts.

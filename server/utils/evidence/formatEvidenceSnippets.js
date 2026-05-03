@@ -391,7 +391,12 @@ function normalizeSource(source = {}) {
   const merged = { ...metadata, ...source };
   delete merged.metadata;
   const snippetText =
-    source.text || source.pageContent || metadata.text || metadata.pageContent || "";
+    source.__snippetText ||
+    source.text ||
+    source.pageContent ||
+    metadata.text ||
+    metadata.pageContent ||
+    "";
   const storedPdfPageText = getStoredCustomDocumentPageText(merged);
   const rawText = shouldPreferStoredPdfPageText(
     snippetText,
@@ -401,11 +406,13 @@ function normalizeSource(source = {}) {
     ? storedPdfPageText
     : snippetText;
   const text = sanitizeFinanceEvidenceText(rawText, merged);
+  const sanitizedSnippetText = sanitizeFinanceEvidenceText(snippetText, merged);
 
   return {
     ...merged,
     text,
     __cleanText: text,
+    __snippetText: sanitizedSnippetText,
   };
 }
 
@@ -1577,7 +1584,11 @@ function extractProfitOrLossEpsSupportByPeriod(sources = []) {
 
 function extractProfitOrLossShareBaseSupport(sources = []) {
   const merged = (Array.isArray(sources) ? sources : [])
-    .map((source) => source.__cleanText || "")
+    .map((source) =>
+      [source.__snippetText || "", source.__cleanText || ""]
+        .filter(Boolean)
+        .join("\n")
+    )
     .filter(Boolean)
     .join("\n");
 
@@ -1833,9 +1844,11 @@ function buildProfitOrLossDerivedRows(periodRows = [], sources = []) {
 function buildProfitOrLossFormulaNotesHelper(sources = []) {
   const shareBaseSupport = extractProfitOrLossShareBaseSupport(sources);
   const notes = [];
-  const hasEbitdaSupport = (Array.isArray(sources) ? sources : []).some((source) =>
-    isProfitOrLossEbitdaSupportText(source.__cleanText || "")
-  );
+  const hasEbitdaSupport =
+    Boolean(buildProfitOrLossEbitdaComputationHelper(sources)) ||
+    (Array.isArray(sources) ? sources : []).some((source) =>
+      isProfitOrLossEbitdaSupportText(source.__cleanText || "")
+    );
 
   if (hasEbitdaSupport) {
     notes.push("(1) EBITDA is computed as follows:");
@@ -1869,6 +1882,190 @@ function buildProfitOrLossFormulaNotesHelper(sources = []) {
     : "";
 }
 
+function extractNormalizedStatementRowsWithRawValues(sources = [], options = {}) {
+  const { labelPattern = null, minValues = 5, maxRows = 24 } = options;
+  const rows = [];
+  const seenLabels = new Set();
+
+  for (const source of Array.isArray(sources) ? sources : []) {
+    let pendingLabel = "";
+    const lines = String(source?.__snippetText || source?.text || source?.__cleanText || "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    for (const line of lines) {
+      const compact = line.replace(/\s+/g, " ").trim();
+      if (!compact) continue;
+      if (/^(audited|unaudited)\b/i.test(compact)) continue;
+      if (/^rm'?000\b/i.test(compact)) continue;
+      if (/^(fye|fpe)\b/i.test(compact)) continue;
+
+      const rawTokens = extractNumericTokens(compact).filter(Boolean);
+      if (rawTokens.length < minValues) {
+        if (!/\d/.test(compact) && /[A-Za-z]/.test(compact)) {
+          pendingLabel = /:\s*$/.test(compact)
+            ? compact
+            : pendingLabel
+              ? `${pendingLabel} ${compact}`
+              : compact;
+        }
+        continue;
+      }
+
+      const firstMatch = compact.match(/\(?-?\d[\d,]*(?:\.\d+)?\)?/);
+      if (!firstMatch || !Number.isFinite(firstMatch.index)) continue;
+      const labelPart = compact.slice(0, firstMatch.index).trim();
+      const label = cleanStatementRowLabel(
+        pendingLabel ? `${pendingLabel} ${labelPart}` : labelPart
+      );
+      const shouldRetainSectionPrefix =
+        pendingLabel && /:\s*$/.test(pendingLabel) && /^-/.test(labelPart);
+      pendingLabel = shouldRetainSectionPrefix ? pendingLabel : "";
+
+      if (!label) continue;
+      if (labelPattern && !labelPattern.test(label)) continue;
+
+      const rawValues = rawTokens
+        .slice(-5)
+        .map((value) => String(value || "").trim())
+        .filter(Boolean);
+      if (rawValues.length !== 5) continue;
+
+      const labelKey = label.toLowerCase();
+      if (seenLabels.has(labelKey)) continue;
+      seenLabels.add(labelKey);
+      rows.push({
+        label,
+        rawValues,
+        values: rawValues.map((value) => formatTokenAsThousands(value)),
+      });
+      if (rows.length >= maxRows) return rows;
+    }
+  }
+
+  return rows;
+}
+
+function sumRawSupportRowsByPeriod(rows = [], matcher = () => false) {
+  const matched = (Array.isArray(rows) ? rows : []).filter((row) => matcher(row.label || ""));
+  if (!matched.length) return [];
+
+  return STANDARD_PERIOD_COLUMNS.map((_, index) => {
+    let total = 0;
+    let found = false;
+    for (const row of matched) {
+      const value = tokenToNumber(row.rawValues?.[index] || "");
+      if (!Number.isFinite(value)) continue;
+      total += value;
+      found = true;
+    }
+    return found ? total : null;
+  });
+}
+
+function buildProfitOrLossEbitdaComputationHelper(sources = []) {
+  const periodRows = buildProfitOrLossRowAlignedData(sources);
+  if (periodRows.length < 3) return "";
+
+  const supportRows = extractNormalizedStatementRowsWithRawValues(sources, {
+    labelPattern:
+      /(?:depreciation|interest expense|interest income|fixed deposits with licensed banks|bank balances|property, plant and equipment|investment property|right-of-use assets|bank overdrafts|lease liabilities|term loans|hire purchase payables|promissory notes|related parties|others)/i,
+    maxRows: 28,
+  });
+
+  const depreciationTotals = sumRawSupportRowsByPeriod(
+    supportRows,
+    (label) =>
+      /depreciation:/i.test(label) &&
+      /property, plant and equipment|investment property|right-of-use assets/i.test(label)
+  );
+  const financeCostTotals = sumRawSupportRowsByPeriod(
+    supportRows,
+    (label) => /^interest expense:/i.test(label)
+  );
+  const financeIncomeTotals = sumRawSupportRowsByPeriod(
+    supportRows,
+    (label) => /^interest income:/i.test(label)
+  );
+
+  if (
+    depreciationTotals.length !== STANDARD_PERIOD_COLUMNS.length ||
+    financeCostTotals.length !== STANDARD_PERIOD_COLUMNS.length ||
+    financeIncomeTotals.length !== STANDARD_PERIOD_COLUMNS.length
+  ) {
+    return "";
+  }
+
+  const periodValueMap = new Map(
+    periodRows.map((row) => [
+      row.period,
+      {
+        pat: tokenToNumber(
+          row.values["Profit after taxation/Total comprehensive income"] || ""
+        ),
+        tax: tokenToNumber(row.values["Income tax expense"] || ""),
+      },
+    ])
+  );
+
+  const patValues = [];
+  const taxValues = [];
+  const depreciationValues = [];
+  const financeCostValues = [];
+  const financeIncomeValues = [];
+  const ebitdaValues = [];
+
+  for (let index = 0; index < STANDARD_PERIOD_COLUMNS.length; index += 1) {
+    const period = STANDARD_PERIOD_COLUMNS[index];
+    const values = periodValueMap.get(period);
+    const pat = values?.pat;
+    const tax = Number.isFinite(values?.tax) ? Math.abs(values.tax) : values?.tax;
+    const depreciation = depreciationTotals[index];
+    const financeCost = financeCostTotals[index];
+    const financeIncome = Number.isFinite(financeIncomeTotals[index])
+      ? Math.abs(financeIncomeTotals[index])
+      : financeIncomeTotals[index];
+
+    if (
+      !Number.isFinite(pat) ||
+      !Number.isFinite(tax) ||
+      !Number.isFinite(depreciation) ||
+      !Number.isFinite(financeCost) ||
+      !Number.isFinite(financeIncome)
+    ) {
+      return "";
+    }
+
+    const ebitda = pat + tax + depreciation + financeCost - financeIncome;
+
+    patValues.push(formatAccountingInteger(truncateTowardsZero(pat / 1000)));
+    taxValues.push(formatAccountingInteger(truncateTowardsZero(tax / 1000)));
+    depreciationValues.push(
+      formatAccountingInteger(truncateTowardsZero(depreciation / 1000))
+    );
+    financeCostValues.push(
+      formatAccountingInteger(truncateTowardsZero(financeCost / 1000))
+    );
+    financeIncomeValues.push(
+      formatAccountingInteger(truncateTowardsZero(financeIncome / 1000))
+    );
+    ebitdaValues.push(formatAccountingInteger(truncateTowardsZero(ebitda / 1000)));
+  }
+
+  return [
+    "[Directly traceable helper | EBITDA computation table | normalized to RM'000]",
+    `| EBITDA computation | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
+    `| --- | ${STANDARD_PERIOD_COLUMNS.map(() => "---").join(" | ")} |`,
+    `| PAT | ${patValues.join(" | ")} |`,
+    `| Add: Taxation | ${taxValues.join(" | ")} |`,
+    `| Add: Depreciation | ${depreciationValues.join(" | ")} |`,
+    `| Add: Finance cost | ${financeCostValues.join(" | ")} |`,
+    `| Less: Finance income | ${financeIncomeValues.join(" | ")} |`,
+    `| EBITDA | ${ebitdaValues.join(" | ")} |`,
+  ].join("\n");
+}
+
 function buildProfitOrLossRowAlignedHelper(sources = []) {
   const periodRows = buildProfitOrLossRowAlignedData(sources);
   if (periodRows.length < 3) return "";
@@ -1891,7 +2088,7 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
   }
 
   const derivedRows = buildProfitOrLossDerivedRows(periodRows, sources);
-  const formulaNotesHelper = buildProfitOrLossFormulaNotesHelper(sources);
+  const ebitdaHelper = buildProfitOrLossEbitdaComputationHelper(sources);
 
   const parts = [
     "[Directly traceable helper | row-aligned OCR reconstruction | statement line items normalized to RM'000; EPS rows remain in RM]",
@@ -1901,7 +2098,7 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
     ...epsRows,
     ...derivedRows,
   ];
-  if (formulaNotesHelper) parts.push("", formulaNotesHelper);
+  if (ebitdaHelper) parts.push("", ebitdaHelper);
   return parts.join("\n");
 }
 
@@ -2034,27 +2231,34 @@ function extractNormalizedStatementRows(sources = [], options = {}) {
     if (/^rm'?000\b/i.test(compact)) continue;
     if (/^(fye|fpe)\b/i.test(compact)) continue;
 
-    const valueMatches = [...compact.matchAll(/\(?-?\d[\d,\s]*\.?\d*\)?/g)];
-    if (valueMatches.length < minValues) {
+      const rawTokens = extractNumericTokens(compact).filter(Boolean);
+      if (rawTokens.length < minValues) {
       if (!/\d/.test(compact) && /[A-Za-z]/.test(compact)) {
-        pendingLabel = pendingLabel ? `${pendingLabel} ${compact}` : compact;
+        pendingLabel = /:\s*$/.test(compact)
+          ? compact
+          : pendingLabel
+            ? `${pendingLabel} ${compact}`
+            : compact;
       }
       continue;
     }
 
-    const firstMatch = valueMatches[0];
+    const firstMatch = compact.match(/\(?-?\d[\d,]*(?:\.\d+)?\)?/);
+    if (!firstMatch || !Number.isFinite(firstMatch.index)) continue;
     const labelPart = compact.slice(0, firstMatch.index).trim();
     const label = cleanStatementRowLabel(
       pendingLabel ? `${pendingLabel} ${labelPart}` : labelPart
     );
-    pendingLabel = "";
+    const shouldRetainSectionPrefix =
+      pendingLabel && /:\s*$/.test(pendingLabel) && /^-/.test(labelPart);
+    pendingLabel = shouldRetainSectionPrefix ? pendingLabel : "";
 
     if (!label) continue;
     if (labelPattern && !labelPattern.test(label)) continue;
 
-    const values = valueMatches
+    const values = rawTokens
       .slice(-5)
-      .map((match) => formatTokenAsThousands(match[0]))
+      .map((value) => formatTokenAsThousands(value))
       .filter(Boolean);
     if (values.length !== 5) continue;
 

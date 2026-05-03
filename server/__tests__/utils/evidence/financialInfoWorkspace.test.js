@@ -85,8 +85,23 @@ describe("financial info prompt guards", () => {
     expect(systemPrompt).toContain(
       "Do not output a label-only table, a single-column line-item list, or blank value columns"
     );
+    expect(systemPrompt).toContain(
+      "The only exception to the exact unsupported fallback is section 12.2"
+    );
     expect(userPrompt).toContain(
       "If the evidence supports only part of the section, draft only the supported part"
+    );
+    expect(userPrompt).toContain(
+      "12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME"
+    );
+    expect(userPrompt).toContain(
+      "12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION"
+    );
+    expect(userPrompt).toContain(
+      "12.1.3 CONSOLIDATED STATEMENTS OF CASH FLOWS"
+    );
+    expect(userPrompt).toContain(
+      "12.2 CAPITALISATION AND INDEBTEDNESS"
     );
     expect(userPrompt).toContain("For 12.1, follow this priority order:");
     expect(userPrompt).toContain(
@@ -115,6 +130,24 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       'Do not use bland fallback openings such as "The Group\'s historical financial information comprises ..." or "Our Group\'s historical financial information comprises ..."'
+    );
+    expect(userPrompt).toContain(
+      "Present one complete main table for this section, followed by the EBITDA computation table and all supported numbered formula notes."
+    );
+    expect(userPrompt).toContain(
+      "For the approved 12.1.1 prospectus summary display, include EBITDA, GP margin, PBT margin, PAT margin, and basic and diluted EPS whenever the row labels and period values are expressly disclosed or are directly traceable"
+    );
+    expect(userPrompt).toContain(
+      "Include all supported numbered footnotes and formula notes for EBITDA, margins, EPS, diluted-equals-basic wording, and share-base assumptions"
+    );
+    expect(userPrompt).toContain(
+      "For 12.1.1, when directly traceable support exists for EBITDA or numbered computation notes, treat those items as expected output for the section rather than optional extras."
+    );
+    expect(userPrompt).toContain(
+      "Keep classifications such as current and non-current exactly as disclosed."
+    );
+    expect(userPrompt).toContain(
+      "Preserve the distinction between operating, investing, and financing cash flow line items exactly as supported by the evidence."
     );
   });
 
@@ -173,6 +206,9 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       'Do not use generic accounting-policy referral wording such as "material accounting policy information", "applied consistently", "unless otherwise stated", "all periods presented", or "the respective financial years presented"'
+    );
+    expect(userPrompt).toContain(
+      "If the evidence block explicitly begins with a `[Template fallback | 12.2 ...]` marker"
     );
     expect(userPrompt).toContain(
       'Do not use generic Note 3 referral wording such as "Further details regarding the material accounting policy information are set out ..."'
@@ -1297,6 +1333,53 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("page:71");
   });
 
+  test("builds an EBITDA helper table from directly traceable support pages", () => {
+    const block = formatEvidenceSnippets(
+      [
+        normalizeSource({
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 22,
+          table_candidate: true,
+          text: "ACCOUNTANTSâ€™\nRegistration Registration 14. IMPAIRMENT LOSSES ON FINANCIAL ASSETS INCOME FOR THE FINANCIAL YEAR/PERIOD\nJRK HOLDINGS BERHAD CONSOLIDATED REVENUE COST OF SALES GROSS PROFIT OTHER INCOME ADMINISTRATIVE EXPENSES SELLING AND DISTRIBUTION EXPENSES OTHER EXPENSES FINANCE COSTS NET (IMPAIRMENT LOSSES)/REVERSAL OF PROFIT BEFORE TAXATION INCOME TAX EXPENSE PROFIT AFTER TAXATION/TOTAL COMPREHENSIVE",
+        }),
+        normalizeSource({
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 23,
+          table_candidate: true,
+          text: "OF\nREPORT\nSTATEMENTS\ncontrolling interests\nCOMPREHENSIVE INCOME ATTRIBUTABLE TO: Owners of the Company Non Basic Diluted\nJRK HOLDINGS BERHAD CONSOLIDATED PROFIT AFTER TAXATION/TOTAL EARNINGS PER SHARE (RM) - -",
+        }),
+        normalizeSource({
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 66,
+          table_candidate: true,
+          text: "Profit before taxation is arrived at after charging/(crediting):-\nDepreciation:\n- property, plant and equipment 28,965 494,964 541,412 306,278 345,217\n- investment property - - 11,414 7,552 6,659\n- right-of-use assets 451,642 568,859 648,411 378,240 196,715\nInterest expense:\n- bank overdrafts - 3,062 990 - 39,652\n- lease liabilities 28,388 52,174 41,136 28,162 9,441\n- term loans 1,026,484 331,403 1,081,711 501,190 1,071,550",
+        }),
+        normalizeSource({
+          title: "accountant-report-JRK.pdf",
+          filetype: "pdf",
+          page_number: 67,
+          table_candidate: true,
+          text: "Interest expense:\n- hire purchase payables - 86,475 79,607 44,785 46,058\n- promissory notes - 33,233 44,964 16,537 29,640\n- related parties - 1,271,227 392,631 392,631 -\n- others 883,951 2,340,218 237,824 162,544 89,483\nInterest income:\n- fixed deposits with licensed banks (7,789) (18,108) (133,689) (114,317) (47,025)\n- bank balances (4,228) (18,625) (69,778) (37,910) (92,719)\n- others (6,518) (70,521) (47,977) (36,336) (176)",
+        }),
+      ],
+      {
+        maxSnippets: 8,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+      }
+    );
+
+    expect(block).toContain(
+      "[Directly traceable helper | EBITDA computation table | normalized to RM'000]"
+    );
+    expect(block).toContain(
+      "| EBITDA | 11,350 | 16,550 | 23,204 | 16,051 | 12,583 |"
+    );
+  });
+
   test("excludes adjacent financial position pages from profit or loss evidence blocks", () => {
     const block = formatEvidenceSnippets(
       [
@@ -1440,7 +1523,7 @@ describe("financial info evidence formatting", () => {
       filetype: "pdf",
       page_number: 71,
       table_candidate: true,
-      text: "EARNINGS PER SHARE\nWeighted average number of ordinary shares in issue\nBasic earnings per share (RM)",
+      text: "EARNINGS PER SHARE\nWeighted average number of ordinary shares in issue\nBasic earnings per share (RM)\nThe Group has not issued any dilutive potential ordinary shares and hence, the diluted earnings per share is equal to the basic earnings per share.",
     });
     const page11 = normalizeSource({
       title: "accountant-report-JRK.pdf",
@@ -1488,6 +1571,9 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("(2) Computed based on GP over revenue.");
     expect(block).toContain("(3) Computed based on PBT over revenue.");
     expect(block).toContain("(4) Computed based on PAT over revenue.");
+    expect(block).toContain(
+      "(5) The basic EPS is the same as diluted EPS as there were no outstanding convertible securities for the Financial Years/Period Under Review."
+    );
     expect(block).toContain(
       "(6) Computed based on PAT attributable to owners of our Company over 703,062,738 Shares after the Subdivision but before our IPO."
     );
@@ -1593,6 +1679,19 @@ describe("financial info evidence formatting", () => {
 
     expect(blocks.styleBlock).toContain("[TABLE_INTRO_PATTERN]");
     expect(blocks.styleBlock).not.toContain("30 June 2024");
+  });
+
+  test("buildIpoPromptBlocks returns a 12.2 template scaffold when evidence is missing", () => {
+    const blocks = buildIpoPromptBlocks([], {
+      userTemplate: "TARGET SECTION HEADING\n12.2 CAPITALISATION AND INDEBTEDNESS",
+    });
+
+    expect(blocks.evidenceBlock).toContain(
+      "[Template fallback | 12.2 capitalisation and indebtedness skeleton"
+    );
+    expect(blocks.evidenceBlock).toContain("Framing paragraph template:");
+    expect(blocks.evidenceBlock).toContain("| Total indebtedness | [amount] | [amount] | [amount] |");
+    expect(blocks.evidenceBlock).not.toBe("Not disclosed in the provided documents.");
   });
 
   test("style formatter picks matching section text when source section numbers differ", () => {

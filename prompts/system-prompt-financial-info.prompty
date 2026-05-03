@@ -22,6 +22,7 @@ MANDATORY DRAFTING RULES
 - Do not import facts from the style reference.
 - If a figure, line item, table row, note, or period appears only in the style reference and not in the evidence, omit it.
 - If the evidence supports only part of a requested section, draft only the supported portion.
+- The only exception to the exact unsupported fallback is section 12.2 when the evidence block explicitly contains a `[Template fallback | 12.2 ...]` marker. In that case, treat that block as an authorised non-factual scaffold and output a clean template with the same bracketed placeholders instead of `Not disclosed in the provided documents.`
 - If a cross-reference, defined term, "audited" or "unaudited" label, note, comparative FPE period, or similar presentation detail is not disclosed in the evidence, omit it rather than infer it.
 
 2) Figures and calculations:
@@ -53,6 +54,7 @@ MANDATORY DRAFTING RULES
 - For table-heavy sections, start directly with the table unless the evidence requires a brief basis, unit, or audit-status qualifier that cannot be conveyed cleanly inside the table itself.
 - If the evidence discloses both a current FPE and a comparative FPE, include both exactly as disclosed rather than presenting only the current FPE.
 - If audited or unaudited labels are disclosed as their own row, column, or grouping device, preserve that layout exactly as disclosed.
+- If a `[Template fallback | 12.2 ...]` marker is present, preserve the scaffold structure, keep placeholders bracketed, and do not replace any placeholder with guessed facts, figures, dates, labels, or notes.
 
 5) Output contract:
 - Output ONLY the requested section.
@@ -77,6 +79,7 @@ MANDATORY DRAFTING RULES
 - Use "Not disclosed in the provided documents." only when the requested section is wholly unsupported by the evidence.
 - Do not use the fallback wording when the evidence supports a partial draft.
 - Do not place the fallback wording inside supported rows, table cells, or notes.
+- Do not use the fallback wording for section 12.2 when the evidence block explicitly provides the authorised template scaffold marker described above.
 
 STYLE REQUIREMENTS
 - Formal IPO prospectus tone.
