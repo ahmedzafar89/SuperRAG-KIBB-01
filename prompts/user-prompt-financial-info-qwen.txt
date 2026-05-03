@@ -36,6 +36,18 @@ SECTION TASK
 - If the second paragraph is supported only by a Note 3 style cross-reference, keep it to one short sentence and prefer:
   "For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report."
   Adjust only the issuer term, note number, and report reference to match the evidence.
+- Before writing, decide these items in order and use only the supported result for each item:
+  1. issuer term: "our Group" or "the Group";
+  2. statement scope: profit or loss and financial position only, or add cash flows only if clearly supported;
+  3. period phrasing: "Financial Years/Period Under Review" if supported by the selected style reference, otherwise only the expressly disclosed periods;
+  4. second-paragraph mode: no second paragraph, "no peculiar accounting policies", Note 3 referral, or a short combined paragraph.
+- First paragraph target shape when supported:
+  opening summary sentence, then one short sentence for accounting framework and read-together wording.
+- If the evidence supports only one of accounting framework or read-together wording, keep only the supported item and omit the unsupported item.
+- Keep the output tight for Qwen:
+  1. no more than two paragraphs;
+  2. first paragraph no more than two short sentences;
+  3. second paragraph one short sentence when it is only a note referral.
 
 DO NOT
 - Do not analyse performance, liquidity, cash flow, ratios, or trends.
@@ -46,6 +58,8 @@ DO NOT
 - Do not use bland fallback openings such as "The Group's historical financial information comprises ..." or "Our Group's historical financial information comprises ..." when the approved prospectus-style intro is supported.
 - Do not rewrite the first paragraph into accountant-report syntax such as "as at [date]" or "for the financial years ended [date]" when the approved style reference supports the shorter chapter-introduction framing.
 - Do not force cash flows, statements of changes in equity, audit-qualification wording, or generic Note 3 referral wording when not supported.
+- Do not output bullets, labels, drafting notes, or any text before or after the section heading and body.
+- Do not write more than two paragraphs or let the second paragraph turn into a Note 3 summary.
 - Do not continue into section 12.1.1.
 
 STYLE REFERENCE
@@ -60,6 +74,7 @@ OUTPUT CONTRACT
 - Do not add markdown heading markers.
 - Use short prospectus-style narrative only.
 - Use two short paragraphs where the evidence supports both paragraphs.
+- If only the first paragraph is supported, output only one short paragraph.
 
 --- 12.1.1
 
@@ -76,6 +91,11 @@ SECTION TASK
 - When the mapping is exact from the evidence, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025.
 - If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
 - Where audit status is disclosed across periods, prefer a separate audit-status row above the FYE/FPE row.
+- For 12.1.1, when audit status is disclosed across periods, use the header in this order:
+  1. audit-status row;
+  2. FYE/FPE period row;
+  3. RM'000 row.
+- For 12.1.1, match the approved grouped-header pattern as closely as markdown allows, so the audited years appear together before the unaudited or later audited period columns.
 - When using separate audit-status or RM'000 rows, leave the first cell blank rather than labelling it `Audit status` or `Unit`.
 - Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 - Include all supported line items for the statement, in the same order as presented in the factual evidence.
@@ -93,6 +113,8 @@ DO NOT
 - If a row label and its period values cannot be aligned cleanly from the selected factual evidence, omit that row rather than shifting a value into the wrong row or period.
 - Do not output unlabeled subtotal-only rows.
 - Do not move a figure from one row label to another merely to complete the table.
+- Do not place the FYE/FPE row above the audit-status row for 12.1.1 when the audit status is disclosed.
+- Do not place `Audited`, `Unaudited`, or `RM'000` in the statement body; keep them in header rows only when used.
 - Do not explain movements or performance drivers.
 - Do not continue into section 12.1.2.
 
@@ -113,7 +135,7 @@ OUTPUT CONTRACT
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
-- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
+- For 12.1.1, when audit status is disclosed, the table header should read in this order: audit-status row, period row, then RM'000 row.
 - Do not use `Line item` as the first-column header.
 - Do not use `Unit` as a row label.
 - If audit-status or RM'000 rows are used, keep their first cells blank.
@@ -374,11 +396,15 @@ TARGET SECTION HEADING
 
 SECTION TASK
 - Draft only section 12.3.3.
-- Use clean prospectus-style narrative only.
+- Use clean prospectus-style narrative and include a short supporting table when the factual evidence expressly supports headline figures for this subsection.
 - Summarise the overall results of operations only to the extent supported by the evidence.
+- Where the accountants' report or directly related note disclosure supports headline figures for the disclosed periods, present a short summary table before the narrative.
+- For the 12.3.3 summary table, include only line items and figures that are expressly disclosed or directly traceable from the accountants' report, such as revenue, gross profit, profit before taxation, and profit after taxation, in the same order as supported by the evidence.
+- Where the evidence provides full RM figures, present that summary table in RM'000 only if the scaling is direct and traceable.
 - Include revenue recognition, segment contribution, project contribution, customer type, geographic mix, cost structure, or other operating-result context only where supported.
 - Start with the general results-of-operations discussion first, then move to segment, category, customer, project, or geographic sub-breakdowns where the evidence supports both.
 - Do not calculate margins, growth rates, CAGR, or derived metrics unless expressly disclosed.
+- Do not omit supported headline figures merely because the narrative evidence is stronger; if the factual evidence supports both figures and narrative, include both.
 - Do not duplicate detailed line-item analysis that belongs more appropriately in later subsections unless the evidence presents it here as part of the overview.
 - If the evidence block explicitly begins with a `[Template fallback | 12.3.3 ...]` marker, output a clean overview-of-results skeleton based on that scaffold instead of `Not disclosed in the provided documents.`
 - When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
@@ -395,7 +421,9 @@ OUTPUT CONTRACT
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
 - Use clean prospectus-style narrative.
-- Do not output tables unless the factual evidence expressly supports one.
+- Use a short supporting table when the factual evidence expressly supports headline figures for this subsection.
+- If a table is used, place it before the narrative and keep it in clean markdown using pipe characters.
+- Include a header row and separator row for any table used.
 - If the evidence block is the authorised `12.3.3` template fallback scaffold, keep the placeholder wording exactly as placeholders and do not turn them into facts.
 
 --- 12.3.4

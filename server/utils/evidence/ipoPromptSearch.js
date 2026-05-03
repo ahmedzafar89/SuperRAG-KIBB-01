@@ -95,6 +95,30 @@ function buildIpoRetrievalQueries(prompt = "") {
         ].join(" ")
       );
       break;
+    case "12.3.3":
+      queries.push(
+        [
+          promptContext.heading,
+          "revenue",
+          "gross profit",
+          "profit before taxation",
+          "profit after taxation",
+          "results of operations",
+          "segment information",
+        ].join(" ")
+      );
+      queries.push(
+        [
+          promptContext.heading,
+          "revenue from contracts with customers",
+          "timing of revenue recognition",
+          "over time",
+          "point in time",
+          "major customer",
+          "geographical information",
+        ].join(" ")
+      );
+      break;
     default:
       break;
   }

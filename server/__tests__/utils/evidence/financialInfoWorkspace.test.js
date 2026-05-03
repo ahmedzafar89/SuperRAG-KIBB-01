@@ -138,16 +138,43 @@ describe("financial info prompt guards", () => {
       'For further details on the accounting policies of the Group, please see Note 3 of the Accountants\' Report.'
     );
     expect(userPrompt).toContain(
+      "Before writing, decide these items in order and use only the supported result for each item:"
+    );
+    expect(userPrompt).toContain(
+      'period phrasing: "Financial Years/Period Under Review" if supported by the selected style reference'
+    );
+    expect(userPrompt).toContain(
+      "First paragraph target shape when supported:"
+    );
+    expect(userPrompt).toContain(
+      "If the evidence supports only one of accounting framework or read-together wording, keep only the supported item"
+    );
+    expect(userPrompt).toContain(
+      "Keep the output tight for Qwen:"
+    );
+    expect(userPrompt).toContain(
+      "Do not output bullets, labels, drafting notes, or any text before or after the section heading and body."
+    );
+    expect(userPrompt).toContain(
       'Do not rewrite the first paragraph into accountant-report syntax such as "as at [date]" or "for the financial years ended [date]"'
     );
     expect(userPrompt).toContain(
       'Do not force cash flows, statements of changes in equity, audit-qualification wording, or generic Note 3 referral wording when not supported'
     );
     expect(userPrompt).toContain(
+      "If only the first paragraph is supported, output only one short paragraph."
+    );
+    expect(userPrompt).toContain(
       'Do not use bland fallback openings such as "The Group\'s historical financial information comprises ..." or "Our Group\'s historical financial information comprises ..."'
     );
     expect(userPrompt).toContain(
       "Present one complete main table for this section, followed by the EBITDA computation table and all supported numbered formula notes."
+    );
+    expect(userPrompt).toContain(
+      "For 12.1.1, when audit status is disclosed across periods, use the header in this order:"
+    );
+    expect(userPrompt).toContain(
+      "For 12.1.1, match the approved grouped-header pattern as closely as markdown allows"
     );
     expect(userPrompt).toContain(
       "For the approved 12.1.1 prospectus summary display, include EBITDA, GP margin, PBT margin, PAT margin, and basic and diluted EPS whenever the row labels and period values are expressly disclosed or are directly traceable"
@@ -171,6 +198,9 @@ describe("financial info prompt guards", () => {
       "Do not use `Unit` as a row label."
     );
     expect(userPrompt).toContain(
+      "Do not place the FYE/FPE row above the audit-status row for 12.1.1 when the audit status is disclosed."
+    );
+    expect(userPrompt).toContain(
       "If audit-status or RM'000 rows are used, keep their first cells blank."
     );
     expect(userPrompt).toContain(
@@ -181,6 +211,9 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       "If the evidence block explicitly begins with a `[Template fallback | 12.3"
+    );
+    expect(userPrompt).toContain(
+      "include a short supporting table when the factual evidence expressly supports headline figures for this subsection"
     );
   });
 
@@ -350,6 +383,28 @@ describe("IPO prompt source expansion", () => {
     expect(
       queries.some((query) =>
         query.includes("there are no accounting policies which are peculiar")
+      )
+    ).toBe(true);
+  });
+
+  test("builds companion retrieval queries for 12.3.3 headline figures and operating context support", () => {
+    const queries = buildIpoRetrievalQueries(
+      "TARGET SECTION HEADING\n12.3.3 OVERVIEW OF OUR RESULTS OF OPERATIONS"
+    );
+
+    expect(queries.length).toBeGreaterThan(1);
+    expect(
+      queries.some((query) =>
+        query.includes("gross profit") &&
+        query.includes("profit before taxation") &&
+        query.includes("profit after taxation")
+      )
+    ).toBe(true);
+    expect(
+      queries.some((query) =>
+        query.includes("revenue from contracts with customers") &&
+        query.includes("major customer") &&
+        query.includes("geographical information")
       )
     ).toBe(true);
   });
@@ -1771,6 +1826,48 @@ describe("financial info evidence formatting", () => {
     expect(blocks.styleBlock).not.toContain("30 June 2024");
   });
 
+  test("adds grouped audit-status header helper for section 12.1.1", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 22,
+          table_candidate: true,
+          text: "PDF page: 22\nSource section: INCOME 2023\nUnaudited 1.1.2024 to 31.7.2024 83,479,155 23,346,710 23,699,076 (3,834,720) (3,423,841)\nAudited FYE 31 December 2024 117,648,930 37,003,229 37,821,478 (8,222,406) (5,372,269)\nAudited FYE 31 December 2023 65,092,484 26,878,587 27,007,844 (7,512,980) (2,557,608)\nFinancial Year Ended (\"FYE\") 31 December 2022 52,931,108 18,639,526 18,708,669 (4,751,086) (2,400,444)\nCONSOLIDATED REVENUE COST OF SALES GROSS PROFIT OTHER INCOME ADMINISTRATIVE EXPENSES SELLING AND DISTRIBUTION EXPENSES OTHER EXPENSES FINANCE COSTS NET (IMPAIRMENT LOSSES)/REVERSAL OF IMPAIRMENT LOSSES ON FINANCIAL ASSETS PROFIT BEFORE TAXATION INCOME TAX EXPENSE PROFIT AFTER TAXATION/TOTAL COMPREHENSIVE INCOME FOR THE FINANCIAL YEAR/PERIOD",
+        },
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 23,
+          table_candidate: true,
+          text: "PDF page: 23\nSource section: COMPREHENSIVE\nAudited FPE 1.1.2025 to 31.7.2025 7,102,817 129,786 7,232,603\nAudited FYE 31 December 2024 10,921,590 2,941,220 13,862,810\nAudited FYE 31 December 2023 6,511,013 1,376,600 7,887,613\nAudited FYE 31 December 2022 5,593,471 919,050 6,512,521\nCOMPREHENSIVE INCOME ATTRIBUTABLE TO: Owners of the Company Non-controlling interests Basic Diluted CONSOLIDATED PROFIT AFTER TAXATION/TOTAL EARNINGS PER SHARE (RM)",
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.1 CONSOLIDATED STATEMENTS OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+      }
+    );
+
+    expect(block).toContain(
+      "[Directly traceable helper | preferred prospectus-style header formatting]"
+    );
+    expect(block).toContain(
+      "|  | Audited | Audited | Audited | Unaudited | Audited |"
+    );
+    expect(block).toContain(
+      "|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |"
+    );
+    expect(block).toContain(
+      "|  | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |"
+    );
+    expect(block.indexOf("|  | Audited | Audited | Audited | Unaudited | Audited |")).toBeLessThan(
+      block.indexOf("|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |")
+    );
+  });
+
   test("buildIpoPromptBlocks returns a 12.2 template scaffold when evidence is missing", () => {
     const blocks = buildIpoPromptBlocks([], {
       userTemplate: "TARGET SECTION HEADING\n12.2 CAPITALISATION AND INDEBTEDNESS",
@@ -1798,6 +1895,24 @@ describe("financial info evidence formatting", () => {
     );
     expect(blocks.evidenceBlock).toContain(
       "(a) FYE [year 2] compared to FYE [year 1]"
+    );
+    expect(blocks.evidenceBlock).not.toBe("Not disclosed in the provided documents.");
+  });
+
+  test("buildIpoPromptBlocks returns a 12.3.3 template scaffold with summary table when evidence is missing", () => {
+    const blocks = buildIpoPromptBlocks([], {
+      userTemplate: "TARGET SECTION HEADING\n12.3.3 OVERVIEW OF OUR RESULTS OF OPERATIONS",
+    });
+
+    expect(blocks.evidenceBlock).toContain(
+      "[Template fallback | 12.3.3 results overview skeleton"
+    );
+    expect(blocks.evidenceBlock).toContain("Summary table template:");
+    expect(blocks.evidenceBlock).toContain(
+      "| Results of operations | FYE [year 1] | FYE [year 2] | FYE [year 3] | FPE [current period] | FPE [comparative period] |"
+    );
+    expect(blocks.evidenceBlock).toContain(
+      "| Revenue | [amount] | [amount] | [amount] | [amount] | [amount] |"
     );
     expect(blocks.evidenceBlock).not.toBe("Not disclosed in the provided documents.");
   });

@@ -39,6 +39,7 @@ function extractIpoPromptContext(promptText = "") {
     "12.1.2",
     "12.1.3",
     "12.2",
+    "12.3.3",
     "12.3.12",
     "12.4.2",
     "12.8",
@@ -146,6 +147,10 @@ function extractIpoPromptContext(promptText = "") {
     "12.3.3": [
       "overview of our results of operations",
       "results of operations",
+      "revenue",
+      "gross profit",
+      "profit before taxation",
+      "profit after taxation",
       "revenue recognition",
       "segment contribution",
       "project contribution",
@@ -670,6 +675,32 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
       )
         score -= 1.1;
       break;
+    case "12.3.3":
+      if (
+        /revenue|gross profit|profit before taxation|profit after taxation|results of operations/.test(
+          normalized
+        )
+      )
+        score += 0.34;
+      if (
+        /revenue from contracts with customers|timing of revenue recognition|over time|point in time|major customer|geographical information|segment information/.test(
+          normalized
+        )
+      )
+        score += 0.28;
+      if (
+        /management discussion and analysis|overview of our results of operations/.test(
+          normalized
+        )
+      )
+        score += 0.18;
+      if (
+        /reporting accountants[â€™'] opinion|basis for opinion|ethical responsibilities|directors[â€™'] responsibilities/.test(
+          normalized
+        )
+      )
+        score -= 1.0;
+      break;
     default:
       break;
   }
@@ -839,6 +870,21 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
       score += 0.45;
     if (Number.isFinite(pageNumber) && pageNumber <= 4) score -= 0.65;
     if (Number.isFinite(pageNumber) && pageNumber === 9) score -= 0.4;
+  }
+  if (promptContext.sectionNumber === "12.3.3") {
+    const pageNumber = Number(source.page_number);
+    if (Number.isFinite(pageNumber) && pageNumber >= 20 && pageNumber <= 24) {
+      score += 0.3;
+    }
+    if (Number.isFinite(pageNumber) && pageNumber > 60 && pageNumber <= 90) {
+      score += 0.18;
+    }
+    if (
+      /revenue|gross profit|profit before taxation|profit after taxation/.test(text) &&
+      hasProfitOrLossPeriodValueSignals(text)
+    ) {
+      score += 0.48;
+    }
   }
 
   for (const keyword of promptContext.keywords) {
@@ -2318,24 +2364,52 @@ function inferStatementPeriodColumns(sources = [], options = {}) {
 }
 
 function inferAuditColumns(sources = [], periodColumns = []) {
-  const combined = collectStatementEvidenceLines(sources).join("\n");
+  const lines = collectStatementEvidenceLines(sources).map((line) =>
+    line.replace(/\s+/g, " ").trim()
+  );
+  const combined = lines.join("\n");
   const hasAudited = /\baudited\b/i.test(combined);
   const hasUnaudited = /\bunaudited\b/i.test(combined);
 
   if (!periodColumns.length || (!hasAudited && !hasUnaudited)) return [];
   return periodColumns.map((label) => {
     const parts = parsePeriodLabelParts(label);
-    if (hasUnaudited && parts?.kind === "FPE") return "Unaudited";
+    if (parts) {
+      const yearPattern =
+        parts.kind === "FPE"
+          ? new RegExp(
+              `(?:fpe\\s+${parts.year}|1\\.1\\.${parts.year}\\s+to\\s+31\\.7\\.${parts.year}|31\\.7\\.${parts.year})`,
+              "i"
+            )
+          : new RegExp(
+              `(?:fye\\s+${parts.year}|31\\s+december\\s+${parts.year}|financial year ended[^\\n]*${parts.year})`,
+              "i"
+            );
+      const matchedLines = lines.filter((line) => yearPattern.test(line));
+      if (matchedLines.some((line) => /\bunaudited\b/i.test(line))) return "Unaudited";
+      if (matchedLines.some((line) => /\baudited\b/i.test(line))) return "Audited";
+    }
+    if (hasUnaudited && !hasAudited && parts?.kind === "FPE") return "Unaudited";
     return "Audited";
   });
 }
 
-function buildStandardPeriodFormattingHelper(helperLabel, periodColumns = STANDARD_PERIOD_COLUMNS, auditColumns = []) {
+function buildStandardPeriodFormattingHelper(
+  helperLabel,
+  periodColumns = STANDARD_PERIOD_COLUMNS,
+  auditColumns = [],
+  opts = {}
+) {
+  const { auditRowFirst = false } = opts;
+
   return [
     helperLabel,
+    ...(auditColumns.length && auditRowFirst
+      ? [`|  | ${auditColumns.join(" | ")} |`]
+      : []),
     `|  | ${periodColumns.join(" | ")} |`,
     `| --- | ${periodColumns.map(() => "---").join(" | ")} |`,
-    ...(auditColumns.length
+    ...(auditColumns.length && !auditRowFirst
       ? [`|  | ${auditColumns.join(" | ")} |`]
       : []),
     `|  | ${periodColumns.map(() => "RM'000").join(" | ")} |`,
@@ -2840,20 +2914,29 @@ function renderPicked(picked = [], maxCharsPerSnippet = 1800, promptContext = {}
     .join("\n\n");
 
   if (promptContext.sectionNumber === "12.1.1") {
+    const periodColumns = inferStatementPeriodColumns(picked, {
+      labelPattern:
+        /(?:revenue|cost of sales|gross profit|other income|administrative expenses|selling and distribution expenses|other expenses|finance costs|profit before taxation|income tax expense|profit after taxation|earnings per share|basic|diluted)/i,
+    });
+    const auditColumns = inferAuditColumns(picked, periodColumns);
+    const periodFormattingHelper = buildStandardPeriodFormattingHelper(
+      "[Directly traceable helper | preferred prospectus-style header formatting]",
+      periodColumns,
+      auditColumns,
+      { auditRowFirst: true }
+    );
     const rowAlignedHelper = buildProfitOrLossRowAlignedHelper(picked);
     const helper = buildProfitOrLossLeadingValueHelper(picked);
     const formulaNotesHelper = buildProfitOrLossFormulaNotesHelper(picked);
-    if (rowAlignedHelper && helper && formulaNotesHelper) {
-      return `${rendered}\n\n${rowAlignedHelper}\n\n${helper}\n\n${formulaNotesHelper}`;
-    }
-    if (rowAlignedHelper && helper) return `${rendered}\n\n${rowAlignedHelper}\n\n${helper}`;
-    if (rowAlignedHelper && formulaNotesHelper) {
-      return `${rendered}\n\n${rowAlignedHelper}\n\n${formulaNotesHelper}`;
-    }
-    if (helper && formulaNotesHelper) return `${rendered}\n\n${helper}\n\n${formulaNotesHelper}`;
-    if (rowAlignedHelper) return `${rendered}\n\n${rowAlignedHelper}`;
-    if (helper) return `${rendered}\n\n${helper}`;
-    return formulaNotesHelper ? `${rendered}\n\n${formulaNotesHelper}` : rendered;
+    return [
+      rendered,
+      periodFormattingHelper,
+      rowAlignedHelper,
+      helper,
+      formulaNotesHelper,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
   }
 
   if (promptContext.sectionNumber === "12.1.2") {
