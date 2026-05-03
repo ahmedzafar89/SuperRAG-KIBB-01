@@ -2404,15 +2404,17 @@ function buildStandardPeriodFormattingHelper(
 
   return [
     helperLabel,
-    ...(auditColumns.length && auditRowFirst
-      ? [`|  | ${auditColumns.join(" | ")} |`]
-      : []),
     `|  | ${periodColumns.join(" | ")} |`,
     `| --- | ${periodColumns.map(() => "---").join(" | ")} |`,
-    ...(auditColumns.length && !auditRowFirst
+    ...(auditColumns.length
       ? [`|  | ${auditColumns.join(" | ")} |`]
       : []),
     `|  | ${periodColumns.map(() => "RM'000").join(" | ")} |`,
+    ...(auditColumns.length && auditRowFirst
+      ? [
+          "- For markdown rendering, keep the FYE/FPE row as the actual header row and place the audit-status row immediately beneath it so the columns stay aligned.",
+        ]
+      : []),
     "- Leave the first cell blank for header helper rows; do not label it Line item, Unit, or Audit status unless the evidence itself requires that wording.",
   ].join("\n");
 }

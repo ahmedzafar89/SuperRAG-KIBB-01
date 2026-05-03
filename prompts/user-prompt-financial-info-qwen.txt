@@ -105,6 +105,7 @@ SECTION TASK
 - Where EBITDA is part of the approved display, include the EBITDA computation immediately beneath the main table and calculate it from the directly traceable supporting line items only when every component value is available for the relevant periods.
 - Include all supported numbered footnotes and formula notes for EBITDA, margins, EPS, diluted-equals-basic wording, and share-base assumptions where those notes or their computation basis are expressly disclosed or directly traceable from the selected Accountants' Report figures.
 - When a numbered footnote is directly traceable but the full wording is longer than needed, preserve the note number and condense the note to the minimum necessary prospectus-style computation basis.
+- Calculate EBITDA using following PAT, Less(Finance income), Add(Taxation), Depreciation and Finance cost
 
 DO NOT
 - Do not stop after the first few rows if additional supported rows for the same statement are available.
@@ -154,6 +155,8 @@ SECTION TASK
 - When the summary table is presented in RM'000, mechanically convert the disclosed statement line-item figures into RM'000 before drafting.
 - When the mapping is exact from the evidence, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025.
 - If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
+- For markdown tables, keep the FYE/FPE row as the actual header row immediately above the separator row.
+- If audit-status or RM'000 rows are used, place them as aligned rows beneath the header row so the columns render correctly.
 - When using separate audit-status or RM'000 rows, leave the first cell blank rather than labelling it `Audit status` or `Unit`.
 - Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 - Include all supported line items for the statement of financial position, in the same order as presented in the factual evidence.
@@ -169,6 +172,7 @@ DO NOT
 - Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
 - Do not output unlabeled subtotal-only rows.
 - If a line-item cluster appears without its parent classification heading in the selected factual evidence, omit that cluster rather than inferring the missing classification.
+- Do not place an audit-status row above the markdown header separator, as that breaks table alignment.
 - Do not relabel this section as "historical financial position" or any other alternative heading.
 - Do not interpret balance sheet strength, capital position, solvency, or movements.
 - Do not continue into section 12.1.3.
@@ -189,7 +193,6 @@ OUTPUT CONTRACT
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
-- Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
 - Do not use `Line item` as the first-column header.
 - Do not use `Unit` as a row label.
 - If audit-status or RM'000 rows are used, keep their first cells blank.
@@ -252,11 +255,18 @@ TARGET SECTION HEADING
 SECTION TASK
 - Draft only section 12.2.
 - Match the approved prospectus display pattern closely.
-- Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or status qualifier.
+- Use one or two short framing paragraphs before the table only when the factual evidence supports them.
+- For 12.2, prefer the approved skeleton shape when supported:
+  first framing paragraph for basis date and adjustment wording;
+  second framing paragraph for pro forma illustrative-only wording.
 - State the basis date and whether the information is audited, unaudited, pro forma, adjusted, or after a specific transaction only where expressly disclosed in the evidence.
 - Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
 - When the summary table is presented in RM'000, mechanically convert the disclosed monetary line-item figures into RM'000 before drafting and do not leave them in full RM.
 - If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
+- For 12.2, when the approved display uses stacked column headers, prefer this order in markdown:
+  1. top header row for column labels such as `Unaudited`, `Pro Forma I`, and `Pro Forma II`;
+  2. second row for basis captions such as `As at [date]`, `After [transaction]`, or `After [transaction] and the use of proceeds`;
+  3. third row for `RM'000`.
 - Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 - Include all supported line items, classifications, subtotals, totals, adjustment columns, and directly related summary disclosure for capitalisation and indebtedness, in the same order as presented in the factual evidence.
 - Preserve categories such as current, non-current, secured, unsecured, guaranteed, unguaranteed, total indebtedness, total capitalisation, and equivalent issuer-specific classifications exactly as disclosed.
@@ -271,6 +281,7 @@ DO NOT
 - Do not recompute totals or add presentation rows to make figures tie.
 - Do not include boilerplate accountant-report note sentences unless the evidence expressly discloses note detail that belongs in this section.
 - Do not calculate totals, gearing, net debt, post-issue values, or any other derived row unless that exact value is expressly disclosed in the factual evidence.
+- Do not collapse supported stacked header content into a single long column heading when the approved display separates status, basis caption, and `RM'000`.
 - Do not explain capital structure implications, funding adequacy, or borrowing strategy in this section.
 - Do not continue into section 12.3.
 
@@ -284,12 +295,13 @@ OUTPUT CONTRACT
 - Output only section 12.2.
 - Preserve the heading exactly as written above.
 - Do not add markdown heading markers.
-- Use a short framing paragraph only if the factual evidence requires it before the table.
+- Use one or two short framing paragraphs only if the factual evidence requires them before the table.
 - Present one complete table for this section.
 - The table must be in clean markdown using pipe characters.
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- For 12.2, when stacked column headers are supported, keep the first header row above the separator row and place the basis-caption row and `RM'000` row beneath it.
 - Do not use `Line item` as the first-column header.
 - Do not use `Unit` as a row label.
 - If the evidence block is the authorised `12.2` template fallback scaffold, keep the placeholder wording and placeholder table cells exactly as placeholders and do not turn them into facts.
@@ -307,8 +319,9 @@ SECTION TASK
   state that the discussion below should be read together with the historical financial information and the Accountants' Report only where supported;
   state the scope of the discussion in a short chapter-introduction style.
 - Second paragraph:
-  state the main operating-result framing only where supported;
-  otherwise keep it as a short scaffold if the authorised template fallback is provided.
+  - state the accounting policies used for the calculations in the accountants report, if not applicapable provide the following 'There are no accounting policies which are peculiar to our Group because of the nature of the
+business or industry which we are involved in'
+  - for further details, state to refer from the accountants report specific note.
 - Do not include tables, detailed analysis, or subsection-specific discussion in this section.
 - Do not reproduce content that belongs in sections 12.3.1 onward.
 - If the evidence block explicitly begins with a `[Template fallback | 12.3 ...]` marker, output a clean two-paragraph skeleton based on that scaffold instead of `Not disclosed in the provided documents.`
@@ -338,6 +351,7 @@ TARGET SECTION HEADING
 SECTION TASK
 - Draft only section 12.3.1.
 - Use clean prospectus-style narrative only.
+- Generate one short paragraph only.
 - Describe the business only to the extent supported by the evidence.
 - Include business model, principal activities, operating segments, products or services, projects, markets, customers, or geographic presence only where supported.
 - Do not include promotional wording, market-positioning claims, or management opinion.
@@ -396,18 +410,16 @@ TARGET SECTION HEADING
 
 SECTION TASK
 - Draft only section 12.3.3.
-- Use clean prospectus-style narrative and include a short supporting table when the factual evidence expressly supports headline figures for this subsection.
-- Summarise the overall results of operations only to the extent supported by the evidence.
-- Where the accountants' report or directly related note disclosure supports headline figures for the disclosed periods, present a short summary table before the narrative.
-- For the 12.3.3 summary table, include only line items and figures that are expressly disclosed or directly traceable from the accountants' report, such as revenue, gross profit, profit before taxation, and profit after taxation, in the same order as supported by the evidence.
-- Where the evidence provides full RM figures, present that summary table in RM'000 only if the scaling is direct and traceable.
-- Include revenue recognition, segment contribution, project contribution, customer type, geographic mix, cost structure, or other operating-result context only where supported.
-- Start with the general results-of-operations discussion first, then move to segment, category, customer, project, or geographic sub-breakdowns where the evidence supports both.
-- Do not calculate margins, growth rates, CAGR, or derived metrics unless expressly disclosed.
-- Do not omit supported headline figures merely because the narrative evidence is stronger; if the factual evidence supports both figures and narrative, include both.
-- Do not duplicate detailed line-item analysis that belongs more appropriately in later subsections unless the evidence presents it here as part of the overview.
-- If the evidence block explicitly begins with a `[Template fallback | 12.3.3 ...]` marker, output a clean overview-of-results skeleton based on that scaffold instead of `Not disclosed in the provided documents.`
-- When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
+- Use clean prospectus-style narrative only.
+- Generate 4 paragraphs 
+- first paragraph - a short paragraph on how the results were computed.
+- second paragraph - a disclaimer about the company.
+- third paragraph:
+    - summary of the revenue generated over the first and last year and showcase the CAGR between them on the evidence from accountant report. format numbers as millions rather than the complete number.  
+    - reference the paragraph with "Our Group’s revenue"
+    - also add the summary of the revenue generated over the FPE years and showcase the CAGR based on the evidence from accountant report. format numbers as millions rather than the complete number.
+    - lastly add in the main contributing factor to revenue for each year. format numbers as millions rather than the complete number.  
+- forth paragraph - short disclaimer on where the info was extracted from.
 - Do not continue into section 12.3.4.
 
 STYLE REFERENCE

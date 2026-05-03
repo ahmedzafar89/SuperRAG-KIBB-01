@@ -198,6 +198,12 @@ describe("financial info prompt guards", () => {
       "Do not use `Unit` as a row label."
     );
     expect(userPrompt).toContain(
+      "For markdown tables, keep the FYE/FPE row as the actual header row immediately above the separator row."
+    );
+    expect(userPrompt).toContain(
+      "Do not place an audit-status row above the markdown header separator, as that breaks table alignment."
+    );
+    expect(userPrompt).toContain(
       "Do not place the FYE/FPE row above the audit-status row for 12.1.1 when the audit status is disclosed."
     );
     expect(userPrompt).toContain(
@@ -305,6 +311,18 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       "Do not infer any 12-month sufficiency statement, LPD statement, or post-listing funding statement from style convention."
+    );
+    expect(userPrompt).toContain(
+      "For 12.2, prefer the approved skeleton shape when supported:"
+    );
+    expect(userPrompt).toContain(
+      "For 12.2, when the approved display uses stacked column headers, prefer this order in markdown:"
+    );
+    expect(userPrompt).toContain(
+      "Do not collapse supported stacked header content into a single long column heading"
+    );
+    expect(userPrompt).toContain(
+      "For 12.2, when stacked column headers are supported, keep the first header row above the separator row"
     );
   });
 });
@@ -1855,16 +1873,16 @@ describe("financial info evidence formatting", () => {
       "[Directly traceable helper | preferred prospectus-style header formatting]"
     );
     expect(block).toContain(
-      "|  | Audited | Audited | Audited | Unaudited | Audited |"
+      "|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |"
     );
     expect(block).toContain(
-      "|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |"
+      "|  | Audited | Audited | Audited | Unaudited | Audited |"
     );
     expect(block).toContain(
       "|  | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |"
     );
-    expect(block.indexOf("|  | Audited | Audited | Audited | Unaudited | Audited |")).toBeLessThan(
-      block.indexOf("|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |")
+    expect(block.indexOf("|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |")).toBeLessThan(
+      block.indexOf("|  | Audited | Audited | Audited | Unaudited | Audited |")
     );
   });
 
@@ -1876,7 +1894,19 @@ describe("financial info evidence formatting", () => {
     expect(blocks.evidenceBlock).toContain(
       "[Template fallback | 12.2 capitalisation and indebtedness skeleton"
     );
-    expect(blocks.evidenceBlock).toContain("Framing paragraph template:");
+    expect(blocks.evidenceBlock).toContain("Framing paragraph templates:");
+    expect(blocks.evidenceBlock).toContain(
+      "The pro forma financial information below does not represent our actual capitalisation and indebtedness as at [date] and is provided for illustrative purposes only."
+    );
+    expect(blocks.evidenceBlock).toContain(
+      "|  | Unaudited | Pro Forma I | Pro Forma II |"
+    );
+    expect(blocks.evidenceBlock).toContain(
+      "|  | As at [date] | After [transaction 1] | After [transaction 1] and the use of proceeds |"
+    );
+    expect(blocks.evidenceBlock).toContain(
+      "|  | RM'000 | RM'000 | RM'000 |"
+    );
     expect(blocks.evidenceBlock).toContain("| Total indebtedness | [amount] | [amount] | [amount] |");
     expect(blocks.evidenceBlock).not.toBe("Not disclosed in the provided documents.");
   });
