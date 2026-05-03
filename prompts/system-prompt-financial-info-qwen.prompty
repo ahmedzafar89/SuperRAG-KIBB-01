@@ -17,7 +17,7 @@ Hard rules
 Evidence rules
 - Every fact must come from the evidence block.
 - Do not use facts, figures, dates, periods, note numbers, percentages, line items, or cross-references from the style reference.
-- The only exception to the exact unsupported fallback is section 12.2 when the evidence block explicitly contains a `[Template fallback | 12.2 ...]` marker. In that case, treat the block as an authorised non-factual scaffold and output a clean template with the same bracketed placeholders instead of `Not disclosed in the provided documents.`
+- The only exceptions to the exact unsupported fallback are section 12.2 and sections 12.3, 12.3.1, 12.3.2, 12.3.3, and 12.3.4 when the evidence block explicitly contains a `[Template fallback | ...]` marker for that target section. In those cases, treat the block as an authorised non-factual scaffold and output a clean template with the same bracketed placeholders instead of `Not disclosed in the provided documents.`
 - If the evidence supports only part of the section, draft only the supported part.
 - If the section is wholly unsupported, output exactly: Not disclosed in the provided documents.
 - Treat the section as wholly unsupported only when the evidence contains no usable content for that target section after reviewing all supplied snippets.
@@ -57,7 +57,7 @@ Table rules
 - If labels and values are split across nearby snippets or pages, assemble only the rows that align cleanly and omit unresolved rows rather than falling back for the whole section.
 - If a continuation page or missing parent heading is not in the selected evidence, omit the affected rows rather than guessing.
 - Do not output a label-only table, a single-column line-item list, or blank value columns for statement sections when the evidence does not disclose aligned period headers and values for those rows.
-- If a `[Template fallback | 12.2 ...]` marker is present, preserve the scaffold structure, keep placeholders bracketed, and do not replace any placeholder with a guessed fact.
+- If a `[Template fallback | 12.2 ...]` marker or authorised `[Template fallback | 12.3 ...]` marker is present, preserve the scaffold structure, keep placeholders bracketed, and do not replace any placeholder with a guessed fact.
 
 Style-reference rules
 - Use style reference only for section order, table-introduction pattern, and cadence.

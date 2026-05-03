@@ -271,3 +271,167 @@ OUTPUT CONTRACT
 - Do not use `Line item` as the first-column header.
 - Do not use `Unit` as a row label.
 - If the evidence block is the authorised `12.2` template fallback scaffold, keep the placeholder wording and placeholder table cells exactly as placeholders and do not turn them into facts.
+
+--- 12.3
+
+TARGET SECTION HEADING
+12.3 MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+SECTION TASK
+- Draft only section 12.3 as the chapter introduction.
+- Use short prospectus-style narrative only.
+- Use two short paragraphs.
+- First paragraph:
+  state that the discussion below should be read together with the historical financial information and the Accountants' Report only where supported;
+  state the scope of the discussion in a short chapter-introduction style.
+- Second paragraph:
+  state the main operating-result framing only where supported;
+  otherwise keep it as a short scaffold if the authorised template fallback is provided.
+- Do not include tables, detailed analysis, or subsection-specific discussion in this section.
+- Do not reproduce content that belongs in sections 12.3.1 onward.
+- If the evidence block explicitly begins with a `[Template fallback | 12.3 ...]` marker, output a clean two-paragraph skeleton based on that scaffold instead of `Not disclosed in the provided documents.`
+- When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
+- Do not continue into section 12.3.1.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.3.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use short prospectus-style narrative only.
+- Use two short paragraphs.
+- Do not output tables.
+- If the evidence block is the authorised `12.3` template fallback scaffold, keep the placeholder wording exactly as placeholders and do not turn them into facts.
+
+--- 12.3.1
+
+TARGET SECTION HEADING
+12.3.1 OVERVIEW OF OUR BUSINESS
+
+SECTION TASK
+- Draft only section 12.3.1.
+- Use clean prospectus-style narrative only.
+- Describe the business only to the extent supported by the evidence.
+- Include business model, principal activities, operating segments, products or services, projects, markets, customers, or geographic presence only where supported.
+- Do not include promotional wording, market-positioning claims, or management opinion.
+- Do not analyse financial performance, profitability, liquidity, ratios, or trend movements in this subsection.
+- If the evidence block explicitly begins with a `[Template fallback | 12.3.1 ...]` marker, output a clean business-overview skeleton based on that scaffold instead of `Not disclosed in the provided documents.`
+- When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
+- Do not continue into section 12.3.2.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.3.1.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use clean prospectus-style narrative.
+- Do not output tables unless the factual evidence expressly supports one.
+- If the evidence block is the authorised `12.3.1` template fallback scaffold, keep the placeholder wording exactly as placeholders and do not turn them into facts.
+
+--- 12.3.2
+
+TARGET SECTION HEADING
+12.3.2 SIGNIFICANT FACTORS MATERIALLY AFFECTING OUR OPERATIONS AND FINANCIAL RESULTS
+
+SECTION TASK
+- Draft only section 12.3.2.
+- Use clean prospectus-style narrative only.
+- Include only factors, drivers, dependencies, constraints, or conditions that are expressly supported by the evidence.
+- Do not add generic macroeconomic, sector, or business risks unless they are expressly supported by the evidence for this section.
+- If the evidence block explicitly begins with a `[Template fallback | 12.3.2 ...]` marker, output a clean placeholder paragraph based on that scaffold instead of `Not disclosed in the provided documents.`
+- The 12.3.2 placeholder may cross-refer to the Risk Factors section using bracketed placeholders where applicable.
+- When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
+- Do not continue into section 12.3.3.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.3.2.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use clean prospectus-style narrative.
+- Do not output tables unless the factual evidence expressly supports one.
+- If the evidence block is the authorised `12.3.2` template fallback scaffold, keep the placeholder wording exactly as placeholders and do not turn them into facts.
+
+--- 12.3.3
+
+TARGET SECTION HEADING
+12.3.3 OVERVIEW OF OUR RESULTS OF OPERATIONS
+
+SECTION TASK
+- Draft only section 12.3.3.
+- Use clean prospectus-style narrative only.
+- Summarise the overall results of operations only to the extent supported by the evidence.
+- Include revenue recognition, segment contribution, project contribution, customer type, geographic mix, cost structure, or other operating-result context only where supported.
+- Start with the general results-of-operations discussion first, then move to segment, category, customer, project, or geographic sub-breakdowns where the evidence supports both.
+- Do not calculate margins, growth rates, CAGR, or derived metrics unless expressly disclosed.
+- Do not duplicate detailed line-item analysis that belongs more appropriately in later subsections unless the evidence presents it here as part of the overview.
+- If the evidence block explicitly begins with a `[Template fallback | 12.3.3 ...]` marker, output a clean overview-of-results skeleton based on that scaffold instead of `Not disclosed in the provided documents.`
+- When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
+- Do not continue into section 12.3.4.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.3.3.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use clean prospectus-style narrative.
+- Do not output tables unless the factual evidence expressly supports one.
+- If the evidence block is the authorised `12.3.3` template fallback scaffold, keep the placeholder wording exactly as placeholders and do not turn them into facts.
+
+--- 12.3.4
+
+TARGET SECTION HEADING
+12.3.4 REVENUE
+
+SECTION TASK
+- Draft only section 12.3.4.
+- Match the approved prospectus display pattern closely.
+- Use neutral prospectus-style narrative and include a supporting table only if the factual evidence expressly supports one for this subsection.
+- Describe revenue only to the extent supported by the evidence.
+- Include revenue composition, segment contribution, development contribution, product or service categories, customer categories, or geographic contribution only where supported.
+- Start with the general revenue discussion first, then move to segment, category, customer, or geographic sub-breakdowns where the evidence supports both.
+- Do not calculate growth rates, margins, CAGR, or derived percentages unless expressly disclosed.
+- After the main revenue disclosure and any supporting table, include subsection headings and only the first paragraph for each supported comparison:
+  (a) FYE [latest earlier year] compared to FYE [prior year]
+  (b) FYE [most recent audited year] compared to FYE [latest earlier year]
+  (c) FPE [current period] compared to FPE [comparative period]
+- For 12.3.4 comparison subsections, draft only the opening paragraph under each supported heading and stop there.
+- Do not add second or later paragraphs, detailed reasons, or user-fill analysis under the comparison subsections unless those are expressly supported by the evidence.
+- If the evidence block explicitly begins with a `[Template fallback | 12.3.4 ...]` marker, output a clean revenue skeleton with a placeholder table and the comparison subsection headings and first-paragraph placeholders based on that scaffold instead of `Not disclosed in the provided documents.`
+- When using that fallback scaffold, keep bracketed placeholders bracketed, preserve the scaffold order, and omit the marker and instruction labels from the final section output.
+- Do not continue into section 12.3.5.
+
+STYLE REFERENCE
+<<STYLE_REFERENCE_SNIPPETS>>
+
+EVIDENCE
+<<EVIDENCE_SNIPPETS_WITH_METADATA>>
+
+OUTPUT CONTRACT
+- Output only section 12.3.4.
+- Preserve the heading exactly as written above.
+- Do not add markdown heading markers.
+- Use clean prospectus-style narrative.
+- Use a table only if the factual evidence expressly supports one, or if the evidence block is the authorised `12.3.4` template fallback scaffold.
+- If the evidence block is the authorised `12.3.4` template fallback scaffold, keep the placeholder wording and placeholder table cells exactly as placeholders and do not turn them into facts.
+- If comparison subsections are included, provide only the heading and the first paragraph under each subsection.

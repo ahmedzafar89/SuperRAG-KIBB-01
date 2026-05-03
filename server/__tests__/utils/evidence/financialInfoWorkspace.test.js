@@ -86,7 +86,7 @@ describe("financial info prompt guards", () => {
       "Do not output a label-only table, a single-column line-item list, or blank value columns"
     );
     expect(systemPrompt).toContain(
-      "The only exception to the exact unsupported fallback is section 12.2"
+      "The only exceptions to the exact unsupported fallback are section 12.2 and sections 12.3, 12.3.1, 12.3.2, 12.3.3, and 12.3.4"
     );
     expect(userPrompt).toContain(
       "If the evidence supports only part of the section, draft only the supported part"
@@ -102,6 +102,21 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       "12.2 CAPITALISATION AND INDEBTEDNESS"
+    );
+    expect(userPrompt).toContain(
+      "12.3 MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS"
+    );
+    expect(userPrompt).toContain(
+      "12.3.1 OVERVIEW OF OUR BUSINESS"
+    );
+    expect(userPrompt).toContain(
+      "12.3.2 SIGNIFICANT FACTORS MATERIALLY AFFECTING OUR OPERATIONS AND FINANCIAL RESULTS"
+    );
+    expect(userPrompt).toContain(
+      "12.3.3 OVERVIEW OF OUR RESULTS OF OPERATIONS"
+    );
+    expect(userPrompt).toContain(
+      "12.3.4 REVENUE"
     );
     expect(userPrompt).toContain("For 12.1, follow this priority order:");
     expect(userPrompt).toContain(
@@ -160,6 +175,12 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       "mechanically convert the disclosed monetary line-item figures into RM'000 before drafting and do not leave them in full RM."
+    );
+    expect(userPrompt).toContain(
+      "Use two short paragraphs."
+    );
+    expect(userPrompt).toContain(
+      "If the evidence block explicitly begins with a `[Template fallback | 12.3"
     );
   });
 
@@ -1760,6 +1781,24 @@ describe("financial info evidence formatting", () => {
     );
     expect(blocks.evidenceBlock).toContain("Framing paragraph template:");
     expect(blocks.evidenceBlock).toContain("| Total indebtedness | [amount] | [amount] | [amount] |");
+    expect(blocks.evidenceBlock).not.toBe("Not disclosed in the provided documents.");
+  });
+
+  test("buildIpoPromptBlocks returns a 12.3.4 template scaffold when evidence is missing", () => {
+    const blocks = buildIpoPromptBlocks([], {
+      userTemplate: "TARGET SECTION HEADING\n12.3.4 REVENUE",
+    });
+
+    expect(blocks.evidenceBlock).toContain(
+      "[Template fallback | 12.3.4 revenue skeleton"
+    );
+    expect(blocks.evidenceBlock).toContain("Revenue table template:");
+    expect(blocks.evidenceBlock).toContain(
+      "| Revenue | FYE [year 1] | FYE [year 2] | FYE [year 3] | FPE [current period] | FPE [comparative period] |"
+    );
+    expect(blocks.evidenceBlock).toContain(
+      "(a) FYE [year 2] compared to FYE [year 1]"
+    );
     expect(blocks.evidenceBlock).not.toBe("Not disclosed in the provided documents.");
   });
 
