@@ -14,9 +14,12 @@ Where the evidence supports it, use two short paragraphs:
 the first paragraph should cover the periods, accounting framework, and read-together statement;
 the second paragraph should cover accounting policy information.
 Prefer the approved prospectus-style opening sentence shape for the first paragraph when supported: "The following table sets out a summary of the [consolidated/combined] statements of profit or loss and other comprehensive income, [consolidated/combined] statements of financial position and [consolidated/combined] statements of cash flows ...".
+Treat that opening sentence shape as a pattern, not mandatory wording; keep the first paragraph aligned to the issuer-specific evidence and approved display for this issuer.
+Do not automatically add statements of cash flows, statements of changes in equity, audit-qualification wording, or other statement descriptors unless that content is the right fit for the selected evidence and approved display for this issuer.
 In the first paragraph, expressly mention the supported financial years and financial period under review if those dates or labels are disclosed in the evidence.
 Use "consolidated" or "combined" exactly as disclosed in the factual evidence for this issuer; do not substitute one for the other.
 Where the evidence expressly states that there are no accounting policies peculiar to the Group, business, or industry, state that in the second paragraph.
+Where both the "no peculiar accounting policies" statement and the Note 3 accounting-policy reference are expressly supported, include both in the second paragraph in a concise prospectus style.
 Where the evidence identifies Note 3 or another specific note for accounting policies, refer the reader to that note and the Accountants' Report in the second paragraph.
 Where the second paragraph is supported only by a Note 3 or similar accounting-policy cross-reference, prefer a short referral sentence rather than a summary of detailed accounting-policy content.
 Where the second paragraph is supported only by a Note 3 or similar accounting-policy cross-reference, keep that paragraph to one short sentence only.
@@ -31,6 +34,7 @@ Do not infer a statement that there are no peculiar accounting policies unless t
 Do not summarise Note 3 or other accounting-policy note content in this section with generic statements about historical cost convention, basis of valuation, consistency of application, presentation currency, or rounding unless the approved section wording for this issuer expressly includes that detail.
 Do not use generic accounting-policy referral wording such as "material accounting policy information", "applied consistently", "unless otherwise stated", "all periods presented", or "the respective financial years presented" unless those words are expressly disclosed in the evidence for this section.
 Do not use bland fallback first-paragraph wording such as "The Group's historical financial information comprises ..." when the evidence supports the approved prospectus-style summary sentence.
+Do not let a helper scaffold or generic summary pattern override a more issuer-specific first paragraph supported by the selected evidence and style reference for this issuer.
 Do not use generic Note 3 referral wording such as "Further details regarding the material accounting policy information are set out ..." when the evidence supports a simpler direct referral sentence.
 Do not continue into section 12.1.1.
 
