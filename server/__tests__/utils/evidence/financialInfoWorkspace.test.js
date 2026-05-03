@@ -86,58 +86,35 @@ describe("financial info prompt guards", () => {
       "Do not output a label-only table, a single-column line-item list, or blank value columns"
     );
     expect(userPrompt).toContain(
-      "If the evidence supports only part of the requested section, draft only the supported part"
+      "If the evidence supports only part of the section, draft only the supported part"
+    );
+    expect(userPrompt).toContain("For 12.1, follow this priority order:");
+    expect(userPrompt).toContain(
+      "approved issuer-specific chapter-introduction framing from the selected style reference"
     );
     expect(userPrompt).toContain(
-      'Use "consolidated" or "combined" exactly as disclosed in the factual evidence for this issuer'
+      'Use "consolidated" or "combined" exactly as disclosed.'
     );
     expect(userPrompt).toContain(
-      "prefer a short referral sentence rather than a summary of detailed accounting-policy content"
+      'If the selected style reference supports "Financial Years/Period Under Review", use that framing in the first paragraph'
     );
     expect(userPrompt).toContain(
-      "keep that paragraph to one short sentence only"
+      'Prefer "our Group" over "the Group" where the evidence and style reference support that intro phrasing.'
     );
     expect(userPrompt).toContain(
-      'Prefer the approved prospectus-style opening sentence shape for the first paragraph when supported'
+      "combine them into one short second paragraph"
     );
     expect(userPrompt).toContain(
-      "Treat that opening sentence shape as a pattern, not mandatory wording"
+      'For further details on the accounting policies of the Group, please see Note 3 of the Accountants\' Report.'
     );
     expect(userPrompt).toContain(
-      "Do not automatically add statements of cash flows, statements of changes in equity, audit-qualification wording"
+      'Do not rewrite the first paragraph into accountant-report syntax such as "as at [date]" or "for the financial years ended [date]"'
     );
     expect(userPrompt).toContain(
-      'prefer this sentence shape: "For further details on the accounting policies of the Group, please see Note 3 of the Accountants\' Report."'
+      'Do not force cash flows, statements of changes in equity, audit-qualification wording, or generic Note 3 referral wording when not supported'
     );
     expect(userPrompt).toContain(
-      'If both the "no peculiar accounting policies" statement and the Note 3 accounting-policy reference are expressly supported, include both in the second paragraph'
-    );
-    expect(userPrompt).toContain(
-      'Do not use generic accounting-policy referral wording such as "material accounting policy information"'
-    );
-    expect(userPrompt).toContain(
-      'Do not use bland fallback first-paragraph wording such as "The Group\'s historical financial information comprises ..."'
-    );
-    expect(userPrompt).toContain(
-      "Do not let a helper scaffold or generic summary pattern override a more issuer-specific first paragraph"
-    );
-    expect(userPrompt).toContain(
-      "Review all snippets for the same statement together before deciding that this section is unsupported."
-    );
-    expect(userPrompt).toContain(
-      "Do not treat disclosed line items, period labels, or value fragments for this statement as wholly unsupported evidence"
-    );
-    expect(userPrompt).toContain(
-      "Do not output a single-column line-item list, a label-only table, or blank value columns"
-    );
-    expect(userPrompt).toContain(
-      "basic and diluted EPS after subdivision but before IPO"
-    );
-    expect(userPrompt).toContain(
-      "After the main revenue disclosure and any supporting table, include comparison paragraphs in the approved prospectus style only if expressly supported"
-    );
-    expect(userPrompt).toContain(
-      "(a) FYE [latest earlier year] compared to FYE [prior year]"
+      'Do not use bland fallback openings such as "The Group\'s historical financial information comprises ..." or "Our Group\'s historical financial information comprises ..."'
     );
   });
 
@@ -180,6 +157,15 @@ describe("financial info prompt guards", () => {
       "Do not automatically add statements of cash flows, statements of changes in equity, audit-qualification wording"
     );
     expect(userPrompt).toContain(
+      'if the selected style reference for this issuer uses prospectus shorthand such as "Financial Years/Period Under Review", prefer that framing'
+    );
+    expect(userPrompt).toContain(
+      "if the selected style reference for this issuer frames the summary around only the profit or loss and financial position statements, do not add cash flows"
+    );
+    expect(userPrompt).toContain(
+      'Where the evidence uses "our Group" in this intro framing'
+    );
+    expect(userPrompt).toContain(
       "Do not summarise Note 3 or other accounting-policy note content in this section with generic statements about historical cost convention"
     );
     expect(userPrompt).toContain(
@@ -193,6 +179,12 @@ describe("financial info prompt guards", () => {
     );
     expect(userPrompt).toContain(
       "Do not let a helper scaffold or generic summary pattern override a more issuer-specific first paragraph"
+    );
+    expect(userPrompt).toContain(
+      'Do not force exact date enumeration into the 12.1 first paragraph when the approved style reference for this issuer supports the shorter "Financial Years/Period Under Review" chapter-introduction framing.'
+    );
+    expect(userPrompt).toContain(
+      "Do not force cash flows into the 12.1 first paragraph solely because the accountants' report elsewhere includes a cash flow statement"
     );
     expect(userPrompt).toContain(
       "Include disclosed indicator notes, formula notes, annualisation notes, and explanatory commentary"
@@ -763,7 +755,7 @@ describe("financial info evidence formatting", () => {
       "- Short accounting-policy referral sentence supported: For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report."
     );
     expect(block).toContain(
-      "- Supported first-paragraph scaffold: The following table sets out a summary of the consolidated statements of profit or loss and other comprehensive income, consolidated statements of financial position and consolidated statements of cash flows for 31 December 2022, 31 December 2023, 31 December 2024, 31 July 2025, FYE 31 December 2022 and FPE 31 July 2025. The historical financial information has been prepared in accordance with MFRS and IFRS Accounting Standards and should be read together with the Accountants' Report."
+      "- Supported first-paragraph scaffold: The following table sets out a summary of the consolidated statements of profit or loss and other comprehensive income and consolidated statements of financial position for 31 December 2022, 31 December 2023, 31 December 2024, 31 July 2025, FYE 31 December 2022 and FPE 31 July 2025. The consolidated financial statements have been prepared in accordance with MFRS and IFRS Accounting Standards and should be read in conjunction with the Accountants' Report."
     );
   });
 
@@ -826,7 +818,7 @@ describe("financial info evidence formatting", () => {
 
     expect(block).toContain("- Audit qualification status: expressly disclosed");
     expect(block).toContain(
-      "- Supported first-paragraph scaffold: The following table sets out a summary of the combined statements of profit or loss and other comprehensive income, combined statements of financial position and combined statements of cash flows for the Financial Years/Period Under Review. The historical financial information has been prepared in accordance with MFRS and IFRS and were not subject to any audit qualification and should be read together with the Accountants' Report."
+      "- Supported first-paragraph scaffold: The following table sets out a summary of the combined statements of profit or loss and other comprehensive income, combined statements of financial position and combined statements of cash flows of our Group for the Financial Years/Period Under Review. The combined financial statements have been prepared in accordance with MFRS and IFRS and were not subject to any audit qualification and should be read in conjunction with the Accountants' Report."
     );
   });
 
@@ -859,7 +851,7 @@ describe("financial info evidence formatting", () => {
       "- Periods disclosed: 31 August 2021; 31 August 2022; 31 August 2023; 31 March 2024"
     );
     expect(block).toContain(
-      "- Supported first-paragraph scaffold: The following table sets out a summary of the combined statements of profit or loss and other comprehensive income, combined statements of financial position and combined statements of cash flows for 31 August 2021, 31 August 2022, 31 August 2023 and 31 March 2024. The historical financial information has been prepared in accordance with Malaysian Financial Reporting Standards and IFRS and should be read together with the Accountants' Report."
+      "- Supported first-paragraph scaffold: The following table sets out a summary of the combined statements of profit or loss and other comprehensive income and combined statements of financial position for 31 August 2021, 31 August 2022, 31 August 2023 and 31 March 2024. The combined financial statements have been prepared in accordance with Malaysian Financial Reporting Standards and IFRS and should be read in conjunction with the Accountants' Report."
     );
   });
 
@@ -912,6 +904,9 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("page:31");
     expect(block).toContain("page:32");
     expect(block).toContain("- Accounting policy reference: Note 3");
+    expect(block).toContain(
+      "- Preferred combined accounting-policy sentence supported: There are no accounting policies which are peculiar to our Group because of the nature of the business or industry which we are involved in. For further details on the accounting policies of our Group, please see Note 3 of the Accountants' Report."
+    );
     expect(block).toContain(
       "- Peculiar accounting policies statement: expressly disclosed"
     );
@@ -1673,6 +1668,41 @@ describe("financial info evidence formatting", () => {
     expect(styleBlock).not.toContain("IMPACT OF FOREIGN EXCHANGE RATES");
     expect(styleBlock).not.toContain("Interest coverage ratio");
     expect(styleBlock).not.toContain("Analysis of revenue by sales channel");
+  });
+
+  test("style formatter picks matching 12.1 intro style text even when section numbers differ", () => {
+    const styleBlock = formatStyleReferenceSnippets(
+      [
+        {
+          docTitle: "style_ref_financial-info_sample",
+          text: [
+            "11.1 HISTORICAL FINANCIAL INFORMATION",
+            "The following table sets out a summary of the consolidated statements of profit or loss and other comprehensive income and consolidated statements of financial position of our Group for the Financial Years/Period Under Review.",
+            "The consolidated financial statements have been prepared in accordance with MFRS and IFRS and should be read in conjunction with the Accountants' Report as set out in Section 14 of this Prospectus.",
+            "There are no accounting policies which are peculiar to our Group because of the nature of the business or industry which we are involved in.",
+            "For further details on the accounting policies of our Group, please see Note 3 of the Accountants' Report as set out in Section 14 of this Prospectus.",
+            "",
+            "11.1.1 Combined statements of profit or loss and other comprehensive income",
+            "Revenue RM20.05 million for FYE 2025.",
+          ].join("\n"),
+        },
+      ],
+      {
+        maxSnippets: 1,
+        maxCharsPerSnippet: 1200,
+        promptContext: extractIpoPromptContext(
+          "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION"
+        ),
+      }
+    );
+
+    expect(styleBlock).toContain(
+      "[TABLE_INTRO_PATTERN] for the Financial Years/Period Under Review."
+    );
+    expect(styleBlock).toContain("[READING_REFERENCE_PATTERN]");
+    expect(styleBlock).toContain("peculiar to our Group");
+    expect(styleBlock).not.toContain("Revenue");
+    expect(styleBlock).not.toContain("RM20.05 million");
   });
 });
 

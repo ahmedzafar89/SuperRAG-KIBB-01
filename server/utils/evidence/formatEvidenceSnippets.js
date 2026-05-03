@@ -352,6 +352,10 @@ function sanitizeFinanceEvidenceText(txt = "", source = {}) {
       .replace(
         /\bread together with the\b/g,
         "read together with the Accountants' Report"
+      )
+      .replace(
+        /(Accountants[â€™'] Report)\s+\1/gi,
+        "$1"
       );
   }
 
@@ -956,7 +960,10 @@ function extractHistoricalIntroHelperData(sources = []) {
   if (/statements? of financial position/i.test(normalized)) {
     statements.push(`${basisTerm || "consolidated"} statements of financial position`);
   }
-  if (/statements? of cash flows?|cash flows?/i.test(normalized)) {
+  const hasExplicitCashFlowStatementLabel = /statements? of cash flows/i.test(
+    normalized
+  );
+  if (hasExplicitCashFlowStatementLabel) {
     statements.push(`${basisTerm || "consolidated"} statements of cash flows`);
   }
 
@@ -1030,6 +1037,7 @@ function extractHistoricalIntroHelperData(sources = []) {
     noAuditQualificationStatus,
     hasFinancialYearsUnderReviewPhrase,
     hasFinancialYearsEndedPhrase,
+    prefersOurGroupTerm: /\bour group\b/i.test(normalized),
   };
 }
 
@@ -1041,30 +1049,34 @@ function joinWithAnd(items = []) {
 }
 
 function buildHistoricalIntroParagraphOneScaffold(data = {}) {
-  const statementsPart = data.statements.length
+  let statementsPart = data.statements.length
     ? `The following table sets out a summary of the ${joinWithAnd(data.statements)}`
     : "The following table sets out a summary of the historical financial information";
+  if (data.prefersOurGroupTerm && data.statements.length) {
+    statementsPart += " of our Group";
+  }
 
   let periodPart = "";
-  if (data.hasFinancialYearsEndedPhrase && data.periods.length) {
+  if (data.hasFinancialYearsUnderReviewPhrase) {
+    periodPart = " for the Financial Years/Period Under Review";
+  } else if (data.hasFinancialYearsEndedPhrase && data.periods.length) {
     periodPart = ` for ${joinWithAnd(data.periods)}`;
   } else if (data.periods.length) {
     periodPart = ` for ${joinWithAnd(data.periods)}`;
-  } else if (data.hasFinancialYearsUnderReviewPhrase) {
-    periodPart = " for the Financial Years/Period Under Review";
   }
 
   let remainder = "";
   if (data.frameworks.length) {
-    remainder += ` The historical financial information has been prepared in accordance with ${joinWithAnd(
-      data.frameworks
-    )}`;
+    const subject = data.basisTerm
+      ? ` The ${data.basisTerm} financial statements have been prepared`
+      : " The historical financial information has been prepared";
+    remainder += `${subject} in accordance with ${joinWithAnd(data.frameworks)}`;
   }
   if (data.noAuditQualificationStatus === "expressly disclosed") {
     remainder += " and were not subject to any audit qualification";
   }
   if (data.hasAccountantsReportReference) {
-    remainder += " and should be read together with the Accountants' Report";
+    remainder += " and should be read in conjunction with the Accountants' Report";
   }
 
   return `${statementsPart}${periodPart}.${remainder}.`
@@ -1100,6 +1112,12 @@ function buildHistoricalFinancialIntroHelper(sources = []) {
     lines.push(`- Accounting policy reference: ${data.noteReference}`);
     lines.push(
       `- Short accounting-policy referral sentence supported: For further details on the accounting policies of the Group, please see ${data.noteReference} of the Accountants' Report.`
+    );
+  }
+  if (data.hasPeculiarAccountingPoliciesStatement && data.noteReference) {
+    const groupTerm = data.prefersOurGroupTerm ? "our Group" : "the Group";
+    lines.push(
+      `- Preferred combined accounting-policy sentence supported: There are no accounting policies which are peculiar to ${groupTerm} because of the nature of the business or industry which we are involved in. For further details on the accounting policies of ${groupTerm}, please see ${data.noteReference} of the Accountants' Report.`
     );
   }
   lines.push(

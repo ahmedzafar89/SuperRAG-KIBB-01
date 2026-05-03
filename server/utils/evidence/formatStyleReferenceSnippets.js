@@ -73,7 +73,10 @@ function sanitizeStyleReferenceText(txt = "") {
     .replace(/\u00a0/g, " ")
     .replace(
       /\b(?:The following table sets out|The table below (?:sets out|summaris(?:es|es))|Set out below is)\b[^.\n]*[.\n]?/gi,
-      "[TABLE_INTRO_PATTERN]. "
+      (match) =>
+        /financial years\/period under review/i.test(match)
+          ? "[TABLE_INTRO_PATTERN] for the Financial Years/Period Under Review. "
+          : "[TABLE_INTRO_PATTERN]. "
     )
     .replace(
       /\bThe selected financial information\b[^.\n]*[.\n]?/gi,
@@ -81,6 +84,10 @@ function sanitizeStyleReferenceText(txt = "") {
     )
     .replace(
       /\b(?:This should be read together with|The following discussion should be read together with)\b[^.\n]*[.\n]?/gi,
+      "[READING_REFERENCE_PATTERN]. "
+    )
+    .replace(
+      /\bshould be read in conjunction with\b[^.\n]*[.\n]?/gi,
       "[READING_REFERENCE_PATTERN]. "
     )
     .replace(/\bReaders are referred to\b[^.\n]*[.\n]?/gi, "")
@@ -227,6 +234,18 @@ function scoreStyleSectionSignals(text = "", promptContext = {}) {
   const normalized = cleanText(text).toLowerCase();
 
   switch (promptContext.sectionNumber) {
+    case "12.1":
+      if (
+        /historical financial information|financial years\/period under review|accountants[’'] report|accounting policies|note\s+\d+|peculiar to (?:our )?group/i.test(
+          normalized
+        )
+      )
+        return 2;
+      return /profit or loss|other comprehensive income|financial position|cash flows/i.test(
+        normalized
+      )
+        ? 1
+        : 0;
     case "12.1.1":
       if (/profit or loss|other comprehensive income/i.test(normalized)) return 2;
       return [
