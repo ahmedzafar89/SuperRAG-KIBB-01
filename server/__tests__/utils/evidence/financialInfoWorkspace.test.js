@@ -156,6 +156,9 @@ describe("financial info prompt guards", () => {
       "Do not use `Unit` as a row label."
     );
     expect(userPrompt).toContain(
+      "If audit-status or RM'000 rows are used, keep their first cells blank."
+    );
+    expect(userPrompt).toContain(
       "mechanically convert the disclosed monetary line-item figures into RM'000 before drafting and do not leave them in full RM."
     );
   });
@@ -636,15 +639,12 @@ describe("financial info evidence formatting", () => {
       }
     );
 
-    expect(block).toContain("[Directly traceable helper | period and unit formatting]");
+    expect(block).toContain("[Directly traceable helper | preferred prospectus-style header formatting]");
     expect(block).toContain(
-      "- Audit status by period when expressly needed: Audited | Audited | Audited | Unaudited | Audited"
+      "|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |"
     );
     expect(block).toContain(
-      "- Monetary unit for normalized statement line items: RM'000"
-    );
-    expect(block).toContain(
-      "- Do not add first-column labels such as Line item, Unit, or Audit status to the final table unless the evidence itself requires them."
+      "|  | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |"
     );
     expect(block).toContain(
       "| Property, plant and equipment | 267 | 2,160 | 2,912 | 2,498 | 5,825 |"
@@ -688,15 +688,12 @@ describe("financial info evidence formatting", () => {
       }
     );
 
-    expect(block).toContain("[Directly traceable helper | period and unit formatting]");
+    expect(block).toContain("[Directly traceable helper | preferred prospectus-style header formatting]");
     expect(block).toContain(
-      "- Audit status by period when expressly needed: Audited | Audited | Audited | Unaudited | Audited"
+      "|  | FYE 2022 | FYE 2023 | FYE 2024 | FPE 2024 | FPE 2025 |"
     );
     expect(block).toContain(
-      "- Monetary unit for normalized statement line items: RM'000"
-    );
-    expect(block).toContain(
-      "- Do not add first-column labels such as Line item, Unit, or Audit status to the final table unless the evidence itself requires them."
+      "|  | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |"
     );
     expect(block).toContain(
       "| Net cash generated from operating activities | 12,345 | 23,456 | 34,567 | 11,111 | 22,222 |"
@@ -704,6 +701,55 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain(
       "| Net cash used in investing activities | (4,321) | (5,432) | (6,543) | (2,100) | (1,200) |"
     );
+  });
+
+  test("builds a four-period normalized header and values for financial position statements", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 20,
+          table_candidate: true,
+          text: [
+            "CONSOLIDATED STATEMENTS OF FINANCIAL POSITION",
+            "As at 31 December 2010 2011 2012 As at 31 July 2015",
+            "Property, plant and equipment 267,251 2,160,315 2,912,285 5,825,165",
+            "Investment properties - - 1,288,586 1,281,927",
+            "TOTAL ASSETS 45,900,000 78,100,000 120,500,000 156,800,000",
+          ].join("\n"),
+        },
+        {
+          title: "accountant-report-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 21,
+          table_candidate: true,
+          text: [
+            "CONSOLIDATED STATEMENTS OF FINANCIAL POSITION (CONT'D)",
+            "Audited",
+            "Share capital 27,099,862 27,099,862 27,099,862 96,306,274",
+            "TOTAL EQUITY AND LIABILITIES 45,900,000 78,100,000 120,500,000 156,800,000",
+          ].join("\n"),
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1.2 CONSOLIDATED STATEMENTS OF FINANCIAL POSITION",
+      }
+    );
+
+    expect(block).toContain("|  | FYE 2010 | FYE 2011 | FYE 2012 | FPE 2015 |");
+    expect(block).toContain("|  | Audited | Audited | Audited | Audited |");
+    expect(block).toContain("|  | RM'000 | RM'000 | RM'000 | RM'000 |");
+    expect(block).toContain(
+      "| Property, plant and equipment | 267 | 2,160 | 2,912 | 5,825 |"
+    );
+    expect(block).toContain(
+      "| Investment properties | - | - | 1,288 | 1,281 |"
+    );
+    expect(block).not.toContain("| Unit |");
+    expect(block).not.toContain("| Line item |");
   });
 
   test("prefers actual profit or loss statement pages over changes in equity pages", () => {

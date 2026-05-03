@@ -76,6 +76,7 @@ SECTION TASK
 - When the mapping is exact from the evidence, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025.
 - If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
 - Where audit status is disclosed across periods, prefer a separate audit-status row above the FYE/FPE row.
+- When using separate audit-status or RM'000 rows, leave the first cell blank rather than labelling it `Audit status` or `Unit`.
 - Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 - Include all supported line items for the statement, in the same order as presented in the factual evidence.
 - If both a current FPE and comparative FPE are disclosed, include both.
@@ -115,6 +116,7 @@ OUTPUT CONTRACT
 - Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
 - Do not use `Line item` as the first-column header.
 - Do not use `Unit` as a row label.
+- If audit-status or RM'000 rows are used, keep their first cells blank.
 
 --- 12.1.2
 
@@ -130,6 +132,7 @@ SECTION TASK
 - When the summary table is presented in RM'000, mechanically convert the disclosed statement line-item figures into RM'000 before drafting.
 - When the mapping is exact from the evidence, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025.
 - If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
+- When using separate audit-status or RM'000 rows, leave the first cell blank rather than labelling it `Audit status` or `Unit`.
 - Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 - Include all supported line items for the statement of financial position, in the same order as presented in the factual evidence.
 - Keep classifications such as current and non-current exactly as disclosed.
@@ -167,6 +170,7 @@ OUTPUT CONTRACT
 - Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
 - Do not use `Line item` as the first-column header.
 - Do not use `Unit` as a row label.
+- If audit-status or RM'000 rows are used, keep their first cells blank.
 
 --- 12.1.3
 

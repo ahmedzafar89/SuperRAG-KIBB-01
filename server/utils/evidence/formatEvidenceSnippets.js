@@ -1225,16 +1225,14 @@ const PROFIT_OR_LOSS_ROW_HELPER_LABELS = [
   "Profit after taxation/Total comprehensive income",
 ];
 
-const PROFIT_OR_LOSS_PERIOD_ORDER = [
-  "FYE 2022",
-  "FYE 2023",
-  "FYE 2024",
-  "FPE 2024",
-  "FPE 2025",
-];
+const YEAR_TOKEN_PATTERN = /^(?:19|20)\d{2}$/;
 
 function extractNumericTokens(text = "") {
   return String(text || "").match(/\(?\d[\d,]*(?:\.\d+)?\)?|-/g) || [];
+}
+
+function isYearToken(token = "") {
+  return YEAR_TOKEN_PATTERN.test(String(token || "").trim());
 }
 
 function extractStatementNumberTokens(text = "") {
@@ -1247,21 +1245,21 @@ function extractStatementNumberTokens(text = "") {
     .replace(/1\.1\.\d{4}\s+to/gi, " ")
     .replace(/31\.7\.\d{4}/gi, " ")
     .replace(/31\s+december/gi, " ")
-    .replace(/\b(2022|2023|2024|2025)\b/g, " ")
+    .replace(/\b(?:19|20)\d{2}\b/g, " ")
     .replace(/[A-Za-z]/g, " ");
 
   return extractNumericTokens(normalized).filter(
     (token) =>
       token &&
       token !== "-" &&
-      !/^(2022|2023|2024|2025)$/.test(token) &&
+      !isYearToken(token) &&
       !/^\d{1,2}$/.test(token)
   );
 }
 
 function firstNonTrivialIntegerToken(text = "") {
   return extractNumericTokens(text).find(
-    (token) => token !== "-" && !token.includes(".") && !/^(2022|2023|2024|2025)$/.test(token)
+    (token) => token !== "-" && !token.includes(".") && !isYearToken(token)
   ) || "";
 }
 
@@ -1274,7 +1272,7 @@ function largeIntegerTokens(text = "") {
     (token) =>
       token !== "-" &&
       !token.includes(".") &&
-      !/^(2022|2023|2024|2025)$/.test(token) &&
+      !isYearToken(token) &&
       digitCount(token) >= 6
   );
 }
@@ -1883,9 +1881,17 @@ function buildProfitOrLossFormulaNotesHelper(sources = []) {
 }
 
 function extractNormalizedStatementRowsWithRawValues(sources = [], options = {}) {
-  const { labelPattern = null, minValues = 5, maxRows = 24 } = options;
+  const {
+    labelPattern = null,
+    minValues = 5,
+    maxRows = 24,
+    periodColumns = STANDARD_PERIOD_COLUMNS,
+  } = options;
   const rows = [];
   const seenLabels = new Set();
+  const periodCount = Array.isArray(periodColumns) && periodColumns.length
+    ? periodColumns.length
+    : minValues;
 
   for (const source of Array.isArray(sources) ? sources : []) {
     let pendingLabel = "";
@@ -1902,7 +1908,7 @@ function extractNormalizedStatementRowsWithRawValues(sources = [], options = {})
       if (/^(fye|fpe)\b/i.test(compact)) continue;
 
       const rawTokens = extractNumericTokens(compact).filter(Boolean);
-      if (rawTokens.length < minValues) {
+      if (rawTokens.length < periodCount) {
         if (!/\d/.test(compact) && /[A-Za-z]/.test(compact)) {
           pendingLabel = /:\s*$/.test(compact)
             ? compact
@@ -1927,10 +1933,10 @@ function extractNormalizedStatementRowsWithRawValues(sources = [], options = {})
       if (labelPattern && !labelPattern.test(label)) continue;
 
       const rawValues = rawTokens
-        .slice(-5)
+        .slice(-periodCount)
         .map((value) => String(value || "").trim())
         .filter(Boolean);
-      if (rawValues.length !== 5) continue;
+      if (rawValues.length !== periodCount) continue;
 
       const labelKey = label.toLowerCase();
       if (seenLabels.has(labelKey)) continue;
@@ -1951,7 +1957,7 @@ function sumRawSupportRowsByPeriod(rows = [], matcher = () => false) {
   const matched = (Array.isArray(rows) ? rows : []).filter((row) => matcher(row.label || ""));
   if (!matched.length) return [];
 
-  return STANDARD_PERIOD_COLUMNS.map((_, index) => {
+  return (matched[0]?.rawValues || []).map((_, index) => {
     let total = 0;
     let found = false;
     for (const row of matched) {
@@ -1967,11 +1973,14 @@ function sumRawSupportRowsByPeriod(rows = [], matcher = () => false) {
 function buildProfitOrLossEbitdaComputationHelper(sources = []) {
   const periodRows = buildProfitOrLossRowAlignedData(sources);
   if (periodRows.length < 3) return "";
+  const periodColumns = periodRows.map((row) => row.period);
 
   const supportRows = extractNormalizedStatementRowsWithRawValues(sources, {
     labelPattern:
       /(?:depreciation|interest expense|interest income|fixed deposits with licensed banks|bank balances|property, plant and equipment|investment property|right-of-use assets|bank overdrafts|lease liabilities|term loans|hire purchase payables|promissory notes|related parties|others)/i,
     maxRows: 28,
+    minValues: periodColumns.length,
+    periodColumns,
   });
 
   const depreciationTotals = sumRawSupportRowsByPeriod(
@@ -1990,9 +1999,9 @@ function buildProfitOrLossEbitdaComputationHelper(sources = []) {
   );
 
   if (
-    depreciationTotals.length !== STANDARD_PERIOD_COLUMNS.length ||
-    financeCostTotals.length !== STANDARD_PERIOD_COLUMNS.length ||
-    financeIncomeTotals.length !== STANDARD_PERIOD_COLUMNS.length
+    depreciationTotals.length !== periodColumns.length ||
+    financeCostTotals.length !== periodColumns.length ||
+    financeIncomeTotals.length !== periodColumns.length
   ) {
     return "";
   }
@@ -2016,8 +2025,8 @@ function buildProfitOrLossEbitdaComputationHelper(sources = []) {
   const financeIncomeValues = [];
   const ebitdaValues = [];
 
-  for (let index = 0; index < STANDARD_PERIOD_COLUMNS.length; index += 1) {
-    const period = STANDARD_PERIOD_COLUMNS[index];
+  for (let index = 0; index < periodColumns.length; index += 1) {
+    const period = periodColumns[index];
     const values = periodValueMap.get(period);
     const pat = values?.pat;
     const tax = Number.isFinite(values?.tax) ? Math.abs(values.tax) : values?.tax;
@@ -2055,8 +2064,8 @@ function buildProfitOrLossEbitdaComputationHelper(sources = []) {
 
   return [
     "[Directly traceable helper | EBITDA computation table | normalized to RM'000]",
-    `| EBITDA computation | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
-    `| --- | ${STANDARD_PERIOD_COLUMNS.map(() => "---").join(" | ")} |`,
+    `| EBITDA computation | ${periodColumns.join(" | ")} |`,
+    `| --- | ${periodColumns.map(() => "---").join(" | ")} |`,
     `| PAT | ${patValues.join(" | ")} |`,
     `| Add: Taxation | ${taxValues.join(" | ")} |`,
     `| Add: Depreciation | ${depreciationValues.join(" | ")} |`,
@@ -2114,6 +2123,82 @@ function inferProfitOrLossPeriodLabel(line = "") {
   return "";
 }
 
+function parsePeriodLabelParts(label = "") {
+  const match = String(label || "").match(/^(FYE|FPE)\s+((?:19|20)\d{2})$/i);
+  if (!match) return null;
+  return {
+    kind: match[1].toUpperCase(),
+    year: Number(match[2]),
+  };
+}
+
+function comparePeriodLabels(a = "", b = "") {
+  const left = parsePeriodLabelParts(a);
+  const right = parsePeriodLabelParts(b);
+  if (left && right) {
+    if (left.year !== right.year) return left.year - right.year;
+    if (left.kind !== right.kind) return left.kind === "FYE" ? -1 : 1;
+  }
+  return String(a || "").localeCompare(String(b || ""));
+}
+
+function extractStatementPeriodLabels(sources = []) {
+  const lines = collectStatementEvidenceLines(sources);
+  const annualYears = new Set();
+  const interimYears = new Set();
+
+  for (const line of lines) {
+    const compact = String(line || "").replace(/\s+/g, " ").trim();
+    if (!compact) continue;
+
+    const multiAnnualMatch = compact.match(
+      /as at\s+31\s+december\s+((?:(?:19|20)\d{2}\s*){1,6})/i
+    );
+    if (multiAnnualMatch?.[1]) {
+      for (const year of multiAnnualMatch[1].match(/\b(?:19|20)\d{2}\b/g) || []) {
+        annualYears.add(year);
+      }
+    }
+
+    for (const match of compact.matchAll(
+      /financial year ended(?:\s*\(?["']?fye["']?\)?)?\s*31\s+december\s+((?:19|20)\d{2})/gi
+    )) {
+      annualYears.add(match[1]);
+    }
+
+    for (const match of compact.matchAll(
+      /\bfye\s+31\s+december\s+((?:19|20)\d{2})/gi
+    )) {
+      annualYears.add(match[1]);
+    }
+
+    for (const match of compact.matchAll(/\b31\s+december\s+((?:19|20)\d{2})\b/gi)) {
+      annualYears.add(match[1]);
+    }
+
+    for (const match of compact.matchAll(
+      /\b\d{1,2}[./-]\d{1,2}[./-]((?:19|20)\d{2})\s+to\s+\d{1,2}[./-]\d{1,2}[./-]\1\b/gi
+    )) {
+      interimYears.add(match[1]);
+    }
+
+    for (const match of compact.matchAll(
+      /as at\s+31\s+(?!december\b)(?:january|february|march|april|may|june|july|august|september|october|november)\s+((?:19|20)\d{2})/gi
+    )) {
+      interimYears.add(match[1]);
+    }
+  }
+
+  const annualLabels = [...annualYears]
+    .sort((a, b) => Number(a) - Number(b))
+    .map((year) => `FYE ${year}`);
+  const interimLabels = [...interimYears]
+    .sort((a, b) => Number(a) - Number(b))
+    .map((year) => `FPE ${year}`);
+
+  return [...annualLabels, ...interimLabels];
+}
+
 function extractProfitOrLossLeadingValueRows(sources = []) {
   const rows = [];
   const seenPeriods = new Set();
@@ -2155,16 +2240,7 @@ function extractProfitOrLossLeadingValueRows(sources = []) {
     }
   }
 
-  const order = ["FYE 2022", "FYE 2023", "FYE 2024", "FPE 2024", "FPE 2025"];
-  return rows.sort((a, b) => {
-    const aIndex = order.indexOf(a.period);
-    const bIndex = order.indexOf(b.period);
-    if (aIndex !== -1 || bIndex !== -1) {
-      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) -
-        (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
-    }
-    return a.period.localeCompare(b.period);
-  });
+  return rows.sort((a, b) => comparePeriodLabels(a.period, b.period));
 }
 
 function buildProfitOrLossLeadingValueHelper(sources = []) {
@@ -2186,21 +2262,64 @@ function buildProfitOrLossLeadingValueHelper(sources = []) {
 }
 
 const STANDARD_PERIOD_COLUMNS = ["FYE 2022", "FYE 2023", "FYE 2024", "FPE 2024", "FPE 2025"];
-const STANDARD_AUDIT_COLUMNS = ["Audited", "Audited", "Audited", "Unaudited", "Audited"];
 
-function buildStandardPeriodFormattingHelper(helperLabel) {
+function inferStatementPeriodColumns(sources = [], options = {}) {
+  const { labelPattern = null } = options;
+  const extractedLabels = extractStatementPeriodLabels(sources);
+  if (extractedLabels.length >= 2) {
+    return extractedLabels.sort(comparePeriodLabels);
+  }
+
+  const counts = new Map();
+  const lines = collectStatementEvidenceLines(sources);
+
+  for (const line of lines) {
+    const compact = line.replace(/\s+/g, " ").trim();
+    if (!compact || (labelPattern && !labelPattern.test(compact))) continue;
+    const valueCount = extractStatementNumberTokens(compact).length;
+    if (valueCount >= 4 && valueCount <= 5) {
+      counts.set(valueCount, (counts.get(valueCount) || 0) + 1);
+    }
+  }
+
+  const preferredCount =
+    [...counts.entries()].sort((a, b) => b[1] - a[1] || b[0] - a[0])[0]?.[0] || 5;
+
+  return preferredCount === 4
+    ? ["FYE 1", "FYE 2", "FYE 3", "FPE 1"]
+    : STANDARD_PERIOD_COLUMNS;
+}
+
+function inferAuditColumns(sources = [], periodColumns = []) {
+  const combined = collectStatementEvidenceLines(sources).join("\n");
+  const hasAudited = /\baudited\b/i.test(combined);
+  const hasUnaudited = /\bunaudited\b/i.test(combined);
+
+  if (!periodColumns.length || (!hasAudited && !hasUnaudited)) return [];
+  return periodColumns.map((label) => {
+    const parts = parsePeriodLabelParts(label);
+    if (hasUnaudited && parts?.kind === "FPE") return "Unaudited";
+    return "Audited";
+  });
+}
+
+function buildStandardPeriodFormattingHelper(helperLabel, periodColumns = STANDARD_PERIOD_COLUMNS, auditColumns = []) {
   return [
     helperLabel,
-    `- Preferred period columns: ${STANDARD_PERIOD_COLUMNS.join(" | ")}`,
-    `- Audit status by period when expressly needed: ${STANDARD_AUDIT_COLUMNS.join(" | ")}`,
-    "- Monetary unit for normalized statement line items: RM'000",
-    "- Do not add first-column labels such as Line item, Unit, or Audit status to the final table unless the evidence itself requires them.",
+    `|  | ${periodColumns.join(" | ")} |`,
+    `| --- | ${periodColumns.map(() => "---").join(" | ")} |`,
+    ...(auditColumns.length
+      ? [`|  | ${auditColumns.join(" | ")} |`]
+      : []),
+    `|  | ${periodColumns.map(() => "RM'000").join(" | ")} |`,
+    "- Leave the first cell blank for header helper rows; do not label it Line item, Unit, or Audit status unless the evidence itself requires that wording.",
   ].join("\n");
 }
 
 function cleanStatementRowLabel(rawLabel = "") {
   return String(rawLabel || "")
     .replace(/\s+/g, " ")
+    .replace(/(?:\s+-)+\s*$/g, "")
     .replace(/\s+\d+$/, "")
     .replace(/\s+[A-Za-z]$/, "")
     .trim();
@@ -2217,11 +2336,14 @@ function collectStatementEvidenceLines(sources = []) {
 }
 
 function extractNormalizedStatementRows(sources = [], options = {}) {
-  const { labelPattern = null, minValues = 5, maxRows = 24 } = options;
+  const { labelPattern = null, minValues = 5, maxRows = 24, periodColumns = STANDARD_PERIOD_COLUMNS } = options;
   const lines = collectStatementEvidenceLines(sources);
   const rows = [];
   const seenLabels = new Set();
   let pendingLabel = "";
+  const periodCount = Array.isArray(periodColumns) && periodColumns.length
+    ? periodColumns.length
+    : minValues;
 
   for (const line of lines) {
     const compact = line.replace(/\s+/g, " ").trim();
@@ -2239,7 +2361,7 @@ function extractNormalizedStatementRows(sources = [], options = {}) {
     }
 
     const rawTokens = extractNumericTokens(compact).filter(Boolean);
-    if (rawTokens.length < minValues) {
+    if (rawTokens.length < periodCount) {
       if (!/\d/.test(compact) && /[A-Za-z]/.test(compact)) {
         pendingLabel = /:\s*$/.test(compact)
           ? compact
@@ -2264,10 +2386,10 @@ function extractNormalizedStatementRows(sources = [], options = {}) {
     if (labelPattern && !labelPattern.test(label)) continue;
 
     const values = rawTokens
-      .slice(-5)
+      .slice(-periodCount)
       .map((value) => formatTokenAsThousands(value))
       .filter(Boolean);
-    if (values.length !== 5) continue;
+    if (values.length !== periodCount) continue;
 
     const labelKey = label.toLowerCase();
     if (seenLabels.has(labelKey)) continue;
@@ -2280,33 +2402,45 @@ function extractNormalizedStatementRows(sources = [], options = {}) {
 }
 
 function buildFinancialPositionRowAlignedHelper(sources = []) {
+  const periodColumns = inferStatementPeriodColumns(sources, {
+    labelPattern:
+      /(?:property|investment|right-of-use|intangible|inventories|trade receivables|other receivables|fixed deposits|cash and bank balances|non-current assets|current assets|total assets|share capital|retained profits|retained earnings|equity attributable|total equity|borrowings|trade payables|other payables|lease liabilities|current liabilities|non-current liabilities|total liabilities|total equity and liabilities|equity and liabilities)/i,
+  });
   const rows = extractNormalizedStatementRows(sources, {
     labelPattern:
       /(?:property|investment|right-of-use|intangible|inventories|trade receivables|other receivables|fixed deposits|cash and bank balances|non-current assets|current assets|total assets|share capital|retained profits|retained earnings|equity attributable|total equity|borrowings|trade payables|other payables|lease liabilities|current liabilities|non-current liabilities|total liabilities|total equity and liabilities|equity and liabilities)/i,
     maxRows: 28,
+    minValues: periodColumns.length,
+    periodColumns,
   });
   if (!rows.length) return "";
 
   return [
     "[Directly traceable helper | row-aligned OCR reconstruction | statement line items normalized to RM'000]",
-    `|  | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
-    `| --- | ${STANDARD_PERIOD_COLUMNS.map(() => "---").join(" | ")} |`,
+    `|  | ${periodColumns.join(" | ")} |`,
+    `| --- | ${periodColumns.map(() => "---").join(" | ")} |`,
     ...rows.map((row) => `| ${row.label} | ${row.values.join(" | ")} |`),
   ].join("\n");
 }
 
 function buildCashFlowRowAlignedHelper(sources = []) {
+  const periodColumns = inferStatementPeriodColumns(sources, {
+    labelPattern:
+      /(?:profit before tax|adjustments for|depreciation|finance costs?|interest expense|operating profit before working capital changes|changes in working capital|inventories|receivables|payables|cash generated from operations|tax paid|net cash (?:generated from|used in) operating activities|purchase of property|acquisition of property|interest received|net cash (?:used in|generated from) investing activities|proceeds from|repayment of|drawdown|dividends paid|lease payments|net cash (?:generated from|used in) financing activities|net (?:increase|decrease) in cash and cash equivalents|cash and cash equivalents at beginning|cash and cash equivalents at end)/i,
+  });
   const rows = extractNormalizedStatementRows(sources, {
     labelPattern:
       /(?:profit before tax|adjustments for|depreciation|finance costs?|interest expense|operating profit before working capital changes|changes in working capital|inventories|receivables|payables|cash generated from operations|tax paid|net cash (?:generated from|used in) operating activities|purchase of property|acquisition of property|interest received|net cash (?:used in|generated from) investing activities|proceeds from|repayment of|drawdown|dividends paid|lease payments|net cash (?:generated from|used in) financing activities|net (?:increase|decrease) in cash and cash equivalents|cash and cash equivalents at beginning|cash and cash equivalents at end)/i,
     maxRows: 24,
+    minValues: periodColumns.length,
+    periodColumns,
   });
   if (rows.length < 3) return "";
 
   return [
     "[Directly traceable helper | row-aligned OCR reconstruction | statement line items normalized to RM'000]",
-    `|  | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
-    `| --- | ${STANDARD_PERIOD_COLUMNS.map(() => "---").join(" | ")} |`,
+    `|  | ${periodColumns.join(" | ")} |`,
+    `| --- | ${periodColumns.map(() => "---").join(" | ")} |`,
     ...rows.map((row) => `| ${row.label} | ${row.values.join(" | ")} |`),
   ].join("\n");
 }
@@ -2696,16 +2830,30 @@ function renderPicked(picked = [], maxCharsPerSnippet = 1800, promptContext = {}
   }
 
   if (promptContext.sectionNumber === "12.1.2") {
+    const periodColumns = inferStatementPeriodColumns(picked, {
+      labelPattern:
+        /(?:property|investment|right-of-use|intangible|inventories|trade receivables|other receivables|fixed deposits|cash and bank balances|non-current assets|current assets|total assets|share capital|retained profits|retained earnings|equity attributable|total equity|borrowings|trade payables|other payables|lease liabilities|current liabilities|non-current liabilities|total liabilities|total equity and liabilities|equity and liabilities)/i,
+    });
+    const auditColumns = inferAuditColumns(picked, periodColumns);
     const periodFormattingHelper = buildStandardPeriodFormattingHelper(
-      "[Directly traceable helper | period and unit formatting]"
+      "[Directly traceable helper | preferred prospectus-style header formatting]",
+      periodColumns,
+      auditColumns
     );
     const rowAlignedHelper = buildFinancialPositionRowAlignedHelper(picked);
     return [rendered, periodFormattingHelper, rowAlignedHelper].filter(Boolean).join("\n\n");
   }
 
   if (promptContext.sectionNumber === "12.1.3") {
+    const periodColumns = inferStatementPeriodColumns(picked, {
+      labelPattern:
+        /(?:profit before tax|adjustments for|depreciation|finance costs?|interest expense|operating profit before working capital changes|changes in working capital|inventories|receivables|payables|cash generated from operations|tax paid|net cash (?:generated from|used in) operating activities|purchase of property|acquisition of property|interest received|net cash (?:used in|generated from) investing activities|proceeds from|repayment of|drawdown|dividends paid|lease payments|net cash (?:generated from|used in) financing activities|net (?:increase|decrease) in cash and cash equivalents|cash and cash equivalents at beginning|cash and cash equivalents at end)/i,
+    });
+    const auditColumns = inferAuditColumns(picked, periodColumns);
     const periodFormattingHelper = buildStandardPeriodFormattingHelper(
-      "[Directly traceable helper | period and unit formatting]"
+      "[Directly traceable helper | preferred prospectus-style header formatting]",
+      periodColumns,
+      auditColumns
     );
     const rowAlignedHelper = buildCashFlowRowAlignedHelper(picked);
     return [rendered, periodFormattingHelper, rowAlignedHelper].filter(Boolean).join("\n\n");
