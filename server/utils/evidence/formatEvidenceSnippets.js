@@ -877,6 +877,9 @@ function titleCasePeriodLabel(label = "") {
   });
 }
 
+const MONTH_NAME_PATTERN =
+  "January|February|March|April|May|June|July|August|September|October|November|December";
+
 function extractHistoricalIntroHelperData(sources = []) {
   const text = (Array.isArray(sources) ? sources : [])
     .map((source) => source.__cleanText || "")
@@ -908,10 +911,8 @@ function extractHistoricalIntroHelperData(sources = []) {
   const periods = Array.from(
     new Set(
       [
-        ...(normalized.match(/31\s+December\s+20\d{2}/gi) || []),
-        ...(normalized.match(/31\s+July\s+20\d{2}/gi) || []),
-        ...(normalized.match(/FYE\s+31\s+December\s+20\d{2}/gi) || []),
-        ...(normalized.match(/FPE\s+31\s+July\s+20\d{2}/gi) || []),
+        ...(normalized.match(new RegExp(`\\b\\d{1,2}\\s+(?:${MONTH_NAME_PATTERN})\\s+20\\d{2}\\b`, "gi")) || []),
+        ...(normalized.match(new RegExp(`\\b(?:FYE|FPE)\\s+\\d{1,2}\\s+(?:${MONTH_NAME_PATTERN})\\s+20\\d{2}\\b`, "gi")) || []),
       ].map((value) => titleCasePeriodLabel(value))
     )
   );
@@ -991,12 +992,12 @@ function buildHistoricalIntroParagraphOneScaffold(data = {}) {
     : "The following table sets out a summary of the historical financial information";
 
   let periodPart = "";
-  if (data.hasFinancialYearsUnderReviewPhrase) {
-    periodPart = " for the Financial Years/Period Under Review";
-  } else if (data.hasFinancialYearsEndedPhrase && data.periods.length) {
+  if (data.hasFinancialYearsEndedPhrase && data.periods.length) {
     periodPart = ` for ${joinWithAnd(data.periods)}`;
   } else if (data.periods.length) {
     periodPart = ` for ${joinWithAnd(data.periods)}`;
+  } else if (data.hasFinancialYearsUnderReviewPhrase) {
+    periodPart = " for the Financial Years/Period Under Review";
   }
 
   let remainder = "";
@@ -2234,6 +2235,101 @@ function pruneHistoricalFinancialIntroPages(
   return hasHistoricalFinancialIntroCoverage(narrowed) ? narrowed : [];
 }
 
+function pruneHistoricalFinancialIntroPagesForPrompt(
+  picked = [],
+  promptContext = {},
+  hardExcludeTransactions = true
+) {
+  if (!Array.isArray(picked) || picked.length === 0) return [];
+
+  const introSignals = (text = "") =>
+    /historical financial information|comprise the consolidated statements|statements of financial position|statements of profit or loss and other comprehensive income|statements of changes in equity|statements of cash flows|31 december 2022|31 december 2023|31 december 2024|31 july 2025|fpe 31 july 2025|malaysian financial reporting standards|mfrs|ifrs accounting standards|basis of preparation|accountants[â€™'] report|accounting policies|material accounting policy information|note\s+3|peculiar accounting policies|peculiar to (?:our )?group/i.test(
+      text
+    );
+  const excludeSignals = (text = "") =>
+    /directors[â€™'] responsibilities|basis for opinion|ethical responsibilities|by-laws|iesba code|reporting accountants[â€™'] responsibilities/i.test(
+      text
+    );
+  const coreIntroSignals = (text = "") =>
+    /historical financial information|comprise the consolidated statements|statements of financial position|statements of profit or loss and other comprehensive income|statements of changes in equity|statements of cash flows|malaysian financial reporting standards|mfrs|ifrs accounting standards|basis of preparation/i.test(
+      text
+    );
+  const policySignals = (text = "") =>
+    /accounting policies|material accounting policy information|note\s+3|peculiar accounting policies|peculiar to (?:our )?group|nature of the business or industry/i.test(
+      text
+    );
+  const readTogetherSignals = (text = "") =>
+    /accountants[â€™'] report|read in conjunction with|read together with/i.test(
+      text
+    );
+
+  const rankedPicked = [...picked]
+    .filter((source) => {
+      const text = source.__cleanText || "";
+      return introSignals(text) && !excludeSignals(text);
+    })
+    .sort((a, b) => {
+      return (
+        scoreSource(b, promptContext, hardExcludeTransactions) -
+        scoreSource(a, promptContext, hardExcludeTransactions)
+      );
+    });
+
+  const bestByPage = new Map();
+  for (const source of rankedPicked) {
+    const pageKey = `${sourceDocKey(source)}|${source.page_number || "na"}`;
+    if (!bestByPage.has(pageKey)) {
+      bestByPage.set(pageKey, source);
+    }
+  }
+
+  const pageCandidates = Array.from(bestByPage.values());
+  const scoreFor = (source) =>
+    scoreSource(source, promptContext, hardExcludeTransactions);
+  const byScoreDesc = (a, b) => scoreFor(b) - scoreFor(a);
+  const selected = [];
+  const seen = new Set();
+  const addSelected = (source) => {
+    const key = sourceLocationKey(source);
+    if (seen.has(key)) return;
+    seen.add(key);
+    selected.push(source);
+  };
+
+  pageCandidates
+    .filter((source) => coreIntroSignals(source.__cleanText || ""))
+    .sort(byScoreDesc)
+    .slice(0, 2)
+    .forEach(addSelected);
+
+  pageCandidates
+    .filter((source) => policySignals(source.__cleanText || ""))
+    .sort(byScoreDesc)
+    .slice(0, 2)
+    .forEach(addSelected);
+
+  pageCandidates
+    .filter((source) => readTogetherSignals(source.__cleanText || ""))
+    .sort(byScoreDesc)
+    .slice(0, 1)
+    .forEach(addSelected);
+
+  pageCandidates.sort(byScoreDesc).slice(0, 5).forEach(addSelected);
+
+  const narrowed = selected
+    .sort((a, b) => {
+      const aPage = Number(a.page_number);
+      const bPage = Number(b.page_number);
+      if (Number.isFinite(aPage) && Number.isFinite(bPage) && aPage !== bPage) {
+        return aPage - bPage;
+      }
+      return byScoreDesc(a, b);
+    })
+    .slice(0, 5);
+
+  return hasHistoricalFinancialIntroCoverage(narrowed) ? narrowed : [];
+}
+
 function pruneCapitalisationPages(
   picked = [],
   promptContext = {},
@@ -2422,7 +2518,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     }
 
     if (promptContext.sectionNumber === "12.1") {
-      const narrowed = pruneHistoricalFinancialIntroPages(
+      const narrowed = pruneHistoricalFinancialIntroPagesForPrompt(
         picked,
         promptContext,
         hardExcludeTransactions
@@ -2468,7 +2564,7 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
   }
 
   if (promptContext.sectionNumber === "12.1") {
-    const narrowed = pruneHistoricalFinancialIntroPages(
+    const narrowed = pruneHistoricalFinancialIntroPagesForPrompt(
       picked,
       promptContext,
       hardExcludeTransactions
