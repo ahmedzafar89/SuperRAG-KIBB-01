@@ -149,6 +149,15 @@ describe("financial info prompt guards", () => {
     expect(userPrompt).toContain(
       "Preserve the distinction between operating, investing, and financing cash flow line items exactly as supported by the evidence."
     );
+    expect(userPrompt).toContain(
+      "Do not use `Line item` as the first-column header."
+    );
+    expect(userPrompt).toContain(
+      "Do not use `Unit` as a row label."
+    );
+    expect(userPrompt).toContain(
+      "mechanically convert the disclosed monetary line-item figures into RM'000 before drafting and do not leave them in full RM."
+    );
   });
 
   test("updated section templates cover finance costs and MD&A commentary rules", () => {
@@ -628,8 +637,15 @@ describe("financial info evidence formatting", () => {
     );
 
     expect(block).toContain("[Directly traceable helper | period and unit formatting]");
-    expect(block).toContain("| Audit status | Audited | Audited | Audited | Unaudited | Audited |");
-    expect(block).toContain("| Unit | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |");
+    expect(block).toContain(
+      "- Audit status by period when expressly needed: Audited | Audited | Audited | Unaudited | Audited"
+    );
+    expect(block).toContain(
+      "- Monetary unit for normalized statement line items: RM'000"
+    );
+    expect(block).toContain(
+      "- Do not add first-column labels such as Line item, Unit, or Audit status to the final table unless the evidence itself requires them."
+    );
     expect(block).toContain(
       "| Property, plant and equipment | 267 | 2,160 | 2,912 | 2,498 | 5,825 |"
     );
@@ -673,8 +689,15 @@ describe("financial info evidence formatting", () => {
     );
 
     expect(block).toContain("[Directly traceable helper | period and unit formatting]");
-    expect(block).toContain("| Audit status | Audited | Audited | Audited | Unaudited | Audited |");
-    expect(block).toContain("| Unit | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |");
+    expect(block).toContain(
+      "- Audit status by period when expressly needed: Audited | Audited | Audited | Unaudited | Audited"
+    );
+    expect(block).toContain(
+      "- Monetary unit for normalized statement line items: RM'000"
+    );
+    expect(block).toContain(
+      "- Do not add first-column labels such as Line item, Unit, or Audit status to the final table unless the evidence itself requires them."
+    );
     expect(block).toContain(
       "| Net cash generated from operating activities | 12,345 | 23,456 | 34,567 | 11,111 | 22,222 |"
     );
@@ -1449,7 +1472,7 @@ describe("financial info evidence formatting", () => {
     );
 
     expect(block).toContain("[Directly traceable helper | leading line items only]");
-    expect(block).toContain("| Line item | FYE 2022 | FYE 2023 | FPE 2024 |");
+    expect(block).toContain("|  | FYE 2022 | FYE 2023 | FPE 2024 |");
     expect(block).toContain(
       "| Revenue | 52,931,108 | 65,092,484 | 83,479,155 |"
     );

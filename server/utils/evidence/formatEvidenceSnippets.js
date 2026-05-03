@@ -2070,7 +2070,7 @@ function buildProfitOrLossRowAlignedHelper(sources = []) {
   const periodRows = buildProfitOrLossRowAlignedData(sources);
   if (periodRows.length < 3) return "";
 
-  const header = `| Line item | ${periodRows.map((row) => row.period).join(" | ")} |`;
+  const header = `|  | ${periodRows.map((row) => row.period).join(" | ")} |`;
   const divider = `| --- | ${periodRows.map(() => "---").join(" | ")} |`;
   const bodyRows = PROFIT_OR_LOSS_ROW_HELPER_LABELS.map((label) => {
     const values = periodRows.map((row) => formatTokenAsThousands(row.values[label] || ""));
@@ -2179,7 +2179,7 @@ function buildProfitOrLossLeadingValueHelper(sources = []) {
 
   return [
     "[Directly traceable helper | leading line items only]",
-    `| Line item | ${periods.join(" | ")} |`,
+    `|  | ${periods.join(" | ")} |`,
     `| --- | ${periods.map(() => "---").join(" | ")} |`,
     ...helperRows,
   ].join("\n");
@@ -2191,11 +2191,10 @@ const STANDARD_AUDIT_COLUMNS = ["Audited", "Audited", "Audited", "Unaudited", "A
 function buildStandardPeriodFormattingHelper(helperLabel) {
   return [
     helperLabel,
-    "",
-    `| Line item | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
-    `| --- | ${STANDARD_PERIOD_COLUMNS.map(() => "---").join(" | ")} |`,
-    `| Audit status | ${STANDARD_AUDIT_COLUMNS.join(" | ")} |`,
-    "| Unit | RM'000 | RM'000 | RM'000 | RM'000 | RM'000 |",
+    `- Preferred period columns: ${STANDARD_PERIOD_COLUMNS.join(" | ")}`,
+    `- Audit status by period when expressly needed: ${STANDARD_AUDIT_COLUMNS.join(" | ")}`,
+    "- Monetary unit for normalized statement line items: RM'000",
+    "- Do not add first-column labels such as Line item, Unit, or Audit status to the final table unless the evidence itself requires them.",
   ].join("\n");
 }
 
@@ -2230,9 +2229,17 @@ function extractNormalizedStatementRows(sources = [], options = {}) {
     if (/^(audited|unaudited)\b/i.test(compact)) continue;
     if (/^rm'?000\b/i.test(compact)) continue;
     if (/^(fye|fpe)\b/i.test(compact)) continue;
+    if (
+      /consolidated statements? of financial position|consolidated statements? of cash flows|consolidated statements? of profit or loss|other comprehensive income|statement of financial position|statement of cash flows/i.test(
+        compact
+      )
+    ) {
+      pendingLabel = "";
+      continue;
+    }
 
-      const rawTokens = extractNumericTokens(compact).filter(Boolean);
-      if (rawTokens.length < minValues) {
+    const rawTokens = extractNumericTokens(compact).filter(Boolean);
+    if (rawTokens.length < minValues) {
       if (!/\d/.test(compact) && /[A-Za-z]/.test(compact)) {
         pendingLabel = /:\s*$/.test(compact)
           ? compact
@@ -2282,7 +2289,7 @@ function buildFinancialPositionRowAlignedHelper(sources = []) {
 
   return [
     "[Directly traceable helper | row-aligned OCR reconstruction | statement line items normalized to RM'000]",
-    `| Line item | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
+    `|  | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
     `| --- | ${STANDARD_PERIOD_COLUMNS.map(() => "---").join(" | ")} |`,
     ...rows.map((row) => `| ${row.label} | ${row.values.join(" | ")} |`),
   ].join("\n");
@@ -2298,7 +2305,7 @@ function buildCashFlowRowAlignedHelper(sources = []) {
 
   return [
     "[Directly traceable helper | row-aligned OCR reconstruction | statement line items normalized to RM'000]",
-    `| Line item | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
+    `|  | ${STANDARD_PERIOD_COLUMNS.join(" | ")} |`,
     `| --- | ${STANDARD_PERIOD_COLUMNS.map(() => "---").join(" | ")} |`,
     ...rows.map((row) => `| ${row.label} | ${row.values.join(" | ")} |`),
   ].join("\n");

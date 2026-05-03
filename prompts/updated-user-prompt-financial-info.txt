@@ -76,7 +76,7 @@ Present the disclosed periods exactly as supported by the evidence.
 Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
 When the summary table is presented in RM'000, mechanically convert the statement line-item figures into RM'000 before drafting and do not leave those line items in full RM.
 Where the summary table is presented in RM'000, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025 where that mapping is exact from the factual evidence, instead of repeating full date phrases.
-Where concise prospectus-style period headers are used, place RM'000 as a separate unit row beneath the period headers rather than repeating the unit in every period column heading.
+If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
 Where audited and unaudited statuses are disclosed across the periods, prefer a separate audit-status row above the FYE/FPE row instead of folding the status text into each column heading.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 Include all line items expressly disclosed in the relevant statement or directly related summary disclosure for this section, in the same order as presented in the factual evidence.
@@ -120,8 +120,10 @@ OUTPUT CONTRACT
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
 - Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
+- Do not use `Line item` as the first-column header.
+- Do not use `Unit` as a row label.
 - Where numbered notes are supported for EBITDA, margins, and EPS, preserve the note numbering and short computation-basis wording in the approved prospectus style.
-- When the evidence supports prospectus shorthand period labels, prefer column headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025, with a separate RM'000 unit row beneath them.
+- When the evidence supports prospectus shorthand period labels, prefer column headers such as FYE 2022, FYE 2023, FYE 2024, FPE 2024, and FPE 2025, and if a unit qualifier is needed state RM'000 in a short framing sentence or in the period headers rather than as a `Unit` row label.
 - Where the evidence discloses audit status across periods, prefer a separate audit-status row such as `Audited | Audited | Audited | Unaudited | Audited` above the FYE/FPE row.
 - Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - If a row label and its values do not align cleanly across the selected factual evidence, omit that row rather than guessing or shifting values across labels or periods.
@@ -148,7 +150,7 @@ Present the disclosed periods exactly as supported by the evidence.
 Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
 When the summary table is presented in RM'000, mechanically convert the statement line-item figures into RM'000 before drafting and do not leave those line items in full RM.
 Where the summary table is presented in RM'000, prefer concise prospectus-style period headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025 where that mapping is exact from the factual evidence, instead of repeating full "As at ..." date phrases.
-Where concise prospectus-style period headers are used, place RM'000 as a separate unit row beneath the period headers rather than repeating the unit in every period column heading.
+If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 Include all line items expressly disclosed in the relevant statement of financial position or directly related summary disclosure for this section, in the same order as presented in the factual evidence.
 Do not stop after the first few rows if additional disclosed line items for the same statement are available in the evidence.
@@ -183,7 +185,9 @@ OUTPUT CONTRACT
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
 - Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
-- When the evidence supports prospectus shorthand period labels, prefer column headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025, with a separate RM'000 unit row beneath them.
+- Do not use `Line item` as the first-column header.
+- Do not use `Unit` as a row label.
+- When the evidence supports prospectus shorthand period labels, prefer column headers such as FYE 2022, FYE 2023, FYE 2024, and FPE 2025, and if a unit qualifier is needed state RM'000 in a short framing sentence or in the period headers rather than as a `Unit` row label.
 - Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not output a bare numeric subtotal row unless the evidence also discloses the corresponding row label or classification heading in the selected factual evidence.
 - Do not invent figures, classifications, subtotals, notes, or presentation rows that are not expressly disclosed in the factual evidence.
@@ -206,6 +210,7 @@ Start directly with one complete summary table unless the factual evidence requi
 Present the disclosed periods exactly as supported by the evidence.
 Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
 When the summary table is presented in RM'000, mechanically convert the statement line-item figures into RM'000 before drafting and do not leave those line items in full RM.
+If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 Include all line items expressly disclosed in the relevant statement of cash flows or directly related summary disclosure for this section, in the same order as presented in the factual evidence.
 Do not stop after the first few rows if additional disclosed line items for the same statement are available in the evidence.
@@ -236,6 +241,8 @@ OUTPUT CONTRACT
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
 - Do not output `RM'000`, `Audited`, or `Unaudited` as standalone statement line items or records.
+- Do not use `Line item` as the first-column header.
+- Do not use `Unit` as a row label.
 - Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not invent figures, classifications, subtotals, notes, or presentation rows that are not expressly disclosed in the factual evidence.
 - Use the accountant report and retrieved evidence as the only factual source.
@@ -257,6 +264,9 @@ Draft only section 12.2.
 Match the approved prospectus display pattern closely.
 Start directly with one complete summary table unless the factual evidence requires a brief basis, unit, or status qualifier.
 State the basis date and whether the information is audited, unaudited, pro forma, adjusted, or after a specific transaction only where expressly disclosed in the evidence.
+Where the evidence provides full RM figures, present the summary table in RM'000 if the scaling is direct and traceable.
+When the summary table is presented in RM'000, mechanically convert the disclosed monetary line-item figures into RM'000 before drafting and do not leave them in full RM.
+If a unit qualifier must be shown, state RM'000 in a short framing sentence or in the period headers; do not add a `Unit` row label.
 Prefer the approved prospectus summary-table layout over verbatim accountant-report reproduction.
 Include all line items, classifications, subtotals, totals, adjustment columns, and directly related summary disclosure expressly disclosed for capitalisation and indebtedness, in the same order as presented in the factual evidence.
 Do not stop after the first few rows if additional disclosed line items for the same section are available in the evidence.
@@ -288,6 +298,8 @@ OUTPUT CONTRACT
 - Include a header row and separator row.
 - Do not output tab-separated text.
 - Do not output HTML tags such as <br>.
+- Do not use `Line item` as the first-column header.
+- Do not use `Unit` as a row label.
 - Use the complete selected factual evidence block before drafting the table; if a row or continuation page is not present in the selected evidence, omit it rather than inventing or reconstructing it.
 - Do not invent figures, classifications, subtotals, totals, adjustment columns, notes, gearing, net debt, or any derived presentation row that is not expressly disclosed in the factual evidence.
 - If the evidence block is the authorised `12.2` template fallback scaffold, keep the placeholder wording and placeholder table cells exactly as placeholders and do not turn them into facts.
