@@ -23,17 +23,28 @@ TARGET SECTION HEADING
 SECTION TASK
 - Draft only section 12.1 as the chapter introduction.
 - State the actual disclosed periods covered.
+- State the actual disclosed periods expressly; do not replace disclosed dates or period labels with generic phrases such as "the respective financial years presented" or "all periods presented".
 - State the actual disclosed accounting framework.
 - State that the historical financial information should be read together with the Accountants' Report only where disclosed.
 - Use two short paragraphs when supported: the first for periods/framework/read-together context, the second for accounting policy information.
+- Prefer the approved prospectus-style opening sentence shape for the first paragraph when supported: "The following table sets out a summary of the [consolidated/combined] statements of profit or loss and other comprehensive income, [consolidated/combined] statements of financial position and [consolidated/combined] statements of cash flows ...".
+- In the first paragraph, expressly mention the supported financial years and financial period under review if those dates or labels are disclosed in the evidence.
+- Use "consolidated" or "combined" exactly as disclosed in the factual evidence for this issuer; do not substitute one for the other.
 - If the evidence expressly states that there are no accounting policies peculiar to the Group, business, or industry, state that in the second paragraph.
 - If the evidence identifies Note 3 or another specific note for accounting policies, refer to that note and the Accountants' Report in the second paragraph.
+- If the second paragraph is supported only by a Note 3 or similar accounting-policy cross-reference, prefer a short referral sentence rather than a summary of detailed accounting-policy content.
+- If the second paragraph is supported only by a Note 3 or similar accounting-policy cross-reference, keep that paragraph to one short sentence only.
+- If the second paragraph is supported only by a Note 3 or similar accounting-policy cross-reference, prefer this sentence shape: "For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report." Adjust only the issuer term, note number, and report reference to match the evidence.
 
 DO NOT
 - Do not analyse performance, liquidity, cash flow, ratios, or trends.
 - Do not reproduce statement tables.
 - Do not use generic wording such as latest two financial years, latest three financial years, shorter period, or latest practicable date unless disclosed.
 - Do not infer a statement that there are no peculiar accounting policies unless the evidence expressly supports it.
+- Do not summarise Note 3 or other accounting-policy note content in this section with generic statements about historical cost convention, basis of valuation, consistency of application, presentation currency, or rounding unless that detail is expressly required for the approved section wording for this issuer.
+- Do not use generic accounting-policy referral wording such as "material accounting policy information", "applied consistently", "unless otherwise stated", "all periods presented", or "the respective financial years presented" unless those words are expressly disclosed in the evidence for this section.
+- Do not use bland fallback first-paragraph wording such as "The Group's historical financial information comprises ..." when the evidence supports the approved prospectus-style summary sentence.
+- Do not use generic Note 3 referral wording such as "Further details regarding the material accounting policy information are set out ..." when the evidence supports a simpler direct referral sentence.
 - Do not continue into section 12.1.1.
 
 STYLE REFERENCE

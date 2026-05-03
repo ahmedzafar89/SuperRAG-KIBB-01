@@ -89,6 +89,27 @@ describe("financial info prompt guards", () => {
       "If the evidence supports only part of the requested section, draft only the supported part"
     );
     expect(userPrompt).toContain(
+      'Use "consolidated" or "combined" exactly as disclosed in the factual evidence for this issuer'
+    );
+    expect(userPrompt).toContain(
+      "prefer a short referral sentence rather than a summary of detailed accounting-policy content"
+    );
+    expect(userPrompt).toContain(
+      "keep that paragraph to one short sentence only"
+    );
+    expect(userPrompt).toContain(
+      'Prefer the approved prospectus-style opening sentence shape for the first paragraph when supported'
+    );
+    expect(userPrompt).toContain(
+      'prefer this sentence shape: "For further details on the accounting policies of the Group, please see Note 3 of the Accountants\' Report."'
+    );
+    expect(userPrompt).toContain(
+      'Do not use generic accounting-policy referral wording such as "material accounting policy information"'
+    );
+    expect(userPrompt).toContain(
+      'Do not use bland fallback first-paragraph wording such as "The Group\'s historical financial information comprises ..."'
+    );
+    expect(userPrompt).toContain(
       "Review all snippets for the same statement together before deciding that this section is unsupported."
     );
     expect(userPrompt).toContain(
@@ -129,7 +150,25 @@ describe("financial info prompt guards", () => {
       "Where the evidence supports it, use two short paragraphs:"
     );
     expect(userPrompt).toContain(
+      'Use "consolidated" or "combined" exactly as disclosed in the factual evidence for this issuer; do not substitute one for the other.'
+    );
+    expect(userPrompt).toContain(
       "Do not infer a statement that there are no peculiar accounting policies unless the evidence expressly supports it."
+    );
+    expect(userPrompt).toContain(
+      'State the actual disclosed periods expressly; do not replace disclosed dates or period labels with generic phrases such as "the respective financial years presented" or "all periods presented".'
+    );
+    expect(userPrompt).toContain(
+      'Prefer the approved prospectus-style opening sentence shape for the first paragraph when supported'
+    );
+    expect(userPrompt).toContain(
+      "Do not summarise Note 3 or other accounting-policy note content in this section with generic statements about historical cost convention"
+    );
+    expect(userPrompt).toContain(
+      'Do not use generic accounting-policy referral wording such as "material accounting policy information", "applied consistently", "unless otherwise stated", "all periods presented", or "the respective financial years presented"'
+    );
+    expect(userPrompt).toContain(
+      'Do not use generic Note 3 referral wording such as "Further details regarding the material accounting policy information are set out ..."'
     );
     expect(userPrompt).toContain(
       "Include disclosed indicator notes, formula notes, annualisation notes, and explanatory commentary"
@@ -664,6 +703,73 @@ describe("financial info evidence formatting", () => {
     expect(block).toContain("page:17");
     expect(block).toContain("historical financial information");
     expect(block).not.toContain("DIRECTORS' RESPONSIBILITIES");
+  });
+
+  test("adds directly traceable helper facts for section 12.1 intro drafting", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-intro-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 17,
+          table_candidate: true,
+          text: "The historical financial information comprises the consolidated statements of financial position as at 31 December 2022, 31 December 2023, 31 December 2024 and 31 July 2025, and the consolidated statements of profit or loss and other comprehensive income, statements of changes in equity and cash flows for the FYE 31 December 2022, 2023 and 2024 and for the FPE 31 July 2025 in accordance with MFRS and IFRS Accounting Standards.",
+        },
+        {
+          title: "accountant-report-intro-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 31,
+          table_candidate: true,
+          text: "For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report.",
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION",
+      }
+    );
+
+    expect(block).toContain("[Directly traceable helper | 12.1 intro facts]");
+    expect(block).toContain("- Statement basis term: consolidated");
+    expect(block).toContain("- Periods disclosed: 31 December 2022; 31 December 2023; 31 December 2024; 31 July 2025; FYE 31 December 2022; FPE 31 July 2025");
+    expect(block).toContain("- Accounting framework: MFRS; IFRS Accounting Standards");
+    expect(block).toContain("- Accounting policy reference: Note 3");
+    expect(block).toContain(
+      "- Short accounting-policy referral sentence supported: For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report."
+    );
+  });
+
+  test("normalizes accounting-policy sub-note references back to the top-level note for section 12.1", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-intro-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 17,
+          table_candidate: true,
+          text: "The historical financial information comprises the combined statements of financial position as at 31 August 2021, 31 August 2022 and 31 August 2023 and the combined statements of profit or loss and other comprehensive income and cash flows for the financial years then ended and the financial period ended 31 March 2024 in accordance with Malaysian Financial Reporting Standards and International Financial Reporting Standards.",
+        },
+        {
+          title: "accountant-report-intro-synthetic.pdf",
+          filetype: "pdf",
+          page_number: 19,
+          table_candidate: true,
+          text: "3. MATERIAL ACCOUNTING POLICY INFORMATION. Further details on the accounting policies of the Group are disclosed in Note 3.4 to the Accountants' Report.",
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION",
+      }
+    );
+
+    expect(block).toContain("- Accounting policy reference: Note 3");
+    expect(block).not.toContain("- Accounting policy reference: Note 3.4");
+    expect(block).toContain(
+      "- Short accounting-policy referral sentence supported: For further details on the accounting policies of the Group, please see Note 3 of the Accountants' Report."
+    );
   });
 
   test("stops after core financial position statement coverage is present", () => {

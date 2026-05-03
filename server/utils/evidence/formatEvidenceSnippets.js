@@ -868,6 +868,125 @@ function hasCapitalisationCoverage(picked = []) {
   return hasBasis && (hasCapital || hasDebt);
 }
 
+function titleCasePeriodLabel(label = "") {
+  return String(label || "").replace(/\b\w+\b/g, (token) => {
+    if (/^\d+$/.test(token)) return token;
+    if (/^(FYE|FPE)$/i.test(token)) return token.toUpperCase();
+    if (/^(IFRS|MFRS)$/i.test(token)) return token.toUpperCase();
+    return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();
+  });
+}
+
+function extractHistoricalIntroHelperData(sources = []) {
+  const text = (Array.isArray(sources) ? sources : [])
+    .map((source) => source.__cleanText || "")
+    .join("\n");
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (!normalized) return null;
+
+  const basisTerm = /\bcombined statements?\b/i.test(normalized)
+    ? "combined"
+    : /\bconsolidated statements?\b/i.test(normalized)
+      ? "consolidated"
+      : "";
+
+  const statements = [];
+  if (/statements? of profit or loss and other comprehensive income/i.test(normalized)) {
+    statements.push(`${basisTerm || "consolidated"} statements of profit or loss and other comprehensive income`);
+  }
+  if (/statements? of financial position/i.test(normalized)) {
+    statements.push(`${basisTerm || "consolidated"} statements of financial position`);
+  }
+  if (/statements? of cash flows?|cash flows?/i.test(normalized)) {
+    statements.push(`${basisTerm || "consolidated"} statements of cash flows`);
+  }
+
+  const periods = Array.from(
+    new Set(
+      [
+        ...(normalized.match(/31\s+December\s+20\d{2}/gi) || []),
+        ...(normalized.match(/31\s+July\s+20\d{2}/gi) || []),
+        ...(normalized.match(/FYE\s+31\s+December\s+20\d{2}/gi) || []),
+        ...(normalized.match(/FPE\s+31\s+July\s+20\d{2}/gi) || []),
+      ].map((value) => titleCasePeriodLabel(value))
+    )
+  );
+
+  const frameworks = [];
+  if (/malaysian financial reporting standards/i.test(normalized)) {
+    frameworks.push("Malaysian Financial Reporting Standards");
+  } else if (/\bmfrs\b/i.test(normalized)) {
+    frameworks.push("MFRS");
+  }
+  if (/ifrs accounting standards/i.test(normalized)) {
+    frameworks.push("IFRS Accounting Standards");
+  } else if (/\bifrs\b/i.test(normalized)) {
+    frameworks.push("IFRS");
+  }
+
+  const noteMatches = Array.from(
+    normalized.matchAll(/\bNote\s+(\d+(?:\.\d+)?)\b/gi),
+    (match) => match[1]
+  );
+  const hasTopLevelPolicyNoteThree =
+    /\b3\.\s*material accounting policy information\b/i.test(normalized) ||
+    /\bnote\s+3\b/i.test(normalized);
+  let noteReference = "";
+  if (hasTopLevelPolicyNoteThree) {
+    noteReference = "Note 3";
+  } else if (noteMatches.length) {
+    noteReference = `Note ${noteMatches[0]}`;
+  }
+  const hasPeculiarAccountingPoliciesStatement =
+    /no accounting policies which are peculiar|no accounting policy(?:ies)? .* peculiar/i.test(
+      normalized
+    );
+  const hasAccountantsReportReference = /Accountants[’'] Report/i.test(normalized);
+
+  return {
+    basisTerm,
+    statements,
+    periods,
+    frameworks,
+    noteReference,
+    hasPeculiarAccountingPoliciesStatement,
+    hasAccountantsReportReference,
+  };
+}
+
+function buildHistoricalFinancialIntroHelper(sources = []) {
+  const data = extractHistoricalIntroHelperData(sources);
+  if (!data) return "";
+
+  const lines = ["[Directly traceable helper | 12.1 intro facts]"];
+  if (data.basisTerm) lines.push(`- Statement basis term: ${data.basisTerm}`);
+  if (data.statements.length) {
+    lines.push(`- Statements covered: ${data.statements.join("; ")}`);
+  }
+  if (data.periods.length) {
+    lines.push(`- Periods disclosed: ${data.periods.join("; ")}`);
+  }
+  if (data.frameworks.length) {
+    lines.push(`- Accounting framework: ${data.frameworks.join("; ")}`);
+  }
+  if (data.hasAccountantsReportReference) {
+    lines.push("- Accountants' Report reference: disclosed");
+  }
+  if (data.noteReference) {
+    lines.push(`- Accounting policy reference: ${data.noteReference}`);
+    lines.push(
+      `- Short accounting-policy referral sentence supported: For further details on the accounting policies of the Group, please see ${data.noteReference} of the Accountants' Report.`
+    );
+  }
+  lines.push(
+    `- Peculiar accounting policies statement: ${
+      data.hasPeculiarAccountingPoliciesStatement ? "expressly disclosed" : "not expressly disclosed in selected evidence"
+    }`
+  );
+
+  return lines.join("\n");
+}
+
 function hasProfitOrLossStatementCoverage(picked = []) {
   const combined = picked.map((source) => source.__cleanText.toLowerCase());
   const hasMainPage = combined.some(
@@ -2122,6 +2241,11 @@ function renderPicked(picked = [], maxCharsPerSnippet = 1800, promptContext = {}
     );
     const rowAlignedHelper = buildCashFlowRowAlignedHelper(picked);
     return [rendered, periodFormattingHelper, rowAlignedHelper].filter(Boolean).join("\n\n");
+  }
+
+  if (promptContext.sectionNumber === "12.1") {
+    const introHelper = buildHistoricalFinancialIntroHelper(picked);
+    return [rendered, introHelper].filter(Boolean).join("\n\n");
   }
 
   return rendered;
