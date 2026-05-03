@@ -917,6 +917,50 @@ describe("financial info evidence formatting", () => {
     );
   });
 
+  test("prefers issuer-specific 12.1 intro evidence over conflicting generic combined intro snippets", () => {
+    const block = formatEvidenceSnippets(
+      [
+        {
+          title: "accountant-report-correct.pdf",
+          filetype: "pdf",
+          page_number: 17,
+          table_candidate: true,
+          score: 0.2,
+          text: "The historical financial information comprises the consolidated statements of financial position and the consolidated statements of profit or loss and other comprehensive income of our Group for the Financial Years/Period Under Review. The consolidated financial statements have been prepared in accordance with MFRS and IFRS and should be read in conjunction with the Accountants' Report as set out in Section 14 of this Prospectus.",
+        },
+        {
+          title: "accountant-report-correct.pdf",
+          filetype: "pdf",
+          page_number: 31,
+          table_candidate: true,
+          score: 0.1,
+          text: "There are no accounting policies which are peculiar to our Group because of the nature of the business or industry which we are involved in. For further details on the accounting policies of our Group, please see Note 3 of the Accountants' Report as set out in Section 14 of this Prospectus.",
+        },
+        {
+          title: "conflicting-snippet.pdf",
+          filetype: "pdf",
+          page_number: 4,
+          table_candidate: true,
+          score: 0.95,
+          text: "The following table sets out a summary of the combined statements of financial position and combined statements of cash flows for 22 November 2023 and 1 January 2023. The historical financial information has been prepared in accordance with Malaysian Financial Reporting Standards and was not subject to any audit qualification.",
+        },
+      ],
+      {
+        maxSnippets: 4,
+        promptText:
+          "TARGET SECTION HEADING\n12.1 HISTORICAL FINANCIAL INFORMATION",
+      }
+    );
+
+    expect(block).toContain("accountant-report-correct.pdf");
+    expect(block).not.toContain("conflicting-snippet.pdf");
+    expect(block).toContain("- Statement basis term: consolidated");
+    expect(block).toContain("- Peculiar accounting policies statement: expressly disclosed");
+    expect(block).not.toContain("22 November 2023");
+    expect(block).not.toContain("1 January 2023");
+    expect(block).not.toContain("- Statement basis term: combined");
+  });
+
   test("stops after core financial position statement coverage is present", () => {
     const block = formatEvidenceSnippets(
       [

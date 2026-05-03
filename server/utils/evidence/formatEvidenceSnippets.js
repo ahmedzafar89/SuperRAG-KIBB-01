@@ -333,7 +333,29 @@ function sanitizeFinanceEvidenceText(txt = "", source = {}) {
     return true;
   });
 
-  return filtered.join("\n").trim();
+  let sanitized = filtered.join("\n").trim();
+  if (/Accountants[â€™'] Report/i.test(text)) {
+    sanitized = sanitized
+      .replace(/\bof the \./g, "of the Accountants' Report.")
+      .replace(
+        /\bread in conjunction with the \./g,
+        "read in conjunction with the Accountants' Report."
+      )
+      .replace(
+        /\bread together with the \./g,
+        "read together with the Accountants' Report."
+      )
+      .replace(
+        /\bread in conjunction with the\b/g,
+        "read in conjunction with the Accountants' Report"
+      )
+      .replace(
+        /\bread together with the\b/g,
+        "read together with the Accountants' Report"
+      );
+  }
+
+  return sanitized;
 }
 
 function shouldPreferStoredPdfPageText(rawText = "", storedText = "", source = {}) {
@@ -490,12 +512,7 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
         )
       )
         score += 0.5;
-      if (
-        /31 december 2022|31 december 2023|31 december 2024|31 july 2025|fpe 31 july 2025|7-month financial period/.test(
-          normalized
-        )
-      )
-        score += 0.32;
+      if (hasHistoricalIntroPeriodSignals(normalized)) score += 0.32;
       if (
         /malaysian financial reporting standards|mfrs|ifrs accounting standards|basis of preparation|accountants[’'] report/.test(
           normalized
@@ -508,6 +525,12 @@ function sectionSpecificSignalScore(text = "", promptContext = {}) {
         )
       )
         score += 0.38;
+      if (
+        /date of incorporation|incorporated on|commenced operations|commencement of business|reorganisation|acquired on|acquisition date|allotment of shares|ordinary shares were issued|change of name/i.test(
+          normalized
+        )
+      )
+        score -= 0.75;
       if (
         /directors[’'] responsibilities|basis for opinion|ethical responsibilities|by-laws|iesba code|reporting accountants[’'] responsibilities/.test(
           normalized
@@ -735,6 +758,27 @@ function scoreSource(source, promptContext, hardExcludeTransactions) {
   score += sectionSpecificSignalScore(text, promptContext);
   if (promptContext.sectionNumber === "12.1") {
     const pageNumber = Number(source.page_number);
+    if (
+      text.includes("historical financial information") &&
+      /comprises?|comprise/.test(text)
+    ) {
+      score += 0.35;
+    }
+    if (
+      /statements? of financial position/.test(text) &&
+      /profit or loss|other comprehensive income|comprehensive income/.test(text)
+    ) {
+      score += 0.28;
+    }
+    if (/accountants[â€™'] report|read in conjunction with|read together with/.test(text)) {
+      score += 0.2;
+    }
+    if (/accounting policies|note\s+3|peculiar accounting policies|peculiar to (?:our )?group/.test(text)) {
+      score += 0.16;
+    }
+    if (/statements? of cash flows/.test(text) && !/profit or loss|other comprehensive income|comprehensive income/.test(text)) {
+      score -= 0.45;
+    }
     if (Number.isFinite(pageNumber) && pageNumber <= 40) score += 0.15;
     if (Number.isFinite(pageNumber) && pageNumber > 60) score -= 0.45;
   }
@@ -837,13 +881,9 @@ function hasHistoricalFinancialIntroCoverage(picked = []) {
       text
     )
   );
-  const hasPeriods = combined.some((text) =>
-    /31 december 2022|31 december 2023|31 december 2024|31 july 2025|fpe 31 july 2025/.test(
-      text
-    )
-  );
+  const hasPeriods = combined.some((text) => hasHistoricalIntroPeriodSignals(text));
   const hasFramework = combined.some((text) =>
-    /malaysian financial reporting standards|mfrs|ifrs accounting standards/.test(
+    /malaysian financial reporting standards|mfrs|international financial reporting standards|ifrs accounting standards|\bifrs\b/.test(
       text
     )
   );
@@ -879,6 +919,18 @@ function titleCasePeriodLabel(label = "") {
 
 const MONTH_NAME_PATTERN =
   "January|February|March|April|May|June|July|August|September|October|November|December";
+
+function hasHistoricalIntroPeriodSignals(text = "") {
+  const normalized = cleanText(text).toLowerCase();
+  return (
+    /financial years\/period under review|financial years under review|financial period under review|financial years ended|financial period ended|\bfye\b|\bfpe\b/.test(
+      normalized
+    ) ||
+    new RegExp(`\\b\\d{1,2}\\s+(?:${MONTH_NAME_PATTERN})\\s+20\\d{2}\\b`, "i").test(
+      normalized
+    )
+  );
+}
 
 function extractHistoricalIntroHelperData(sources = []) {
   const text = (Array.isArray(sources) ? sources : [])
@@ -925,6 +977,8 @@ function extractHistoricalIntroHelperData(sources = []) {
   }
   if (/ifrs accounting standards/i.test(normalized)) {
     frameworks.push("IFRS Accounting Standards");
+  } else if (/international financial reporting standards/i.test(normalized)) {
+    frameworks.push("IFRS");
   } else if (/\bifrs\b/i.test(normalized)) {
     frameworks.push("IFRS");
   }
@@ -2190,7 +2244,7 @@ function pruneHistoricalFinancialIntroPages(
   if (!Array.isArray(picked) || picked.length === 0) return [];
 
   const introSignals = (text = "") =>
-    /historical financial information|comprise the consolidated statements|statements of financial position|statements of profit or loss and other comprehensive income|statements of changes in equity|statements of cash flows|31 december 2022|31 december 2023|31 december 2024|31 july 2025|fpe 31 july 2025|malaysian financial reporting standards|mfrs|ifrs accounting standards|basis of preparation|accountants[’'] report|accounting policies|material accounting policy information|note\s+3|peculiar accounting policies|peculiar to (?:our )?group/i.test(
+    /historical financial information|comprise the consolidated statements|statements of financial position|statements of profit or loss and other comprehensive income|statements of changes in equity|statements of cash flows|malaysian financial reporting standards|mfrs|international financial reporting standards|ifrs accounting standards|\bifrs\b|basis of preparation|accountants[’'] report|accounting policies|material accounting policy information|note\s+3|peculiar accounting policies|peculiar to (?:our )?group|financial years\/period under review|financial years under review|financial period under review|financial years ended|financial period ended/i.test(
       text
     );
   const excludeSignals = (text = "") =>
@@ -2201,7 +2255,7 @@ function pruneHistoricalFinancialIntroPages(
   const rankedPicked = [...picked]
     .filter((source) => {
       const text = source.__cleanText || "";
-      return introSignals(text) && !excludeSignals(text);
+      return (introSignals(text) || readTogetherSignals(text)) && !excludeSignals(text);
     })
     .sort((a, b) => {
       return (
@@ -2238,7 +2292,8 @@ function pruneHistoricalFinancialIntroPages(
 function pruneHistoricalFinancialIntroPagesForPrompt(
   picked = [],
   promptContext = {},
-  hardExcludeTransactions = true
+  hardExcludeTransactions = true,
+  candidateSources = picked
 ) {
   if (!Array.isArray(picked) || picked.length === 0) return [];
 
@@ -2263,10 +2318,14 @@ function pruneHistoricalFinancialIntroPagesForPrompt(
       text
     );
 
-  const rankedPicked = [...picked]
+  const rankedPicked = [
+    ...(Array.isArray(candidateSources) && candidateSources.length
+      ? candidateSources
+      : picked),
+  ]
     .filter((source) => {
       const text = source.__cleanText || "";
-      return introSignals(text) && !excludeSignals(text);
+      return (introSignals(text) || readTogetherSignals(text)) && !excludeSignals(text);
     })
     .sort((a, b) => {
       return (
@@ -2287,6 +2346,15 @@ function pruneHistoricalFinancialIntroPagesForPrompt(
   const scoreFor = (source) =>
     scoreSource(source, promptContext, hardExcludeTransactions);
   const byScoreDesc = (a, b) => scoreFor(b) - scoreFor(a);
+  const anchor = [...pageCandidates]
+    .sort(byScoreDesc)
+    .find((source) =>
+      /historical financial information/.test(source.__cleanText || "")
+    );
+  const anchorDocKey = anchor ? sourceDocKey(anchor) : "";
+  const anchoredCandidates = anchorDocKey
+    ? pageCandidates.filter((source) => sourceDocKey(source) === anchorDocKey)
+    : pageCandidates;
   const selected = [];
   const seen = new Set();
   const addSelected = (source) => {
@@ -2296,25 +2364,25 @@ function pruneHistoricalFinancialIntroPagesForPrompt(
     selected.push(source);
   };
 
-  pageCandidates
+  anchoredCandidates
     .filter((source) => coreIntroSignals(source.__cleanText || ""))
     .sort(byScoreDesc)
     .slice(0, 2)
     .forEach(addSelected);
 
-  pageCandidates
+  anchoredCandidates
     .filter((source) => policySignals(source.__cleanText || ""))
     .sort(byScoreDesc)
     .slice(0, 2)
     .forEach(addSelected);
 
-  pageCandidates
+  anchoredCandidates
     .filter((source) => readTogetherSignals(source.__cleanText || ""))
     .sort(byScoreDesc)
     .slice(0, 1)
     .forEach(addSelected);
 
-  pageCandidates.sort(byScoreDesc).slice(0, 5).forEach(addSelected);
+  anchoredCandidates.sort(byScoreDesc).slice(0, 5).forEach(addSelected);
 
   const narrowed = selected
     .sort((a, b) => {
@@ -2521,7 +2589,8 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
       const narrowed = pruneHistoricalFinancialIntroPagesForPrompt(
         picked,
         promptContext,
-        hardExcludeTransactions
+        hardExcludeTransactions,
+        ranked
       );
       if (narrowed.length) {
         return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
@@ -2567,7 +2636,8 @@ function formatEvidenceSnippets(sources = [], opts = {}) {
     const narrowed = pruneHistoricalFinancialIntroPagesForPrompt(
       picked,
       promptContext,
-      hardExcludeTransactions
+      hardExcludeTransactions,
+      ranked
     );
     if (narrowed.length) {
       return renderPicked(narrowed, maxCharsPerSnippet, promptContext);
